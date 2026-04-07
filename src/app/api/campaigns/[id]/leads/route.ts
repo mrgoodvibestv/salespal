@@ -47,6 +47,67 @@ interface ExploriumProspect {
 }
 
 
+// ── Post-fetch geo filtering ───────────────────────────────────────────────
+// Maps ISO 3166-2 region code prefixes to country names as Explorium returns them
+const GEO_COUNTRY_MAP: Record<string, string> = {
+  "ca": "canada",
+  "us": "united states",
+  "gb": "united kingdom",
+  "au": "australia",
+}
+
+// Major Ontario cities for secondary sort
+const ONTARIO_CITIES = new Set([
+  "toronto", "mississauga", "ottawa", "hamilton", "brampton", "london",
+  "markham", "vaughan", "kitchener", "windsor", "richmond hill", "oakville",
+  "burlington", "oshawa", "barrie", "waterloo", "cambridge", "guelph",
+])
+
+// Filter prospects by country for local campaigns, then sort region matches first
+function geoFilterAndSort(
+  prospects: ExploriumProspect[],
+  geoScope: string | undefined,
+  geoRegionCode: string | undefined
+): ExploriumProspect[] {
+  if (geoScope !== "local" || !geoRegionCode) return prospects
+
+  const countryPrefix = geoRegionCode.split("-")[0].toLowerCase()
+  const expectedCountry = GEO_COUNTRY_MAP[countryPrefix]
+
+  // Filter: keep only prospects matching the campaign country
+  let filtered = prospects
+  if (expectedCountry) {
+    filtered = prospects.filter(
+      (p) => (p.country_name ?? "").toLowerCase() === expectedCountry
+    )
+    console.log(`[leads/geo] country filter (${expectedCountry}): ${filtered.length}/${prospects.length} kept`)
+  }
+
+  // Secondary sort: prospects whose region/city matches the specific region come first
+  const regionSuffix = geoRegionCode.split("-")[1]?.toLowerCase() ?? ""
+  filtered.sort((a, b) => {
+    const aScore = regionScore(a, geoRegionCode, regionSuffix)
+    const bScore = regionScore(b, geoRegionCode, regionSuffix)
+    return bScore - aScore
+  })
+
+  return filtered
+}
+
+function regionScore(p: ExploriumProspect, regionCode: string, regionSuffix: string): number {
+  const region = (p.region_name ?? "").toLowerCase()
+  const city   = (p.city        ?? "").toLowerCase()
+
+  // Ontario-specific: check region_name contains "ontario" or city is an Ontario city
+  if (regionCode === "ca-on") {
+    if (region.includes("ontario")) return 2
+    if (ONTARIO_CITIES.has(city))   return 1
+  } else if (regionSuffix && region.includes(regionSuffix)) {
+    return 1
+  }
+  return 0
+}
+
 function extractLinkedinUrl(p: ExploriumProspect): string {
   return (
     p.linkedin ??
@@ -77,7 +138,7 @@ interface ScoredProspect {
 
 // ── Explorium: fetch businesses ────────────────────────────────────────────
 // Company-level filter uses country_code only (broad). Region precision is done
-// at prospect level via prospect_region_country_code in fetchProspects.
+// post-fetch via country/region matching on the prospect objects.
 async function fetchBusinesses(
   filters: Record<string, unknown>,
   maxCompanies: number
@@ -125,21 +186,16 @@ async function fetchBusinesses(
 }
 
 // ── Explorium: fetch prospects for a set of business IDs ──────────────────
-// For local/regional campaigns, prospect_region_country_code filters by the
-// prospect's PERSONAL location (not company HQ). Format: uppercase ISO 3166-2
-// e.g. ["CA-ON"] for Ontario. This is the correct geo precision mechanism.
+// NOTE: prospect_region_country_code is rejected by the direct REST API
+// ("extra fields not permitted"). Geo filtering is done post-fetch instead.
 async function fetchProspects(
   businessIds: string[],
-  filters: Record<string, unknown>,
-  geoRegionCode?: string
+  filters: Record<string, unknown>
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
     job_level?: string[]
     job_department?: string[]
   }
-
-  // Uppercase required by Explorium: "ca-on" → "CA-ON"
-  const prospectRegionCodes = geoRegionCode ? [geoRegionCode.toUpperCase()] : []
 
   const body: Record<string, unknown> = {
     mode: "full",
@@ -149,15 +205,11 @@ async function fetchProspects(
     max_per_company: MAX_PROSPECTS_PER_COMPANY,
     filters: {
       business_id: { values: businessIds },
-      ...(ef.job_level?.length       && { job_level:      { values: ef.job_level } }),
-      ...(ef.job_department?.length  && { job_department: { values: ef.job_department } }),
-      ...(prospectRegionCodes.length && { prospect_region_country_code: { values: prospectRegionCodes } }),
+      ...(ef.job_level?.length      && { job_level:      { values: ef.job_level } }),
+      ...(ef.job_department?.length && { job_department: { values: ef.job_department } }),
     },
   }
 
-  if (prospectRegionCodes.length) {
-    console.log("[leads/prospects] prospect_region_country_code filter:", prospectRegionCodes)
-  }
   console.log("[leads/prospects] request business_ids:", businessIds)
 
   const res = await fetch(`${EXPLORIUM_BASE}/v1/prospects`, {
@@ -346,13 +398,17 @@ export async function POST(
       .map((b) => b.business_id ?? b.id ?? "")
       .filter(Boolean)
 
-    // ── Fetch prospects (region precision via prospect_region_country_code) ─
-    prospects = await fetchProspects(businessIds, angleFilters, geoRegionCode)
+    // ── Fetch prospects ──────────────────────────────────────────────────
+    prospects = await fetchProspects(businessIds, angleFilters)
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
       console.log("[leads] first prospect full:", JSON.stringify(prospects[0]))
     }
+
+    // ── Post-fetch geo filter + sort ─────────────────────────────────────
+    prospects = geoFilterAndSort(prospects, geoScope, geoRegionCode)
+    console.log("[leads] prospects after geo filter:", prospects.length)
 
     // ── Score with Claude ────────────────────────────────────────────────
     scoredProspects = await scoreProspects(prospects)

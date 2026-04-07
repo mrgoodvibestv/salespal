@@ -86,10 +86,11 @@ async function fetchBusinesses(
     size: MAX_COMPANIES,
     page: 1,
     filters: {
-      ...(ef.website_keywords?.length    && { website_keywords:    { values: ef.website_keywords } }),
-      ...(ef.company_size?.length        && { company_size:        { values: ef.company_size } }),
-      ...(ef.country_code?.length        && { country_code:        { values: ef.country_code } }),
-      ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
+      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
+      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
+      ...(ef.country_code?.length     && { country_code:     { values: ef.country_code } }),
+      // region_country_code commented out to confirm 422 source:
+      // ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
     },
   }
 
@@ -103,7 +104,8 @@ async function fetchBusinesses(
 
   if (!res.ok) {
     const text = await res.text()
-    console.error("[leads/businesses] HTTP", res.status, text)
+    console.error("[leads/businesses] HTTP", res.status, "body:", text)
+    console.error("[leads/businesses] failed request body was:", JSON.stringify(body))
     throw new Error(`Explorium businesses failed: ${res.status}`)
   }
 

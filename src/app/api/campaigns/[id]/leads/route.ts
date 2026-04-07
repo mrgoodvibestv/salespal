@@ -186,16 +186,19 @@ async function fetchBusinesses(
 }
 
 // ── Explorium: fetch prospects for a set of business IDs ──────────────────
-// NOTE: prospect_region_country_code is rejected by the direct REST API
-// ("extra fields not permitted"). Geo filtering is done post-fetch instead.
+// region_country_code filters by prospect personal location (uppercase ISO 3166-2, e.g. "CA-ON")
 async function fetchProspects(
   businessIds: string[],
-  filters: Record<string, unknown>
+  filters: Record<string, unknown>,
+  geoRegionCode?: string
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
     job_level?: string[]
     job_department?: string[]
   }
+
+  // Uppercase required: "ca-on" → "CA-ON"
+  const regionCodes = geoRegionCode ? [geoRegionCode.toUpperCase()] : []
 
   const body: Record<string, unknown> = {
     mode: "full",
@@ -205,11 +208,15 @@ async function fetchProspects(
     max_per_company: MAX_PROSPECTS_PER_COMPANY,
     filters: {
       business_id: { values: businessIds },
-      ...(ef.job_level?.length      && { job_level:      { values: ef.job_level } }),
+      ...(ef.job_level?.length  && { job_level:      { values: ef.job_level } }),
       ...(ef.job_department?.length && { job_department: { values: ef.job_department } }),
+      ...(regionCodes.length    && { region_country_code: { values: regionCodes } }),
     },
   }
 
+  if (regionCodes.length) {
+    console.log("[leads/prospects] region_country_code filter:", regionCodes)
+  }
   console.log("[leads/prospects] request business_ids:", businessIds)
 
   const res = await fetch(`${EXPLORIUM_BASE}/v1/prospects`, {
@@ -399,7 +406,7 @@ export async function POST(
       .filter(Boolean)
 
     // ── Fetch prospects ──────────────────────────────────────────────────
-    prospects = await fetchProspects(businessIds, angleFilters)
+    prospects = await fetchProspects(businessIds, angleFilters, geoRegionCode)
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))

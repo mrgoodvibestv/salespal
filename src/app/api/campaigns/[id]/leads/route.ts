@@ -7,7 +7,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
-const MAX_COMPANIES = 10
+const MAX_COMPANIES = 7
 const MAX_PROSPECTS_PER_COMPANY = 3
 const MIN_CREDITS_TO_RUN = 5
 
@@ -232,6 +232,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const { id: campaignId } = params
+  console.log("[leads] EXPLORIUM_API_KEY defined:", !!process.env.EXPLORIUM_API_KEY)
   const supabase = await createClient()
 
   // Auth
@@ -302,6 +303,10 @@ export async function POST(
     // ── Fetch prospects ──────────────────────────────────────────────────
     prospects = await fetchProspects(businessIds, angleFilters)
     console.log("[leads] prospects fetched:", prospects.length)
+    if (prospects.length > 0) {
+      console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
+      console.log("[leads] first prospect sample:", JSON.stringify(prospects[0]))
+    }
 
     // ── Score with Claude ────────────────────────────────────────────────
     scoredProspects = await scoreProspects(prospects)

@@ -128,8 +128,12 @@ export default function CampaignDetailClient({
       }
 
       setLeads(data.leads ?? [])
-      setCredits((c) => Math.max(0, c - (data.credits_deducted ?? 0)))
       setStatus("preview_ready")
+      // Re-fetch authoritative credit balance from server
+      fetch("/api/user/credits")
+        .then((r) => r.json())
+        .then((d) => { if (typeof d.credits === "number") setCredits(d.credits) })
+        .catch(() => {/* optimistic fallback already applied */})
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : "Something went wrong")
       setStatus("active")
@@ -227,6 +231,12 @@ export default function CampaignDetailClient({
                 Angle: <span className="font-medium text-black">{campaign.angle_selected}</span>
               </p>
             )}
+            {(() => {
+              const tagline = (campaign.icp_json?.angle_data as Record<string, unknown> | undefined)?.tagline as string | undefined
+              return tagline ? (
+                <p className="text-xs text-gray-400 italic">&ldquo;{tagline}&rdquo;</p>
+              ) : null
+            })()}
             {campaign.stats_result && (
               <p className="text-xs text-gray-400">
                 Market: ~{campaign.stats_result.estimated_contacts?.toLocaleString()} contacts
@@ -443,6 +453,29 @@ export default function CampaignDetailClient({
             <p className="text-xs text-gray-400 text-center">
               {leads.length} contacts shown · Decision Makers and Influencers only · Noise filtered out
             </p>
+
+            {/* Run Full Campaign banner */}
+            {status === "preview_ready" && campaign.stats_result && (
+              <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-semibold text-black">
+                    You&apos;re previewing {leads.length} of ~{campaign.stats_result.estimated_contacts?.toLocaleString()} available contacts.
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Run full campaign to surface all decision makers across {campaign.stats_result.companies?.toLocaleString()} matching companies.
+                    Estimated cost: <span className="font-medium text-black">{campaign.stats_result.companies} credits</span>.
+                  </p>
+                </div>
+                <button
+                  disabled
+                  className="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white opacity-60 cursor-not-allowed whitespace-nowrap"
+                  style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                  title="Coming soon"
+                >
+                  Run Full Campaign
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>

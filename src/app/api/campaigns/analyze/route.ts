@@ -138,10 +138,9 @@ async function fetchExploriumStats(filters: ExploriumFilterInput): Promise<{ com
   try {
     const body: Record<string, unknown> = {
       filters: {
-        ...(filters.website_keywords?.length    && { website_keywords:    { values: filters.website_keywords } }),
-        ...(filters.company_size?.length        && { company_size:        { values: filters.company_size } }),
-        ...(filters.country_code?.length        && { country_code:        { values: filters.country_code } }),
-        ...(filters.region_country_code?.length && { region_country_code: { values: filters.region_country_code } }),
+        ...(filters.website_keywords?.length && { website_keywords: { values: filters.website_keywords } }),
+        ...(filters.company_size?.length     && { company_size:     { values: filters.company_size } }),
+        ...(filters.country_code?.length     && { country_code:     { values: filters.country_code } }),
       },
     }
 

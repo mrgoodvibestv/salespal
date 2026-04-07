@@ -89,8 +89,7 @@ async function fetchBusinesses(
       ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
       ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
       ...(ef.country_code?.length     && { country_code:     { values: ef.country_code } }),
-      // region_country_code commented out to confirm 422 source:
-      // ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
+      ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
     },
   }
 

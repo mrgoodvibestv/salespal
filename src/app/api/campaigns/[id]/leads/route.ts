@@ -75,8 +75,6 @@ async function fetchProspectsDirect(
   geoRegionCode: string | undefined
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
-    website_keywords?: string[]
-    company_size?: string[]
     country_code?: string[]
     job_level?: string[]
     job_department?: string[]
@@ -92,6 +90,9 @@ async function fetchProspectsDirect(
       ? { country_code: { values: ef.country_code } }
       : {}
 
+  // Only confirmed valid filters for /v1/prospects direct (no business_id):
+  // region_country_code, country_code, job_level, job_department.
+  // website_keywords and company_size are company-level filters — rejected as extra fields.
   const body: Record<string, unknown> = {
     mode: "full",
     page_size: pageSize,
@@ -99,10 +100,8 @@ async function fetchProspectsDirect(
     page: 1,
     filters: {
       ...geoFilter,
-      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
-      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
-      ...(ef.job_level?.length        && { job_level:        { values: ef.job_level } }),
-      ...(ef.job_department?.length   && { job_department:   { values: ef.job_department } }),
+      ...(ef.job_level?.length      && { job_level:      { values: ef.job_level } }),
+      ...(ef.job_department?.length && { job_department: { values: ef.job_department } }),
     },
   }
 

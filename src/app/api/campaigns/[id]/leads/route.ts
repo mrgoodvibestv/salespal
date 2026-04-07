@@ -39,7 +39,99 @@ interface ExploriumProspect {
   profile_url?: string
   business_id?: string
   company_id?: string
+  region_name?: string
+  city?: string
+  country_name?: string
   [key: string]: unknown
+}
+
+// ── Region geography mapping ────────────────────────────────────────────────
+// Maps ISO 3166-2 region codes to known region names and major cities/metro areas
+const REGION_GEO: Record<string, { regionNames: string[]; cities: string[] }> = {
+  "ca-on": {
+    regionNames: ["ontario"],
+    cities: ["toronto", "mississauga", "ottawa", "hamilton", "brampton", "london", "markham", "vaughan", "kitchener", "windsor", "richmond hill", "oakville", "burlington", "oshawa", "barrie"],
+  },
+  "ca-bc": {
+    regionNames: ["british columbia"],
+    cities: ["vancouver", "surrey", "burnaby", "richmond", "kelowna", "abbotsford", "victoria", "coquitlam", "langley"],
+  },
+  "ca-ab": {
+    regionNames: ["alberta"],
+    cities: ["calgary", "edmonton", "red deer", "lethbridge", "st. albert", "medicine hat", "grande prairie"],
+  },
+  "ca-qc": {
+    regionNames: ["quebec", "québec"],
+    cities: ["montreal", "québec city", "laval", "gatineau", "longueuil", "sherbrooke"],
+  },
+  "us-ny": {
+    regionNames: ["new york"],
+    cities: ["new york", "nyc", "brooklyn", "queens", "bronx", "buffalo", "rochester", "yonkers", "syracuse", "albany"],
+  },
+  "us-ca": {
+    regionNames: ["california"],
+    cities: ["los angeles", "san francisco", "san diego", "san jose", "sacramento", "fresno", "oakland", "long beach", "bakersfield", "anaheim", "santa ana", "riverside", "irvine"],
+  },
+  "us-tx": {
+    regionNames: ["texas"],
+    cities: ["houston", "san antonio", "dallas", "austin", "fort worth", "el paso", "arlington", "corpus christi", "plano", "lubbock"],
+  },
+  "us-fl": {
+    regionNames: ["florida"],
+    cities: ["jacksonville", "miami", "tampa", "orlando", "st. petersburg", "hialeah", "tallahassee", "fort lauderdale", "port st. lucie", "cape coral"],
+  },
+  "gb-eng": {
+    regionNames: ["england"],
+    cities: ["london", "manchester", "birmingham", "leeds", "liverpool", "sheffield", "bristol", "edinburgh", "leicester", "coventry"],
+  },
+  "au-nsw": {
+    regionNames: ["new south wales"],
+    cities: ["sydney", "newcastle", "wollongong", "central coast", "maitland"],
+  },
+  "au-vic": {
+    regionNames: ["victoria"],
+    cities: ["melbourne", "geelong", "ballarat", "bendigo"],
+  },
+}
+
+function filterProspectsByRegion(
+  prospects: ExploriumProspect[],
+  regionCodes: string[]
+): ExploriumProspect[] {
+  if (!regionCodes.length) return prospects
+
+  const geoSets = regionCodes
+    .map((code) => REGION_GEO[code.toLowerCase()])
+    .filter(Boolean)
+
+  if (!geoSets.length) return prospects // unknown region code — don't filter
+
+  const allRegionNames = geoSets.flatMap((g) => g!.regionNames)
+  const allCities      = geoSets.flatMap((g) => g!.cities)
+
+  const matched = prospects.filter((p) => {
+    const region  = (p.region_name  ?? "").toLowerCase()
+    const city    = (p.city         ?? "").toLowerCase()
+    const country = (p.country_name ?? "").toLowerCase()
+
+    if (allRegionNames.some((r) => region.includes(r)))  return true
+    if (allCities.some((c)      => city.includes(c)))    return true
+    // Broad Canada match when region is missing — keep if country matches and no conflicting region
+    if (regionCodes.some((code) => code.startsWith("ca-")) && country === "canada" && !region) return true
+    if (regionCodes.some((code) => code.startsWith("us-")) && (country === "united states" || country === "usa") && !region) return true
+    return false
+  })
+
+  const kept     = matched.length
+  const filtered = prospects.length - kept
+  console.log(`[leads/geo] region filter (${regionCodes.join(",")}): kept ${kept}, filtered out ${filtered}`)
+
+  // Fall back to all prospects if filter leaves fewer than 3
+  if (kept < 3) {
+    console.warn("[leads/geo] fewer than 3 prospects after geo filter — falling back to full list")
+    return prospects
+  }
+  return matched
 }
 
 function extractLinkedinUrl(p: ExploriumProspect): string {
@@ -85,7 +177,7 @@ async function fetchBusinesses(
     page_size: MAX_COMPANIES,
     size: MAX_COMPANIES,
     page: 1,
-    include_operating_locations: false, // HQ-only — excludes companies that merely operate in the region
+    include_operating_locations: true, // include companies with Ontario presence, not just HQ
     filters: {
       ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
       ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
@@ -337,6 +429,10 @@ export async function POST(
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
       console.log("[leads] first prospect full:", JSON.stringify(prospects[0]))
     }
+
+    // ── Prospect-level geography filter ─────────────────────────────────
+    const regionCodes = (angleFilters as { region_country_code?: string[] }).region_country_code ?? []
+    prospects = filterProspectsByRegion(prospects, regionCodes)
 
     // ── Score with Claude ────────────────────────────────────────────────
     scoredProspects = await scoreProspects(prospects)

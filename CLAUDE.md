@@ -389,9 +389,34 @@ Body shape for /v1/businesses:
     country_code:     { values: ["us", "ca"] }   // lowercase ISO Alpha-2
     // company_country_code → rejected (extra field not permitted)
     // number_of_results   → rejected (extra field not permitted)
+    // city_region_country → DO NOT USE on /v1/businesses — requires exact
+    //   autocomplete strings we don't have; returns 0 results
+    // region_country_code → works on /v1/businesses but NOT on /v1/businesses/stats (422)
+  }
+}
+
+Body shape for /v1/prospects (key addition for local campaigns):
+{
+  mode: "full",
+  page_size: N,
+  size: N,
+  page: 1,
+  max_per_company: 2,
+  filters: {
+    business_id:                  { values: [...] },
+    job_level:                    { values: [...] },
+    job_department:               { values: [...] },
+    prospect_region_country_code: { values: ["CA-ON"] }  // UPPERCASE ISO 3166-2
+    // This filters by the prospect's PERSONAL location, not company HQ.
+    // This is the correct geo precision mechanism for local campaigns.
+    // Do NOT use city_region_country on /v1/businesses for this purpose.
   }
 }
 ```
+
+**Geography filtering rule (IMPORTANT):**
+- Company fetch (`/v1/businesses`): use `country_code` only (broad). Never use `city_region_country`.
+- Prospect fetch (`/v1/prospects`): use `prospect_region_country_code` with UPPERCASE values (e.g. `["CA-ON"]`) to filter by prospect personal location. This is how local/regional campaigns achieve precision.
 
 ---
 

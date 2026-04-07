@@ -23,7 +23,6 @@ interface Lead {
   credits_charged: number
   company_name?: string
   companies?: Company | null
-  geo_match?: boolean
   geo_location?: string
 }
 
@@ -410,16 +409,11 @@ export default function CampaignDetailClient({
                             {companyName}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="flex flex-col gap-0.5">
-                              {lead.geo_location && (
-                                <span className="text-xs text-gray-400">{lead.geo_location}</span>
-                              )}
-                              {lead.geo_match === false && (
-                                <span className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-400">
-                                  Outside region
-                                </span>
-                              )}
-                            </div>
+                            {lead.geo_location ? (
+                              <span className="text-xs text-gray-400">{lead.geo_location}</span>
+                            ) : (
+                              <span className="text-gray-300 text-xs">—</span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>

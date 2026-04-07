@@ -63,13 +63,19 @@ export async function POST(
   }
 
   // Call Explorium enrich
+  // Docs: POST /v1/prospects/contacts_information/enrich
+  // Body: { prospect_id: string, parameters: { contact_types: [...] } }
+  // Response: { response_context, data: { professions_email, mobile_phone, emails: [...], phone_numbers: [...] } }
   console.log("[unlock] enriching prospect_id:", prospect_id)
   const enrichRes = await fetch(
     `${EXPLORIUM_BASE}/v1/prospects/contacts_information/enrich`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", API_KEY: EXPLORIUM_KEY ?? "" },
-      body: JSON.stringify({ prospect_ids: [prospect_id] }),
+      body: JSON.stringify({
+        prospect_id,
+        parameters: { contact_types: ["email", "phone"] },
+      }),
     }
   )
 
@@ -80,27 +86,30 @@ export async function POST(
     const text = await enrichRes.text()
     console.error("[unlock] Explorium enrich HTTP", enrichRes.status, text)
     // Don't block the unlock — deduct credits and mark unlocked even if enrich fails
-    // The user gets a "not available" contact rather than losing the option
   } else {
     const enrichData = await enrichRes.json()
     console.log("[unlock] enrich full response:", JSON.stringify(enrichData))
-    console.log("[unlock] enrich response keys:", Object.keys(enrichData))
 
-    // Handle common response shapes
-    const enriched =
-      enrichData?.prospects?.[0] ??
-      enrichData?.data?.[0] ??
-      enrichData?.results?.[0] ??
-      enrichData?.[0] ??
-      enrichData
+    const d = enrichData?.data ?? {}
+    console.log("[unlock] data keys:", Object.keys(d))
 
-    console.log("[unlock] enriched object keys:", enriched ? Object.keys(enriched) : "null")
-    console.log("[unlock] enriched object full:", JSON.stringify(enriched))
+    // Primary fields (flat, confirmed by Explorium docs)
+    email = d.professions_email ?? null
+    phone = d.mobile_phone ?? null
 
-    email = enriched?.email ?? enriched?.work_email ?? enriched?.personal_email ?? null
-    phone = enriched?.phone ?? enriched?.phone_number ?? enriched?.mobile ?? null
+    // Fallback: scan emails[] / phone_numbers[] arrays for any string value
+    if (!email && Array.isArray(d.emails) && d.emails.length > 0) {
+      const first = d.emails[0]
+      email = typeof first === "string" ? first : (first?.email ?? first?.value ?? first?.address ?? null)
+    }
+    if (!phone && Array.isArray(d.phone_numbers) && d.phone_numbers.length > 0) {
+      const first = d.phone_numbers[0]
+      phone = typeof first === "string" ? first : (first?.phone ?? first?.value ?? first?.number ?? null)
+    }
+
     console.log("[unlock] extracted email:", email ?? "null")
     console.log("[unlock] extracted phone:", phone ?? "null")
+    console.log("[unlock] request_status:", enrichData?.response_context?.request_status ?? "unknown")
   }
 
   // Deduct 2 credits atomically via deduct_credits RPC

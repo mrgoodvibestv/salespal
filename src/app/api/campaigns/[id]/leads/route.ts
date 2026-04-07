@@ -7,8 +7,8 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
-const MAX_COMPANIES = 7
-const MAX_PROSPECTS_PER_COMPANY = 3
+const MAX_COMPANIES = 3
+const MAX_PROSPECTS_PER_COMPANY = 2
 const MIN_CREDITS_TO_RUN = 5
 
 // ── Types ──────────────────────────────────────────────────────────────────

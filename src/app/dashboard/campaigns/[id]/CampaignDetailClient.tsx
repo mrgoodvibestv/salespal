@@ -271,6 +271,39 @@ export default function CampaignDetailClient({
           )}
         </div>
 
+        {/* ICP details */}
+        {(() => {
+          const ad = campaign.icp_json?.angle_data as {
+            target_companies?: string
+            target_titles?: string[]
+            pitch_summary?: string
+            why_now?: string
+          } | undefined
+          if (!ad) return null
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 text-sm">
+              {ad.target_companies && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Target Companies</p>
+                  <p className="text-gray-700">{ad.target_companies}</p>
+                </div>
+              )}
+              {ad.target_titles && ad.target_titles.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Target Titles</p>
+                  <p className="text-gray-700">{ad.target_titles.join(" · ")}</p>
+                </div>
+              )}
+              {ad.pitch_summary && (
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pitch</p>
+                  <p className="text-gray-700">{ad.pitch_summary}</p>
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
         {fetchError && (
           <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-red-50 border border-red-100">
             <svg className="size-4 text-red-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">

@@ -138,10 +138,16 @@ function NewCampaignContent() {
         body: JSON.stringify({
           name: campaignName,
           icp_json: {
-            ...analysis.icp,
+            description:        angle.pitch_summary,
+            geography:          analysis.icp.geography,
+            key_signals:        analysis.icp.key_signals,
             url,
-            selected_angle: selectedAngle,
-            angle_data: angle,
+            selected_angle:     selectedAngle,
+            angle_data:         angle,
+            // top-level explorium_filters mirrors the selected angle so the
+            // leads pipeline always reads the right filters regardless of
+            // which lookup path it uses
+            explorium_filters:  angle.explorium_filters,
           },
           angle_selected: angle.name,
           stats_result: analysis.stats,

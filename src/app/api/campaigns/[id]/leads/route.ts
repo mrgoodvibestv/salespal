@@ -177,8 +177,8 @@ async function fetchBusinesses(
     page_size: MAX_COMPANIES,
     size: MAX_COMPANIES,
     page: 1,
-    include_operating_locations: true, // include companies with Ontario presence, not just HQ
     filters: {
+      include_operating_locations: true, // include companies with Ontario presence, not just HQ
       ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
       ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
       // region_country_code and country_code are mutually exclusive — use region if present

@@ -1,101 +1,163 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+
+export default function LandingPage() {
+  const router = useRouter()
+  const [url, setUrl] = useState("")
+  const [error, setError] = useState("")
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = url.trim()
+    if (!trimmed) {
+      setError("Please enter your website URL.")
+      return
+    }
+    const normalized =
+      trimmed.startsWith("http://") || trimmed.startsWith("https://")
+        ? trimmed
+        : `https://${trimmed}`
+    try {
+      new URL(normalized)
+    } catch {
+      setError("Please enter a valid website URL (e.g. yourcompany.com).")
+      return
+    }
+    router.push(`/signup?url=${encodeURIComponent(normalized)}`)
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen flex flex-col">
+      {/* Nav */}
+      <header className="flex items-center justify-between px-8 py-6">
+        <Logo />
+        <div className="flex items-center gap-6">
+          <Link
+            href="/login"
+            className="text-sm text-gray-500 hover:text-black transition-colors"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/signup"
+            className="text-sm font-medium px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors"
+          >
+            Get started
+          </Link>
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {/* Hero */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div className="max-w-2xl w-full mx-auto space-y-8">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-xs text-gray-500 bg-gray-50">
+            <span
+              className="size-1.5 rounded-full inline-block"
+              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            AI-powered B2B prospecting
+          </div>
+
+          {/* Headline */}
+          <div className="space-y-3">
+            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] text-black">
+              Ready to get
+              <br />
+              more sales?
+            </h1>
+            <p className="text-lg text-gray-500 max-w-md mx-auto leading-relaxed">
+              Enter your website. SalesPal finds your best campaign angle,
+              surfaces qualified leads, and writes your outreach — in minutes.
+            </p>
+          </div>
+
+          {/* URL input */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value)
+                  setError("")
+                }}
+                placeholder="yourcompany.com"
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap"
+                style={{
+                  background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                }}
+              >
+                Analyze my website →
+              </button>
+            </div>
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 max-w-lg mx-auto">
+            <div className="flex-1 h-px bg-gray-100" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+
+          {/* Fallback */}
+          <div>
+            <Link
+              href="/signup?manual=true"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-black transition-colors group"
+            >
+              Tell us about your business
+              <span className="group-hover:translate-x-0.5 transition-transform">
+                →
+              </span>
+            </Link>
+            <p className="mt-1 text-xs text-gray-400">
+              For gated sites or if you&apos;d rather fill in the details yourself
+            </p>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="px-8 py-6 text-center">
+        <p className="text-xs text-gray-400">
+          Business email required to sign up.{" "}
+          <Link
+            href="/login"
+            className="hover:text-gray-600 transition-colors"
+          >
+            Already have an account?
+          </Link>
+        </p>
       </footer>
     </div>
-  );
+  )
+}
+
+function Logo() {
+  return (
+    <span className="text-xl font-bold tracking-tight select-none">
+      <span className="text-black">Sales</span>
+      <span
+        className="bg-clip-text text-transparent"
+        style={{
+          backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+        }}
+      >
+        Pal
+      </span>
+    </span>
+  )
 }

@@ -154,12 +154,14 @@ export default function CampaignDetailClient({
     setUnlockErrors((e) => ({ ...e, [lead.id]: "" }))
 
     try {
+      console.log("[unlock] sending:", { lead_id: lead.id, prospect_id: lead.prospect_id })
       const res = await fetch(`/api/campaigns/${campaign.id}/unlock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lead_id: lead.id, prospect_id: lead.prospect_id }),
       })
       const data = await res.json()
+      console.log("[unlock] response status:", res.status, "body:", JSON.stringify(data))
 
       if (!res.ok) {
         if (res.status === 402) {
@@ -171,6 +173,7 @@ export default function CampaignDetailClient({
       }
 
       // Update lead in state
+      console.log("[unlock] updating lead state — email:", data.email ?? "null", "phone:", data.phone ?? "null")
       setLeads((prev) =>
         prev.map((l) =>
           l.id === lead.id

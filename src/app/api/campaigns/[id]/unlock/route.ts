@@ -83,6 +83,7 @@ export async function POST(
     // The user gets a "not available" contact rather than losing the option
   } else {
     const enrichData = await enrichRes.json()
+    console.log("[unlock] enrich full response:", JSON.stringify(enrichData))
     console.log("[unlock] enrich response keys:", Object.keys(enrichData))
 
     // Handle common response shapes
@@ -93,9 +94,13 @@ export async function POST(
       enrichData?.[0] ??
       enrichData
 
+    console.log("[unlock] enriched object keys:", enriched ? Object.keys(enriched) : "null")
+    console.log("[unlock] enriched object full:", JSON.stringify(enriched))
+
     email = enriched?.email ?? enriched?.work_email ?? enriched?.personal_email ?? null
     phone = enriched?.phone ?? enriched?.phone_number ?? enriched?.mobile ?? null
-    console.log("[unlock] extracted email:", email ? "found" : "null", "phone:", phone ? "found" : "null")
+    console.log("[unlock] extracted email:", email ?? "null")
+    console.log("[unlock] extracted phone:", phone ?? "null")
   }
 
   // Deduct 2 credits atomically via deduct_credits RPC
@@ -131,5 +136,7 @@ export async function POST(
     console.error("[unlock] lead update error:", updateError)
   }
 
-  return NextResponse.json({ email, phone })
+  const responsePayload = { email, phone }
+  console.log("[unlock] returning to client:", JSON.stringify(responsePayload))
+  return NextResponse.json(responsePayload)
 }

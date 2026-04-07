@@ -77,6 +77,7 @@ async function fetchBusinesses(
     website_keywords?: string[]
     company_size?: string[]
     country_code?: string[]
+    region_country_code?: string[]
   }
 
   const body: Record<string, unknown> = {
@@ -85,9 +86,10 @@ async function fetchBusinesses(
     size: MAX_COMPANIES,
     page: 1,
     filters: {
-      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
-      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
-      ...(ef.country_code?.length     && { country_code:     { values: ef.country_code } }),
+      ...(ef.website_keywords?.length    && { website_keywords:    { values: ef.website_keywords } }),
+      ...(ef.company_size?.length        && { company_size:        { values: ef.company_size } }),
+      ...(ef.country_code?.length        && { country_code:        { values: ef.country_code } }),
+      ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
     },
   }
 

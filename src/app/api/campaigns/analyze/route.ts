@@ -92,6 +92,7 @@ Return this exact JSON structure:
       "website_keywords": ["keyword1", "keyword2", "keyword3"],
       "company_size": ["51-200", "201-500"],
       "country_code": ["us", "ca"],
+      "region_country_code": ["ca-on"],
       "job_level": ["c-suite", "director"],
       "job_department": ["engineering"]
     }
@@ -107,6 +108,7 @@ Return this exact JSON structure:
       "website_keywords": ["keyword1", "keyword2"],
       "company_size": ["51-200", "201-500", "501-1000"],
       "country_code": ["us"],
+      "region_country_code": [],
       "job_level": ["director", "vice president"],
       "job_department": ["human resources"]
     }
@@ -117,7 +119,8 @@ CONSTRAINTS — you MUST use only these values:
 company_size: ${VALID_COMPANY_SIZES.join(", ")}
 job_level: ${VALID_JOB_LEVELS.join(", ")}
 job_department: ${VALID_JOB_DEPARTMENTS.join(", ")}
-country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")`,
+country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")
+region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns.`,
       },
     ],
   }),
@@ -135,9 +138,10 @@ async function fetchExploriumStats(filters: ExploriumFilterInput): Promise<{ com
   try {
     const body: Record<string, unknown> = {
       filters: {
-        ...(filters.website_keywords?.length && { website_keywords: { values: filters.website_keywords } }),
-        ...(filters.company_size?.length     && { company_size:     { values: filters.company_size } }),
-        ...(filters.country_code?.length     && { country_code:     { values: filters.country_code } }),
+        ...(filters.website_keywords?.length    && { website_keywords:    { values: filters.website_keywords } }),
+        ...(filters.company_size?.length        && { company_size:        { values: filters.company_size } }),
+        ...(filters.country_code?.length        && { country_code:        { values: filters.country_code } }),
+        ...(filters.region_country_code?.length && { region_country_code: { values: filters.region_country_code } }),
       },
     }
 
@@ -171,6 +175,7 @@ interface ExploriumFilterInput {
   website_keywords?: string[]
   company_size?: string[]
   country_code?: string[]
+  region_country_code?: string[]
   job_level?: string[]
   job_department?: string[]
 }

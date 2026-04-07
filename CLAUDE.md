@@ -334,13 +334,17 @@ Dev server running at `http://localhost:3000`.
 - Auth + campaign ownership (RLS)
 - Minimum 5 credits required — returns `402` with current balance if insufficient
 - Sets campaign `status → fetching_companies`
-- Calls Explorium `POST /v1/businesses` — `mode: "full"`, `page_size/size: 10`, `page: 1`, filters: `website_keywords`, `company_size`, `country_code`
-- Batch-calls Explorium `POST /v1/prospects` for all business IDs — `mode: "full"`, `max_per_company: 3`, `job_level` + `job_department` filters
+- Calls Explorium `POST /v1/prospects` directly — NO company fetch intermediary
+  - Local campaigns (`geo_scope === "local"`): `page_size: 10`, filter `region_country_code: ["CA-ON"]` (uppercase ISO 3166-2 from `icp_json.geo.geo_region_code`)
+  - National campaigns: `page_size: 5`, filter `country_code: ["ca"]` (from `angleFilters.country_code`)
+  - NEVER send `region_country_code` and `country_code` together
+  - Also filters `website_keywords`, `company_size`, `job_level`, `job_department` from `angleFilters`
+  - `company_name` read from Explorium prospect response field directly
 - Scores prospects with Claude Haiku (`claude-haiku-4-5-20251001`) in a single batch call — falls back to rule-based scoring if Claude fails
-- Inserts company rows → lead rows (Decision Maker + Influencer only; Noise excluded)
-- Calls `deduct_credits` RPC — 1 credit per company at `$0.04` Explorium cost
+- Inserts lead rows only (Decision Maker + Influencer; Noise excluded) — `company_id: null`
+- Calls `deduct_credits` RPC — `page_size` credits per run at `$0.04` × prospects returned Explorium cost
 - Sets campaign `status → preview_ready`
-- Returns `{ leads, companies_fetched, credits_deducted }`
+- Returns `{ leads, companies_fetched (= prospects fetched), credits_deducted }`
 
 **`POST /api/campaigns/[id]/unlock`**
 - Auth + lead ownership via join (`campaigns!inner(user_id)`)
@@ -414,9 +418,13 @@ Body shape for /v1/prospects (key addition for local campaigns):
 }
 ```
 
-**Geography filtering rule (IMPORTANT):**
-- Company fetch (`/v1/businesses`): use `country_code` only (broad). Never use `city_region_country`.
-- Prospect fetch (`/v1/prospects`): use `prospect_region_country_code` with UPPERCASE values (e.g. `["CA-ON"]`) to filter by prospect personal location. This is how local/regional campaigns achieve precision.
+**Geography filtering rule (CONFIRMED):**
+- `/v1/businesses` is no longer used in the leads pipeline.
+- `/v1/prospects` with `region_country_code: ["CA-ON"]` (UPPERCASE) works perfectly when `business_id` is absent.
+- NEVER send `region_country_code` alongside `business_id` — Explorium rejects it as extra fields.
+- NEVER send `region_country_code` and `country_code` together — mutually exclusive.
+- `city_region_country` on `/v1/businesses` returns 0 results (requires exact autocomplete strings). Do not use.
+- `prospect_region_country_code` (prefixed) does not exist on the REST API — only works via MCP layer.
 
 ---
 

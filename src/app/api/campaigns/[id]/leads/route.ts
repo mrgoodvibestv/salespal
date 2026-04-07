@@ -7,24 +7,12 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
-const MAX_COMPANIES_LOCAL    = 7
-const MAX_COMPANIES_NATIONAL = 3
-const MAX_PROSPECTS_PER_COMPANY = 1
+// page_size for direct prospect query — no company intermediary
+const PAGE_SIZE_LOCAL    = 10
+const PAGE_SIZE_NATIONAL = 5
 const MIN_CREDITS_TO_RUN = 5
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface ExploriumBusiness {
-  business_id?: string
-  id?: string
-  name: string
-  website?: string
-  domain?: string
-  linkedin_url?: string
-  employee_count?: number
-  industry?: string
-  [key: string]: unknown
-}
-
 interface ExploriumProspect {
   prospect_id?: string
   id?: string
@@ -33,6 +21,7 @@ interface ExploriumProspect {
   job_title?: string
   title?: string
   job_level?: string
+  job_level_main?: string
   linkedin_url?: string
   linkedin?: string
   linkedin_profile?: string
@@ -40,74 +29,25 @@ interface ExploriumProspect {
   profile_url?: string
   business_id?: string
   company_id?: string
+  company_name?: string
+  company_website?: string
   region_name?: string
   city?: string
   country_name?: string
   [key: string]: unknown
 }
 
-
-// ── Post-fetch geo filtering ───────────────────────────────────────────────
-// Maps ISO 3166-2 region code prefixes to country names as Explorium returns them
-const GEO_COUNTRY_MAP: Record<string, string> = {
-  "ca": "canada",
-  "us": "united states",
-  "gb": "united kingdom",
-  "au": "australia",
+interface ScoredProspect {
+  prospect_id: string
+  full_name: string
+  job_title: string
+  linkedin_url: string
+  company_name: string
+  tier: "decision_maker" | "influencer" | "noise"
+  geo_location: string
 }
 
-// Major Ontario cities for secondary sort
-const ONTARIO_CITIES = new Set([
-  "toronto", "mississauga", "ottawa", "hamilton", "brampton", "london",
-  "markham", "vaughan", "kitchener", "windsor", "richmond hill", "oakville",
-  "burlington", "oshawa", "barrie", "waterloo", "cambridge", "guelph",
-])
-
-// Filter prospects by country for local campaigns, then sort region matches first
-function geoFilterAndSort(
-  prospects: ExploriumProspect[],
-  geoScope: string | undefined,
-  geoRegionCode: string | undefined
-): ExploriumProspect[] {
-  if (geoScope !== "local" || !geoRegionCode) return prospects
-
-  const countryPrefix = geoRegionCode.split("-")[0].toLowerCase()
-  const expectedCountry = GEO_COUNTRY_MAP[countryPrefix]
-
-  // Filter: keep only prospects matching the campaign country
-  let filtered = prospects
-  if (expectedCountry) {
-    filtered = prospects.filter(
-      (p) => (p.country_name ?? "").toLowerCase() === expectedCountry
-    )
-    console.log(`[leads/geo] country filter (${expectedCountry}): ${filtered.length}/${prospects.length} kept`)
-  }
-
-  // Secondary sort: prospects whose region/city matches the specific region come first
-  const regionSuffix = geoRegionCode.split("-")[1]?.toLowerCase() ?? ""
-  filtered.sort((a, b) => {
-    const aScore = regionScore(a, geoRegionCode, regionSuffix)
-    const bScore = regionScore(b, geoRegionCode, regionSuffix)
-    return bScore - aScore
-  })
-
-  return filtered
-}
-
-function regionScore(p: ExploriumProspect, regionCode: string, regionSuffix: string): number {
-  const region = (p.region_name ?? "").toLowerCase()
-  const city   = (p.city        ?? "").toLowerCase()
-
-  // Ontario-specific: check region_name contains "ontario" or city is an Ontario city
-  if (regionCode === "ca-on") {
-    if (region.includes("ontario")) return 2
-    if (ONTARIO_CITIES.has(city))   return 1
-  } else if (regionSuffix && region.includes(regionSuffix)) {
-    return 1
-  }
-  return 0
-}
-
+// ── Helpers ────────────────────────────────────────────────────────────────
 function extractLinkedinUrl(p: ExploriumProspect): string {
   return (
     p.linkedin ??
@@ -126,91 +66,47 @@ function normalizeLinkedinUrl(raw: string): string {
   return raw
 }
 
-interface ScoredProspect {
-  prospect_id: string
-  full_name: string
-  job_title: string
-  linkedin_url: string
-  business_id: string
-  tier: "decision_maker" | "influencer" | "noise"
-  geo_location: string
-}
-
-// ── Explorium: fetch businesses ────────────────────────────────────────────
-// Company-level filter uses country_code only (broad). Region precision is done
-// post-fetch via country/region matching on the prospect objects.
-async function fetchBusinesses(
+// ── Explorium: direct prospect fetch (no business_id) ─────────────────────
+// Confirmed working: region_country_code filter works on /v1/prospects ONLY
+// when business_id is absent. Never send both together.
+async function fetchProspectsDirect(
   filters: Record<string, unknown>,
-  maxCompanies: number
-): Promise<ExploriumBusiness[]> {
+  geoScope: string | undefined,
+  geoRegionCode: string | undefined
+): Promise<ExploriumProspect[]> {
   const ef = filters as {
     website_keywords?: string[]
     company_size?: string[]
     country_code?: string[]
-  }
-
-  const body: Record<string, unknown> = {
-    mode: "full",
-    page_size: maxCompanies,
-    size: maxCompanies,
-    page: 1,
-    filters: {
-      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
-      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
-      ...(ef.country_code?.length     && { country_code:     { values: ef.country_code } }),
-    },
-  }
-
-  console.log("[leads/businesses] request:", JSON.stringify(body))
-
-  const res = await fetch(`${EXPLORIUM_BASE}/v1/businesses`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", API_KEY: EXPLORIUM_KEY ?? "" },
-    body: JSON.stringify(body),
-  })
-
-  if (!res.ok) {
-    const text = await res.text()
-    console.error("[leads/businesses] HTTP", res.status, "body:", text)
-    console.error("[leads/businesses] failed request body was:", JSON.stringify(body))
-    throw new Error(`Explorium businesses failed: ${res.status}`)
-  }
-
-  const data = await res.json()
-  console.log("[leads/businesses] response keys:", Object.keys(data))
-
-  // Handle common response shapes
-  const list: ExploriumBusiness[] =
-    data?.businesses ?? data?.data ?? data?.results ?? data?.items ?? []
-  return list
-}
-
-// ── Explorium: fetch prospects for a set of business IDs ──────────────────
-// NOTE: prospect_region_country_code is rejected by the direct REST API
-// ("extra fields not permitted"). Geo filtering is done post-fetch instead.
-async function fetchProspects(
-  businessIds: string[],
-  filters: Record<string, unknown>
-): Promise<ExploriumProspect[]> {
-  const ef = filters as {
     job_level?: string[]
     job_department?: string[]
   }
 
+  const isLocal = geoScope === "local" && !!geoRegionCode
+  const pageSize = isLocal ? PAGE_SIZE_LOCAL : PAGE_SIZE_NATIONAL
+
+  // Geo filter: region_country_code XOR country_code — never both
+  const geoFilter: Record<string, unknown> = isLocal
+    ? { region_country_code: { values: [geoRegionCode!.toUpperCase()] } }
+    : ef.country_code?.length
+      ? { country_code: { values: ef.country_code } }
+      : {}
+
   const body: Record<string, unknown> = {
     mode: "full",
-    page_size: businessIds.length * MAX_PROSPECTS_PER_COMPANY,
-    size: businessIds.length * MAX_PROSPECTS_PER_COMPANY,
+    page_size: pageSize,
+    size: pageSize,
     page: 1,
-    max_per_company: MAX_PROSPECTS_PER_COMPANY,
     filters: {
-      business_id: { values: businessIds },
-      ...(ef.job_level?.length      && { job_level:      { values: ef.job_level } }),
-      ...(ef.job_department?.length && { job_department: { values: ef.job_department } }),
+      ...geoFilter,
+      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
+      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
+      ...(ef.job_level?.length        && { job_level:        { values: ef.job_level } }),
+      ...(ef.job_department?.length   && { job_department:   { values: ef.job_department } }),
     },
   }
 
-  console.log("[leads/prospects] request business_ids:", businessIds)
+  console.log("[leads/prospects] direct fetch request:", JSON.stringify(body))
 
   const res = await fetch(`${EXPLORIUM_BASE}/v1/prospects`, {
     method: "POST",
@@ -226,6 +122,7 @@ async function fetchProspects(
 
   const data = await res.json()
   console.log("[leads/prospects] response keys:", Object.keys(data))
+  console.log("[leads/prospects] total_results:", data?.total_results ?? "unknown")
 
   const list: ExploriumProspect[] =
     data?.prospects ?? data?.data ?? data?.results ?? data?.items ?? []
@@ -239,7 +136,7 @@ async function scoreProspects(prospects: ExploriumProspect[]): Promise<ScoredPro
   const toScore = prospects.map((p) => ({
     id:    p.prospect_id ?? p.id ?? "",
     title: p.job_title   ?? p.title ?? "",
-    level: p.job_level   ?? "",
+    level: p.job_level_main ?? p.job_level ?? "",
   }))
 
   let raw = ""
@@ -271,8 +168,8 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       full_name:    p.full_name   ?? p.name ?? "Unknown",
       job_title:    p.job_title   ?? p.title ?? "",
       linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
-      business_id:  p.business_id ?? p.company_id ?? "",
-      tier: scoreTierByLevel(p.job_level ?? ""),
+      company_name: p.company_name ?? "",
+      tier: scoreTierByLevel(p.job_level_main ?? p.job_level ?? ""),
       geo_location: [(p.city ?? "").trim(), (p.country_name ?? "").trim()].filter(Boolean).join(", "),
     }))
   }
@@ -302,8 +199,8 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
     full_name:    p.full_name   ?? p.name  ?? "Unknown",
     job_title:    p.job_title   ?? p.title ?? "",
     linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
-    business_id:  p.business_id ?? p.company_id ?? "",
-    tier: scoreMap.get(p.prospect_id ?? p.id ?? "") ?? scoreTierByLevel(p.job_level ?? ""),
+    company_name: p.company_name ?? "",
+    tier: scoreMap.get(p.prospect_id ?? p.id ?? "") ?? scoreTierByLevel(p.job_level_main ?? p.job_level ?? ""),
     geo_location: [(p.city ?? "").trim(), (p.country_name ?? "").trim()].filter(Boolean).join(", "),
   }))
 }
@@ -362,53 +259,33 @@ export async function POST(
     .update({ status: "fetching_companies" })
     .eq("id", campaignId)
 
-  // Extract filters from icp_json
+  // Extract filters and geo from icp_json
   const icpJson = campaign.icp_json as Record<string, unknown> | null
   const angleFilters: Record<string, unknown> =
     ((icpJson?.angle_data as Record<string, unknown>)?.explorium_filters as Record<string, unknown>) ??
     (icpJson?.explorium_filters as Record<string, unknown>) ??
-    {} as Record<string, unknown>
+    {}
 
-  // Determine geo scope → max companies to fetch
-  const geoObj = icpJson?.geo as Record<string, unknown> | undefined
-  const geoScope      = geoObj?.geo_scope      as string | undefined
-  const geoRegionCode = geoObj?.geo_region_code as string | undefined
-  const maxCompanies  = geoScope === "local" ? MAX_COMPANIES_LOCAL : MAX_COMPANIES_NATIONAL
+  const geoObj         = icpJson?.geo as Record<string, unknown> | undefined
+  const geoScope       = geoObj?.geo_scope      as string | undefined
+  const geoRegionCode  = geoObj?.geo_region_code as string | undefined
+  const pageSize       = geoScope === "local" ? PAGE_SIZE_LOCAL : PAGE_SIZE_NATIONAL
 
-  console.log("[leads] campaign icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
-  console.log("[leads] extracted filters:", JSON.stringify(angleFilters))
-  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none", "→ maxCompanies:", maxCompanies)
+  console.log("[leads] icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
+  console.log("[leads] angleFilters:", JSON.stringify(angleFilters))
+  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none", "pageSize:", pageSize)
 
-  let businesses: ExploriumBusiness[] = []
   let prospects: ExploriumProspect[] = []
   let scoredProspects: ScoredProspect[] = []
 
   try {
-    // ── Fetch companies (broad: country_code only) ───────────────────────
-    businesses = await fetchBusinesses(angleFilters, maxCompanies)
-    console.log("[leads] businesses fetched:", businesses.length)
-
-    if (businesses.length === 0) {
-      await supabase.from("campaigns").update({ status: "active" }).eq("id", campaignId)
-      return NextResponse.json({ leads: [], companies_fetched: 0, message: "No matching companies found. Try broadening your filters." })
-    }
-
-    // Normalise business IDs
-    const businessIds = businesses
-      .map((b) => b.business_id ?? b.id ?? "")
-      .filter(Boolean)
-
-    // ── Fetch prospects ──────────────────────────────────────────────────
-    prospects = await fetchProspects(businessIds, angleFilters)
+    // ── Direct prospect fetch ────────────────────────────────────────────
+    prospects = await fetchProspectsDirect(angleFilters, geoScope, geoRegionCode)
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
-      console.log("[leads] first prospect full:", JSON.stringify(prospects[0]))
+      console.log("[leads] first prospect:", JSON.stringify(prospects[0]))
     }
-
-    // ── Post-fetch geo filter + sort ─────────────────────────────────────
-    prospects = geoFilterAndSort(prospects, geoScope, geoRegionCode)
-    console.log("[leads] prospects after geo filter:", prospects.length)
 
     // ── Score with Claude ────────────────────────────────────────────────
     scoredProspects = await scoreProspects(prospects)
@@ -429,45 +306,33 @@ export async function POST(
     .filter((p) => p.tier !== "noise")
     .sort((a, b) => (tierOrder[a.tier] ?? 2) - (tierOrder[b.tier] ?? 2))
 
-  // Map prospect_id → scored data for response enrichment
-  const scoredProspectMap = new Map(qualified.map((p) => [p.prospect_id, p]))
-
-  // Build a map of Explorium business_id → DB company uuid
-  const companyIdMap = new Map<string, string>()
-  for (const biz of businesses) {
-    const exploId = biz.business_id ?? biz.id ?? ""
-    if (!exploId) continue
-    const { data: companyRow } = await supabase
-      .from("companies")
-      .insert({
-        campaign_id:     campaignId,
-        business_id:     exploId,
-        name:            biz.name,
-        domain:          biz.website ?? biz.domain ?? "",
-        qualified:       true,
-        credits_charged: 1,
-      })
-      .select("id")
-      .single()
-    if (companyRow) companyIdMap.set(exploId, companyRow.id)
-  }
-
-  // Insert qualified leads
   const leadRows = qualified.map((p) => ({
-    campaign_id:    campaignId,
-    company_id:     companyIdMap.get(p.business_id) ?? null,
-    prospect_id:    p.prospect_id,
-    full_name:      p.full_name,
-    job_title:      p.job_title,
-    linkedin_url:   p.linkedin_url,
-    email:          null,
-    phone:          null,
-    tier:           p.tier,
-    unlocked:       false,
+    campaign_id:     campaignId,
+    company_id:      null,
+    prospect_id:     p.prospect_id,
+    full_name:       p.full_name,
+    job_title:       p.job_title,
+    linkedin_url:    p.linkedin_url,
+    email:           null,
+    phone:           null,
+    tier:            p.tier,
+    unlocked:        false,
     credits_charged: 0,
   }))
 
-  let insertedLeads: { id: string; prospect_id: string; full_name: string; job_title: string; linkedin_url: string; tier: string; unlocked: boolean; email: string | null; phone: string | null; company_id: string | null }[] = []
+  let insertedLeads: {
+    id: string
+    prospect_id: string
+    full_name: string
+    job_title: string
+    linkedin_url: string
+    tier: string
+    unlocked: boolean
+    email: string | null
+    phone: string | null
+    company_id: string | null
+  }[] = []
+
   if (leadRows.length > 0) {
     const { data, error: insertError } = await supabase
       .from("leads")
@@ -477,14 +342,14 @@ export async function POST(
     insertedLeads = data ?? []
   }
 
-  // ── Deduct credits (1 per company fetched) ───────────────────────────────
-  const creditsToDeduct = businesses.length
+  // ── Deduct credits (based on page_size — fixed, predictable cost per run) ─
+  const creditsToDeduct = pageSize
   const { error: deductError } = await supabase.rpc("deduct_credits", {
-    p_user_id:       user.id,
-    p_amount:        creditsToDeduct,
-    p_action:        "company_fetch",
-    p_explorium_cost: businesses.length * 0.04,
-    p_reference_id:  campaignId,
+    p_user_id:        user.id,
+    p_amount:         creditsToDeduct,
+    p_action:         "company_fetch",
+    p_explorium_cost: prospects.length * 0.04,
+    p_reference_id:   campaignId,
   })
   if (deductError) console.error("[leads] deduct_credits error:", deductError)
 
@@ -494,23 +359,21 @@ export async function POST(
     .update({ status: "preview_ready" })
     .eq("id", campaignId)
 
-  // Enrich leads with company name and geo data for the response
-  const companyNameMap = new Map(businesses.map((b) => [b.business_id ?? b.id ?? "", b.name]))
+  // Build a map of prospect_id → scored data for response
+  const scoredMap = new Map(qualified.map((p) => [p.prospect_id, p]))
+
   const leadsWithCompany = insertedLeads.map((l) => {
-    const exploId = businesses.find(
-      (b) => companyIdMap.get(b.business_id ?? b.id ?? "") === l.company_id
-    )
-    const scored = scoredProspectMap.get(l.prospect_id)
+    const scored = scoredMap.get(l.prospect_id)
     return {
       ...l,
-      company_name: exploId ? companyNameMap.get(exploId.business_id ?? exploId.id ?? "") ?? "" : "",
+      company_name: scored?.company_name ?? "",
       geo_location: scored?.geo_location ?? "",
     }
   })
 
   return NextResponse.json({
     leads:             leadsWithCompany,
-    companies_fetched: businesses.length,
+    companies_fetched: prospects.length,  // repurposed: total prospects fetched
     credits_deducted:  creditsToDeduct,
   })
 }

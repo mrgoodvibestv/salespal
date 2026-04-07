@@ -51,6 +51,21 @@ async function fetchWebsiteText(url: string): Promise<string> {
   }
 }
 
+// ── City/region map for local campaigns ───────────────────────────────────
+const CITY_REGION_MAP: Record<string, string[]> = {
+  "ca-on": ["Toronto, ON, CA", "Mississauga, ON, CA", "Ottawa, ON, CA", "Hamilton, ON, CA", "Brampton, ON, CA", "Markham, ON, CA"],
+  "ca-bc": ["Vancouver, BC, CA", "Surrey, BC, CA", "Burnaby, BC, CA"],
+  "ca-ab": ["Calgary, AB, CA", "Edmonton, AB, CA"],
+  "ca-qc": ["Montreal, QC, CA", "Quebec City, QC, CA"],
+  "us-ny": ["New York, NY, US", "Brooklyn, NY, US", "Manhattan, NY, US"],
+  "us-ca": ["Los Angeles, CA, US", "San Francisco, CA, US", "San Jose, CA, US"],
+  "us-tx": ["Houston, TX, US", "Dallas, TX, US", "Austin, TX, US"],
+  "us-fl": ["Miami, FL, US", "Tampa, FL, US", "Orlando, FL, US"],
+  "gb-eng": ["London, England, GB", "Manchester, England, GB", "Birmingham, England, GB"],
+  "au-nsw": ["Sydney, NSW, AU", "Newcastle, NSW, AU"],
+  "au-vic": ["Melbourne, VIC, AU", "Geelong, VIC, AU"],
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 function getCountryCode(countryName: string): string {
   const map: Record<string, string> = {
@@ -81,11 +96,24 @@ async function analyzeWithClaude(url: string, websiteText: string, geo?: GeoPara
       ? `${geo.geo_region}, ${geo.geo_country}`
       : geo.geo_country
     const scopeStr = geo.geo_scope === "local" ? "local/regional" : "national/global"
-    geoConstraint = `\n\nHARD CONSTRAINT — GEOGRAPHY (do not override):
+    const cityValues = geo.geo_region_code ? (CITY_REGION_MAP[geo.geo_region_code] ?? []) : []
+    const isLocal = geo.geo_scope === "local" && cityValues.length > 0
+
+    if (isLocal) {
+      geoConstraint = `\n\nHARD CONSTRAINT — GEOGRAPHY (do not override):
+The client targets local customers in ${locationStr}.
+You MUST set the following in explorium_filters for BOTH angles:
+- country_code: ["${getCountryCode(geo.geo_country)}"]
+- city_region_country: ${JSON.stringify(cityValues)}
+Do NOT use region_country_code — use city_region_country instead for local campaigns.
+Do not suggest different geographies. The ICP geography field must reflect "${locationStr}".`
+    } else {
+      geoConstraint = `\n\nHARD CONSTRAINT — GEOGRAPHY (do not override):
 The client targets ${scopeStr} customers in ${locationStr}.
 You MUST set the following in explorium_filters for BOTH angles:
 - country_code: ["${getCountryCode(geo.geo_country)}"]${geo.geo_region_code ? `\n- region_country_code: ["${geo.geo_region_code}"]` : ""}
 Do not suggest different geographies. The ICP geography field must reflect "${locationStr}".`
+    }
   }
 
   const message = await retryWithBackoff(
@@ -124,6 +152,7 @@ Return this exact JSON structure:
       "company_size": ["51-200", "201-500"],
       "country_code": ["us", "ca"],
       "region_country_code": ["ca-on"],
+      "city_region_country": [],
       "job_level": ["c-suite", "director"],
       "job_department": ["engineering"]
     }
@@ -151,7 +180,8 @@ company_size: ${VALID_COMPANY_SIZES.join(", ")}
 job_level: ${VALID_JOB_LEVELS.join(", ")}
 job_department: ${VALID_JOB_DEPARTMENTS.join(", ")}
 country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")
-region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns. Note: when region_country_code is set, country_code is omitted — they are mutually exclusive.${geoConstraint}`,
+region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York). Use for regional campaigns when city_region_country is not set. Omit (empty array) when using city_region_country.
+city_region_country: city-level targeting strings in "City, Region, COUNTRY" format (e.g. "Toronto, ON, CA"). Use for hyper-local campaigns instead of region_country_code. Omit (empty array) when not targeting a specific city.${geoConstraint}`,
       },
     ],
   }),
@@ -206,6 +236,7 @@ interface ExploriumFilterInput {
   company_size?: string[]
   country_code?: string[]
   region_country_code?: string[]
+  city_region_country?: string[]
   job_level?: string[]
   job_department?: string[]
 }

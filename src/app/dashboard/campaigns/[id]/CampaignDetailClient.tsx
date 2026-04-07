@@ -23,6 +23,8 @@ interface Lead {
   credits_charged: number
   company_name?: string
   companies?: Company | null
+  geo_match?: boolean
+  geo_location?: string
 }
 
 interface Campaign {
@@ -381,6 +383,7 @@ export default function CampaignDetailClient({
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Title</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tier</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">LinkedIn</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</th>
@@ -405,6 +408,18 @@ export default function CampaignDetailClient({
                           </td>
                           <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                             {companyName}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <div className="flex flex-col gap-0.5">
+                              {lead.geo_location && (
+                                <span className="text-xs text-gray-400">{lead.geo_location}</span>
+                              )}
+                              {lead.geo_match === false && (
+                                <span className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-400">
+                                  Outside region
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>

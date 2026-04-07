@@ -7,7 +7,8 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
-const MAX_COMPANIES = 3
+const MAX_COMPANIES_LOCAL    = 15
+const MAX_COMPANIES_NATIONAL = 3
 const MAX_PROSPECTS_PER_COMPANY = 2
 const MIN_CREDITS_TO_RUN = 5
 
@@ -94,44 +95,34 @@ const REGION_GEO: Record<string, { regionNames: string[]; cities: string[] }> = 
   },
 }
 
-function filterProspectsByRegion(
-  prospects: ExploriumProspect[],
-  regionCodes: string[]
-): ExploriumProspect[] {
-  if (!regionCodes.length) return prospects
-
-  const geoSets = regionCodes
-    .map((code) => REGION_GEO[code.toLowerCase()])
-    .filter(Boolean)
-
-  if (!geoSets.length) return prospects // unknown region code — don't filter
+function isGeoMatch(p: ExploriumProspect, regionCodes: string[]): boolean {
+  if (!regionCodes.length) return true
+  const geoSets = regionCodes.map((code) => REGION_GEO[code.toLowerCase()]).filter(Boolean)
+  if (!geoSets.length) return true
 
   const allRegionNames = geoSets.flatMap((g) => g!.regionNames)
   const allCities      = geoSets.flatMap((g) => g!.cities)
+  const region  = (p.region_name  ?? "").toLowerCase()
+  const city    = (p.city         ?? "").toLowerCase()
+  const country = (p.country_name ?? "").toLowerCase()
 
-  const matched = prospects.filter((p) => {
-    const region  = (p.region_name  ?? "").toLowerCase()
-    const city    = (p.city         ?? "").toLowerCase()
-    const country = (p.country_name ?? "").toLowerCase()
+  if (allRegionNames.some((r) => region.includes(r))) return true
+  if (allCities.some((c) => city.includes(c)))        return true
+  if (regionCodes.some((code) => code.startsWith("ca-")) && country === "canada" && !region) return true
+  if (regionCodes.some((code) => code.startsWith("us-")) && (country === "united states" || country === "usa") && !region) return true
+  return false
+}
 
-    if (allRegionNames.some((r) => region.includes(r)))  return true
-    if (allCities.some((c)      => city.includes(c)))    return true
-    // Broad Canada match when region is missing — keep if country matches and no conflicting region
-    if (regionCodes.some((code) => code.startsWith("ca-")) && country === "canada" && !region) return true
-    if (regionCodes.some((code) => code.startsWith("us-")) && (country === "united states" || country === "usa") && !region) return true
-    return false
-  })
-
-  const kept     = matched.length
-  const filtered = prospects.length - kept
-  console.log(`[leads/geo] region filter (${regionCodes.join(",")}): kept ${kept}, filtered out ${filtered}`)
-
-  // Fall back to all prospects if filter leaves fewer than 3
-  if (kept < 3) {
-    console.warn("[leads/geo] fewer than 3 prospects after geo filter — falling back to full list")
-    return prospects
-  }
-  return matched
+function scoreProspectsByRegion(
+  prospects: ExploriumProspect[],
+  regionCodes: string[]
+): ExploriumProspect[] {
+  const matched   = prospects.filter((p) =>  isGeoMatch(p, regionCodes))
+  const unmatched = prospects.filter((p) => !isGeoMatch(p, regionCodes))
+  const matchCount = matched.length
+  console.log(`[leads/geo] geo scoring (${regionCodes.join(",") || "none"}): ${matchCount} match, ${unmatched.length} outside region`)
+  // Return geo_match=true first, then geo_match=false — scoring handles the rest
+  return [...matched, ...unmatched]
 }
 
 function extractLinkedinUrl(p: ExploriumProspect): string {
@@ -159,33 +150,39 @@ interface ScoredProspect {
   linkedin_url: string
   business_id: string
   tier: "decision_maker" | "influencer" | "noise"
+  geo_match: boolean
+  geo_location: string
 }
 
 // ── Explorium: fetch businesses ────────────────────────────────────────────
 async function fetchBusinesses(
-  filters: Record<string, unknown>
+  filters: Record<string, unknown>,
+  maxCompanies: number
 ): Promise<ExploriumBusiness[]> {
   const ef = filters as {
     website_keywords?: string[]
     company_size?: string[]
     country_code?: string[]
     region_country_code?: string[]
+    city_region_country?: string[]
   }
 
   const body: Record<string, unknown> = {
     mode: "full",
-    page_size: MAX_COMPANIES,
-    size: MAX_COMPANIES,
+    page_size: maxCompanies,
+    size: maxCompanies,
     page: 1,
     filters: {
-      ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
-      ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
-      // region_country_code and country_code are mutually exclusive — use region if present
-      ...(ef.region_country_code?.length
-        ? { region_country_code: { values: ef.region_country_code } }
-        : ef.country_code?.length
-          ? { country_code: { values: ef.country_code } }
-          : {}),
+      ...(ef.website_keywords?.length    && { website_keywords:    { values: ef.website_keywords } }),
+      ...(ef.company_size?.length        && { company_size:        { values: ef.company_size } }),
+      // city_region_country, region_country_code, and country_code — use most specific available
+      ...(ef.city_region_country?.length
+        ? { city_region_country: { values: ef.city_region_country } }
+        : ef.region_country_code?.length
+          ? { region_country_code: { values: ef.region_country_code } }
+          : ef.country_code?.length
+            ? { country_code: { values: ef.country_code } }
+            : {}),
     },
   }
 
@@ -259,7 +256,10 @@ async function fetchProspects(
 }
 
 // ── Claude: score prospects ────────────────────────────────────────────────
-async function scoreProspects(prospects: ExploriumProspect[]): Promise<ScoredProspect[]> {
+async function scoreProspects(
+  prospects: ExploriumProspect[],
+  geoMap: Map<string, { geo_match: boolean; geo_location: string }>
+): Promise<ScoredProspect[]> {
   if (prospects.length === 0) return []
 
   const toScore = prospects.map((p) => ({
@@ -292,23 +292,26 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
     raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim()
   } catch (err) {
     console.error("[leads/score] Claude error, falling back to rule-based:", err)
-    // Rule-based fallback
-    return prospects.map((p) => ({
-      prospect_id: p.prospect_id ?? p.id ?? "",
-      full_name:   p.full_name   ?? p.name ?? "Unknown",
-      job_title:   p.job_title   ?? p.title ?? "",
-      linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
-      business_id:  p.business_id ?? p.company_id ?? "",
-      tier: scoreTierByLevel(p.job_level ?? ""),
-    }))
+    return prospects.map((p) => {
+      const id = p.prospect_id ?? p.id ?? ""
+      const geo = geoMap.get(id) ?? { geo_match: true, geo_location: "" }
+      return {
+        prospect_id:  id,
+        full_name:    p.full_name   ?? p.name ?? "Unknown",
+        job_title:    p.job_title   ?? p.title ?? "",
+        linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
+        business_id:  p.business_id ?? p.company_id ?? "",
+        tier: scoreTierByLevel(p.job_level ?? ""),
+        geo_match:    geo.geo_match,
+        geo_location: geo.geo_location,
+      }
+    })
   }
 
   let scores: { id: string; tier: "decision_maker" | "influencer" | "noise" }[] = []
   try {
     scores = JSON.parse(raw)
   } catch {
-    // Response may be truncated — extract all complete objects from the array
-    // Match every {...} object that has both "id" and "tier" fields
     const objectMatches = raw.match(/\{[^{}]*"id"\s*:\s*"[^"]*"[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*\}/g)
       ?? raw.match(/\{[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*"id"\s*:\s*"[^"]*"[^{}]*\}/g)
       ?? []
@@ -327,6 +330,7 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
 
   return prospects.map((p) => {
     const id = p.prospect_id ?? p.id ?? ""
+    const geo = geoMap.get(id) ?? { geo_match: true, geo_location: "" }
     return {
       prospect_id:  id,
       full_name:    p.full_name  ?? p.name  ?? "Unknown",
@@ -334,6 +338,8 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
       business_id:  p.business_id ?? p.company_id ?? "",
       tier: scoreMap.get(id) ?? scoreTierByLevel(p.job_level ?? ""),
+      geo_match:    geo.geo_match,
+      geo_location: geo.geo_location,
     }
   })
 }
@@ -399,8 +405,16 @@ export async function POST(
     (icpJson?.explorium_filters as Record<string, unknown>) ??
     {} as Record<string, unknown>
 
+  // Determine geo scope → max companies to fetch
+  const geoScope = (icpJson?.geo as Record<string, unknown> | undefined)?.geo_scope as string | undefined
+  const maxCompanies = geoScope === "local" ? MAX_COMPANIES_LOCAL : MAX_COMPANIES_NATIONAL
+
+  // Region codes for prospect-level geo scoring
+  const regionCodes = (angleFilters as { region_country_code?: string[] }).region_country_code ?? []
+
   console.log("[leads] campaign icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
   console.log("[leads] extracted filters:", JSON.stringify(angleFilters))
+  console.log("[leads] geo_scope:", geoScope ?? "none", "→ maxCompanies:", maxCompanies)
 
   let businesses: ExploriumBusiness[] = []
   let prospects: ExploriumProspect[] = []
@@ -408,7 +422,7 @@ export async function POST(
 
   try {
     // ── Fetch companies ──────────────────────────────────────────────────
-    businesses = await fetchBusinesses(angleFilters)
+    businesses = await fetchBusinesses(angleFilters, maxCompanies)
     console.log("[leads] businesses fetched:", businesses.length)
 
     if (businesses.length === 0) {
@@ -429,13 +443,22 @@ export async function POST(
       console.log("[leads] first prospect full:", JSON.stringify(prospects[0]))
     }
 
-    // ── Prospect-level geography filter ─────────────────────────────────
-    const regionCodes = (angleFilters as { region_country_code?: string[] }).region_country_code ?? []
-    prospects = filterProspectsByRegion(prospects, regionCodes)
+    // ── Annotate prospects with geo_match / geo_location ─────────────────
+    const prospectGeoMap = new Map<string, { geo_match: boolean; geo_location: string }>()
+    for (const p of prospects) {
+      const id = p.prospect_id ?? p.id ?? ""
+      const city    = (p.city         ?? "").trim()
+      const country = (p.country_name ?? "").trim()
+      const geo_location = [city, country].filter(Boolean).join(", ")
+      prospectGeoMap.set(id, { geo_match: isGeoMatch(p, regionCodes), geo_location })
+    }
+
+    // Sort: geo_match=true first, geo_match=false last (keeps all)
+    prospects = scoreProspectsByRegion(prospects, regionCodes)
 
     // ── Score with Claude ────────────────────────────────────────────────
-    scoredProspects = await scoreProspects(prospects)
-    console.log("[leads] scored:", scoredProspects.map((p) => `${p.job_title}→${p.tier}`))
+    scoredProspects = await scoreProspects(prospects, prospectGeoMap)
+    console.log("[leads] scored:", scoredProspects.map((p) => `${p.job_title}→${p.tier}(geo:${p.geo_match})`))
 
   } catch (err) {
     console.error("[leads] pipeline error:", err)
@@ -447,7 +470,18 @@ export async function POST(
   }
 
   // ── Persist to DB ────────────────────────────────────────────────────────
-  const qualified = scoredProspects.filter((p) => p.tier !== "noise")
+  const tierOrder: Record<string, number> = { decision_maker: 0, influencer: 1, noise: 2 }
+  const qualified = scoredProspects
+    .filter((p) => p.tier !== "noise")
+    .sort((a, b) => {
+      // geo_match=true first
+      if (a.geo_match !== b.geo_match) return a.geo_match ? -1 : 1
+      // then by tier
+      return (tierOrder[a.tier] ?? 2) - (tierOrder[b.tier] ?? 2)
+    })
+
+  // Map prospect_id → geo data for response enrichment
+  const scoredProspectMap = new Map(qualified.map((p) => [p.prospect_id, p]))
 
   // Build a map of Explorium business_id → DB company uuid
   const companyIdMap = new Map<string, string>()
@@ -484,7 +518,7 @@ export async function POST(
     credits_charged: 0,
   }))
 
-  let insertedLeads: { id: string; full_name: string; job_title: string; linkedin_url: string; tier: string; unlocked: boolean; email: string | null; phone: string | null; company_id: string | null }[] = []
+  let insertedLeads: { id: string; prospect_id: string; full_name: string; job_title: string; linkedin_url: string; tier: string; unlocked: boolean; email: string | null; phone: string | null; company_id: string | null }[] = []
   if (leadRows.length > 0) {
     const { data, error: insertError } = await supabase
       .from("leads")
@@ -511,13 +545,19 @@ export async function POST(
     .update({ status: "preview_ready" })
     .eq("id", campaignId)
 
-  // Enrich leads with company name for the response
+  // Enrich leads with company name and geo data for the response
   const companyNameMap = new Map(businesses.map((b) => [b.business_id ?? b.id ?? "", b.name]))
   const leadsWithCompany = insertedLeads.map((l) => {
     const exploId = businesses.find(
       (b) => companyIdMap.get(b.business_id ?? b.id ?? "") === l.company_id
     )
-    return { ...l, company_name: exploId ? companyNameMap.get(exploId.business_id ?? exploId.id ?? "") ?? "" : "" }
+    const scored = scoredProspectMap.get(l.prospect_id)
+    return {
+      ...l,
+      company_name: exploId ? companyNameMap.get(exploId.business_id ?? exploId.id ?? "") ?? "" : "",
+      geo_match:    scored?.geo_match    ?? true,
+      geo_location: scored?.geo_location ?? "",
+    }
   })
 
   return NextResponse.json({

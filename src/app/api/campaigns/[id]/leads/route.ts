@@ -152,7 +152,7 @@ async function scoreProspects(prospects: ExploriumProspect[]): Promise<ScoredPro
     const message = await retryWithBackoff(
       () => anthropic.messages.create({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 800,
+        max_tokens: 2000,
         system: `You score B2B sales prospects. For each prospect return their tier:
 - decision_maker: CxO, VP, Director, Owner, Founder, President, Partner, Board Member — anyone who can sign or block a deal
 - influencer: Senior Manager, Manager, Senior IC — can advocate internally but can't approve solo
@@ -182,8 +182,26 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
     }))
   }
 
-  const scores: { id: string; tier: "decision_maker" | "influencer" | "noise" }[] =
-    JSON.parse(raw)
+  let scores: { id: string; tier: "decision_maker" | "influencer" | "noise" }[] = []
+  try {
+    scores = JSON.parse(raw)
+  } catch {
+    // Response may be truncated — extract all complete objects from the array
+    // Match every {...} object that has both "id" and "tier" fields
+    const objectMatches = raw.match(/\{[^{}]*"id"\s*:\s*"[^"]*"[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*\}/g)
+      ?? raw.match(/\{[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*"id"\s*:\s*"[^"]*"[^{}]*\}/g)
+      ?? []
+    if (objectMatches.length > 0) {
+      try {
+        scores = JSON.parse(`[${objectMatches.join(",")}]`)
+        console.warn(`[leads/score] Recovered ${scores.length} entries from truncated response`)
+      } catch {
+        console.error("[leads/score] JSON recovery failed, falling back to rule-based")
+      }
+    } else {
+      console.error("[leads/score] No recoverable JSON objects, falling back to rule-based")
+    }
+  }
   const scoreMap = new Map(scores.map((s) => [s.id, s.tier]))
 
   return prospects.map((p) => {

@@ -44,13 +44,20 @@ interface ExploriumProspect {
 
 function extractLinkedinUrl(p: ExploriumProspect): string {
   return (
-    p.linkedin_url ??
     p.linkedin ??
+    p.linkedin_url ??
     p.linkedin_profile ??
     p.linkedin_profile_url ??
     p.profile_url ??
     ""
   )
+}
+
+function normalizeLinkedinUrl(raw: string): string {
+  if (!raw) return ""
+  if (raw.startsWith("http")) return raw
+  if (raw.startsWith("linkedin.com")) return `https://${raw}`
+  return raw
 }
 
 interface ScoredProspect {
@@ -191,7 +198,7 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       prospect_id: p.prospect_id ?? p.id ?? "",
       full_name:   p.full_name   ?? p.name ?? "Unknown",
       job_title:   p.job_title   ?? p.title ?? "",
-      linkedin_url: extractLinkedinUrl(p),
+      linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
       business_id:  p.business_id ?? p.company_id ?? "",
       tier: scoreTierByLevel(p.job_level ?? ""),
     }))
@@ -225,7 +232,7 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       prospect_id:  id,
       full_name:    p.full_name  ?? p.name  ?? "Unknown",
       job_title:    p.job_title  ?? p.title ?? "",
-      linkedin_url: extractLinkedinUrl(p),
+      linkedin_url: normalizeLinkedinUrl(extractLinkedinUrl(p)),
       business_id:  p.business_id ?? p.company_id ?? "",
       tier: scoreMap.get(id) ?? scoreTierByLevel(p.job_level ?? ""),
     }

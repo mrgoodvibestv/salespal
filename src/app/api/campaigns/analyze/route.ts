@@ -19,7 +19,7 @@ const VALID_JOB_LEVELS = [
   "president", "senior manager", "advisor", "non-managerial", "vice president",
 ]
 const VALID_JOB_DEPARTMENTS = [
-  "administration", "healthcare", "partnerships", "c-suite", "design",
+  "administration", "healthcare", "partnerships", "design",
   "human resources", "engineering", "education", "strategy", "product",
   "sales", "r&d", "retail", "customer success", "security", "public service",
   "creative", "it", "support", "marketing", "trade", "legal", "operations",
@@ -150,7 +150,15 @@ company_size: ${VALID_COMPANY_SIZES.join(", ")}
 job_level: ${VALID_JOB_LEVELS.join(", ")}
 job_department: ${VALID_JOB_DEPARTMENTS.join(", ")}
 country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")
-Do NOT include region_country_code or city_region_country in explorium_filters — geography is handled separately by the user's geo selector.${geoConstraint}`,
+Do NOT include region_country_code or city_region_country in explorium_filters — geography is handled separately by the user's geo selector.
+
+DEPARTMENT GUIDANCE:
+- Never use "c-suite" as a job_department — it returns Fortune 500 CEOs who are not practical buyers for most products.
+- For B2C event, hospitality, or local campaigns targeting HR buyers: use "human resources", "operations", or "partnerships" only.
+
+COMPANY SIZE GUIDANCE:
+- For local event, hospitality, or B2C-adjacent campaigns: prefer 51-200, 201-500, 501-1000. These companies have dedicated HR or ops staff who handle group bookings and employee morale budgets.
+- Only use 1001-5000 or larger if the client explicitly serves enterprise accounts.${geoConstraint}`,
       },
     ],
   }),

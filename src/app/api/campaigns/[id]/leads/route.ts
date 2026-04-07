@@ -76,6 +76,7 @@ async function fetchProspectsDirect(
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
     country_code?: string[]
+    company_size?: string[]
     job_level?: string[]
     job_department?: string[]
   }
@@ -90,9 +91,9 @@ async function fetchProspectsDirect(
       ? { country_code: { values: ef.country_code } }
       : {}
 
-  // Only confirmed valid filters for /v1/prospects direct (no business_id):
-  // region_country_code, country_code, job_level, job_department.
-  // website_keywords and company_size are company-level filters — rejected as extra fields.
+  // Confirmed valid filters for /v1/prospects direct (no business_id):
+  // region_country_code / country_code, company_size, job_level, job_department.
+  // website_keywords is a company-level filter — rejected as extra fields.
   const body: Record<string, unknown> = {
     mode: "full",
     page_size: pageSize,
@@ -100,6 +101,7 @@ async function fetchProspectsDirect(
     page: 1,
     filters: {
       ...geoFilter,
+      ...(ef.company_size?.length   && { company_size:   { values: ef.company_size } }),
       ...(ef.job_level?.length      && { job_level:      { values: ef.job_level } }),
       ...(ef.job_department?.length && { job_department: { values: ef.job_department } }),
     },
@@ -129,13 +131,17 @@ async function fetchProspectsDirect(
 }
 
 // ── Claude: score prospects ────────────────────────────────────────────────
-async function scoreProspects(prospects: ExploriumProspect[]): Promise<ScoredProspect[]> {
+async function scoreProspects(
+  prospects: ExploriumProspect[],
+  campaignContext: { angleTitle: string; pitch: string }
+): Promise<ScoredProspect[]> {
   if (prospects.length === 0) return []
 
   const toScore = prospects.map((p) => ({
-    id:    p.prospect_id ?? p.id ?? "",
-    title: p.job_title   ?? p.title ?? "",
-    level: p.job_level_main ?? p.job_level ?? "",
+    id:      p.prospect_id ?? p.id ?? "",
+    title:   p.job_title   ?? p.title ?? "",
+    level:   p.job_level_main ?? p.job_level ?? "",
+    company: p.company_name ?? "",
   }))
 
   let raw = ""
@@ -144,10 +150,15 @@ async function scoreProspects(prospects: ExploriumProspect[]): Promise<ScoredPro
       () => anthropic.messages.create({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 2000,
-        system: `You score B2B sales prospects. For each prospect return their tier:
-- decision_maker: CxO, VP, Director, Owner, Founder, President, Partner, Board Member — anyone who can sign or block a deal
+        system: `You score B2B sales prospects for a specific campaign. For each prospect return their tier:
+- decision_maker: CxO, VP, Director, Owner, Founder, President, Partner, Board Member — can sign or block a deal AND is a practical buyer for this product
 - influencer: Senior Manager, Manager, Senior IC — can advocate internally but can't approve solo
-- noise: Junior, non-managerial ICs, interns, freelancers — no buying authority
+- noise: Junior ICs, interns, freelancers — no buying authority. Also noise: Fortune 500 / global enterprise executives who are too senior/large to practically engage with this product.
+
+Campaign: ${campaignContext.angleTitle}
+Pitch: ${campaignContext.pitch}
+
+Use the campaign context to judge fit. A CEO of a 50,000-person company is noise for a local events product. An HR Director at a 200-person company is a decision maker for corporate group ticket sales.
 
 Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influencer|noise"}]`,
         messages: [{
@@ -287,7 +298,9 @@ export async function POST(
     }
 
     // ── Score with Claude ────────────────────────────────────────────────
-    scoredProspects = await scoreProspects(prospects)
+    const angleTitle = (campaign.angle_selected as string | null) ?? ""
+    const pitch = ((icpJson?.angle_data as Record<string, unknown> | undefined)?.pitch_summary as string | null) ?? ""
+    scoredProspects = await scoreProspects(prospects, { angleTitle, pitch })
     console.log("[leads] scored:", scoredProspects.map((p) => `${p.job_title}→${p.tier}`))
 
   } catch (err) {

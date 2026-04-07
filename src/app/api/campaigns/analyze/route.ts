@@ -51,11 +51,42 @@ async function fetchWebsiteText(url: string): Promise<string> {
   }
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+function getCountryCode(countryName: string): string {
+  const map: Record<string, string> = {
+    "canada": "ca", "united states": "us", "united kingdom": "gb",
+    "australia": "au", "germany": "de", "france": "fr", "netherlands": "nl",
+    "singapore": "sg", "ireland": "ie", "new zealand": "nz", "india": "in",
+  }
+  return map[countryName.toLowerCase()] ?? countryName.toLowerCase().slice(0, 2)
+}
+
 // ── Claude ICP analysis ────────────────────────────────────────────────────
-async function analyzeWithClaude(url: string, websiteText: string) {
+interface GeoParams {
+  geo_country?: string
+  geo_region?: string
+  geo_region_code?: string
+  geo_scope?: "local" | "national"
+}
+
+async function analyzeWithClaude(url: string, websiteText: string, geo?: GeoParams) {
   const siteContext = websiteText
     ? `Website content:\n${websiteText}`
     : `(Could not fetch website content — analyze based on the domain name and URL only)`
+
+  // Build hard geo constraint block if provided
+  let geoConstraint = ""
+  if (geo?.geo_country) {
+    const locationStr = geo.geo_region
+      ? `${geo.geo_region}, ${geo.geo_country}`
+      : geo.geo_country
+    const scopeStr = geo.geo_scope === "local" ? "local/regional" : "national/global"
+    geoConstraint = `\n\nHARD CONSTRAINT — GEOGRAPHY (do not override):
+The client targets ${scopeStr} customers in ${locationStr}.
+You MUST set the following in explorium_filters for BOTH angles:
+- country_code: ["${getCountryCode(geo.geo_country)}"]${geo.geo_region_code ? `\n- region_country_code: ["${geo.geo_region_code}"]` : ""}
+Do not suggest different geographies. The ICP geography field must reflect "${locationStr}".`
+  }
 
   const message = await retryWithBackoff(
     () => anthropic.messages.create({
@@ -120,7 +151,7 @@ company_size: ${VALID_COMPANY_SIZES.join(", ")}
 job_level: ${VALID_JOB_LEVELS.join(", ")}
 job_department: ${VALID_JOB_DEPARTMENTS.join(", ")}
 country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")
-region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns. Note: when region_country_code is set, country_code is omitted — they are mutually exclusive. The leads pipeline uses include_operating_locations=false so only companies headquartered in the region are returned, not companies that merely have an office there.`,
+region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns. Note: when region_country_code is set, country_code is omitted — they are mutually exclusive.${geoConstraint}`,
       },
     ],
   }),
@@ -205,18 +236,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { url } = await request.json()
+  const { url, geo_country, geo_region, geo_region_code, geo_scope } = await request.json()
   if (!url || typeof url !== "string") {
     return NextResponse.json({ error: "url is required" }, { status: 400 })
   }
 
-  // Step 1: fetch website content in parallel with nothing yet
+  const geo: GeoParams | undefined = geo_country
+    ? { geo_country, geo_region, geo_region_code, geo_scope }
+    : undefined
+
+  // Step 1: fetch website content
   const websiteText = await fetchWebsiteText(url)
 
   // Step 2: Claude ICP + angle analysis
   let analysis: ClaudeAnalysis
   try {
-    analysis = await analyzeWithClaude(url, websiteText)
+    analysis = await analyzeWithClaude(url, websiteText, geo)
   } catch (err) {
     console.error("[analyze] Claude error", err)
     const overloaded = err instanceof Error && err.message === "AI_OVERLOADED"

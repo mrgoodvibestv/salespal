@@ -31,8 +31,79 @@ interface AnalysisResult {
   stats: { companies: number; estimated_contacts: number }
 }
 
+interface GeoSelection {
+  country: string         // "canada" | "us" | "uk" | "australia" | "other"
+  region: string          // province/state key, or ""
+  scope: "local" | "national"
+  otherCountry: string    // free text when country === "other"
+}
+
 type Step = 1 | 2 | 3
+type GeoPhase = "url" | "geo"
 type Status = "idle" | "analyzing" | "ready" | "creating" | "error"
+
+// ── Geography data ─────────────────────────────────────────────────────────
+const COUNTRY_OPTIONS = [
+  { value: "canada",    label: "Canada" },
+  { value: "us",        label: "United States" },
+  { value: "uk",        label: "United Kingdom" },
+  { value: "australia", label: "Australia" },
+  { value: "other",     label: "Other" },
+]
+
+const REGION_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  canada: [
+    { value: "ca-on", label: "Ontario" },
+    { value: "ca-bc", label: "British Columbia" },
+    { value: "ca-ab", label: "Alberta" },
+    { value: "ca-qc", label: "Quebec" },
+    { value: "ca-mb", label: "Manitoba" },
+    { value: "ca-sk", label: "Saskatchewan" },
+    { value: "ca-ns", label: "Nova Scotia" },
+    { value: "ca-nb", label: "New Brunswick" },
+    { value: "ca-nl", label: "Newfoundland" },
+    { value: "ca-pe", label: "PEI" },
+  ],
+  us: [
+    { value: "us-ny", label: "New York" },
+    { value: "us-ca", label: "California" },
+    { value: "us-tx", label: "Texas" },
+    { value: "us-fl", label: "Florida" },
+    { value: "us-il", label: "Illinois" },
+    { value: "us-wa", label: "Washington" },
+    { value: "us-ma", label: "Massachusetts" },
+    { value: "us-ga", label: "Georgia" },
+    { value: "us-co", label: "Colorado" },
+    { value: "us-az", label: "Arizona" },
+    { value: "us-nc", label: "North Carolina" },
+    { value: "us-oh", label: "Ohio" },
+    { value: "us-mi", label: "Michigan" },
+    { value: "us-pa", label: "Pennsylvania" },
+  ],
+}
+
+// Maps GeoSelection to { geo_country, geo_region, geo_region_code } for the API
+function geoToApiParams(geo: GeoSelection): {
+  geo_country: string
+  geo_region: string
+  geo_region_code: string
+  geo_scope: "local" | "national"
+} {
+  const countryLabels: Record<string, string> = {
+    canada: "Canada", us: "United States", uk: "United Kingdom",
+    australia: "Australia",
+  }
+  const regionLabels: Record<string, string> = {}
+  Object.values(REGION_OPTIONS).flat().forEach(({ value, label }) => {
+    regionLabels[value] = label
+  })
+  return {
+    geo_country:      geo.country === "other" ? geo.otherCountry : (countryLabels[geo.country] ?? geo.country),
+    geo_region:       geo.region ? (regionLabels[geo.region] ?? geo.region) : "",
+    geo_region_code:  geo.region,
+    geo_scope:        geo.scope,
+  }
+}
 
 // ── Scanning animation steps ───────────────────────────────────────────────
 const SCAN_STEPS = [
@@ -48,23 +119,32 @@ function NewCampaignContent() {
   const searchParams = useSearchParams()
   const initialUrl = searchParams.get("url") ?? ""
 
-  const [step, setStep] = useState<Step>(1)
-  const [status, setStatus] = useState<Status>("idle")
-  const [url, setUrl] = useState(initialUrl)
-  const [urlError, setUrlError] = useState("")
-  const [scanStep, setScanStep] = useState(0)
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
+  const [step, setStep]           = useState<Step>(1)
+  const [geoPhase, setGeoPhase]   = useState<GeoPhase>("url")
+  const [status, setStatus]       = useState<Status>("idle")
+  const [url, setUrl]             = useState(initialUrl)
+  const [urlError, setUrlError]   = useState("")
+  const [scanStep, setScanStep]   = useState(0)
+  const [analysis, setAnalysis]   = useState<AnalysisResult | null>(null)
   const [selectedAngle, setSelectedAngle] = useState<"obvious" | "hidden" | null>(null)
-  const [campaignName, setCampaignName] = useState("")
-  const [errorMsg, setErrorMsg] = useState("")
+  const [campaignName, setCampaignName]   = useState("")
+  const [errorMsg, setErrorMsg]   = useState("")
+  const [geo, setGeo]             = useState<GeoSelection>({
+    country: "canada", region: "", scope: "national", otherCountry: "",
+  })
   const scanTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const hasAutoStarted = useRef(false)
 
-  // Auto-start analysis when URL is pre-filled from landing page
+  // If URL pre-filled from landing page, advance straight to geo step
   useEffect(() => {
     if (initialUrl && !hasAutoStarted.current) {
       hasAutoStarted.current = true
-      startAnalysis(initialUrl)
+      const normalized = initialUrl.startsWith("http") ? initialUrl : `https://${initialUrl}`
+      try {
+        new URL(normalized)
+        setUrl(normalized)
+        setGeoPhase("geo")
+      } catch { /* invalid URL — let user fix it */ }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -82,10 +162,8 @@ function NewCampaignContent() {
     return () => { if (scanTimer.current) clearInterval(scanTimer.current) }
   }, [status])
 
-  async function startAnalysis(targetUrl: string) {
+  function handleUrlSubmit(targetUrl: string) {
     setUrlError("")
-    setErrorMsg("")
-
     const normalized =
       targetUrl.startsWith("http://") || targetUrl.startsWith("https://")
         ? targetUrl
@@ -94,15 +172,22 @@ function NewCampaignContent() {
       setUrlError("Please enter a valid website URL.")
       return
     }
-
     setUrl(normalized)
+    setGeoPhase("geo")
+  }
+
+  async function startAnalysis(targetUrl: string, geoSel: GeoSelection) {
+    setUrlError("")
+    setErrorMsg("")
     setStatus("analyzing")
+
+    const geoParams = geoToApiParams(geoSel)
 
     try {
       const res = await fetch("/api/campaigns/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalized }),
+        body: JSON.stringify({ url: targetUrl, ...geoParams }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -144,10 +229,8 @@ function NewCampaignContent() {
             url,
             selected_angle:     selectedAngle,
             angle_data:         angle,
-            // top-level explorium_filters mirrors the selected angle so the
-            // leads pipeline always reads the right filters regardless of
-            // which lookup path it uses
             explorium_filters:  angle.explorium_filters,
+            geo:                geoToApiParams(geo),
           },
           angle_selected: angle.name,
           stats_result: analysis.stats,
@@ -203,8 +286,8 @@ function NewCampaignContent() {
       </header>
 
       <main className="max-w-3xl mx-auto px-8 py-12">
-        {/* ── Step 1: URL entry + loading + stats ── */}
-        {step === 1 && (
+        {/* ── Step 1a: URL entry ── */}
+        {step === 1 && geoPhase === "url" && (
           <Step1
             url={url}
             setUrl={setUrl}
@@ -212,9 +295,35 @@ function NewCampaignContent() {
             status={status}
             scanStep={scanStep}
             errorMsg={errorMsg}
-            onSubmit={(u) => startAnalysis(u)}
-            onRetry={() => { setStatus("idle"); setErrorMsg("") }}
-            onRetryAnalysis={() => startAnalysis(url)}
+            onSubmit={handleUrlSubmit}
+            onRetry={() => { setStatus("idle"); setErrorMsg(""); setGeoPhase("url") }}
+            onRetryAnalysis={() => startAnalysis(url, geo)}
+          />
+        )}
+
+        {/* ── Step 1b: Geography selection ── */}
+        {step === 1 && geoPhase === "geo" && status !== "analyzing" && (
+          <GeoStep
+            url={url}
+            geo={geo}
+            setGeo={setGeo}
+            onBack={() => setGeoPhase("url")}
+            onContinue={() => startAnalysis(url, geo)}
+          />
+        )}
+
+        {/* ── Step 1 loading overlay (shown during analysis regardless of phase) ── */}
+        {step === 1 && status === "analyzing" && (
+          <Step1
+            url={url}
+            setUrl={setUrl}
+            urlError={urlError}
+            status={status}
+            scanStep={scanStep}
+            errorMsg={errorMsg}
+            onSubmit={handleUrlSubmit}
+            onRetry={() => { setStatus("idle"); setErrorMsg(""); setGeoPhase("url") }}
+            onRetryAnalysis={() => startAnalysis(url, geo)}
           />
         )}
 
@@ -383,6 +492,133 @@ function Step1({
         </div>
         {urlError && <p className="text-xs text-red-500">{urlError}</p>}
       </form>
+    </div>
+  )
+}
+
+// ── Geography step component ───────────────────────────────────────────────
+function GeoStep({
+  url, geo, setGeo, onBack, onContinue,
+}: {
+  url: string
+  geo: GeoSelection
+  setGeo: (g: GeoSelection) => void
+  onBack: () => void
+  onContinue: () => void
+}) {
+  const regionOptions = REGION_OPTIONS[geo.country] ?? []
+  const showRegion = geo.country === "canada" || geo.country === "us"
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-black">Where are your customers?</h1>
+        <p className="text-sm text-gray-500">
+          Tell SalesPal where to look. This shapes your ICP and sharpens your lead targeting.
+        </p>
+      </div>
+
+      {/* URL display */}
+      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100">
+        <svg className="size-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        <span className="text-sm text-gray-600 truncate">{url}</span>
+      </div>
+
+      <div className="space-y-5">
+        {/* Country */}
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-black">Country</label>
+          <select
+            value={geo.country}
+            onChange={(e) => setGeo({ ...geo, country: e.target.value, region: "" })}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 bg-white transition-all"
+          >
+            {COUNTRY_OPTIONS.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Other country text field */}
+        {geo.country === "other" && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-black">Country name</label>
+            <input
+              type="text"
+              value={geo.otherCountry}
+              onChange={(e) => setGeo({ ...geo, otherCountry: e.target.value })}
+              placeholder="e.g. Germany, France, Singapore"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400"
+            />
+          </div>
+        )}
+
+        {/* Province / State */}
+        {showRegion && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-black">
+              {geo.country === "canada" ? "Province" : "State"}
+              <span className="text-gray-400 font-normal ml-1">(optional)</span>
+            </label>
+            <select
+              value={geo.region}
+              onChange={(e) => setGeo({ ...geo, region: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 bg-white transition-all"
+            >
+              <option value="">All {geo.country === "canada" ? "provinces" : "states"}</option>
+              {regionOptions.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Scope toggle */}
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-black">Customer scope</label>
+          <div className="grid grid-cols-2 gap-2">
+            {(["local", "national"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setGeo({ ...geo, scope: s })}
+                className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all text-left ${
+                  geo.scope === s
+                    ? "border-[#4B6BF5] bg-blue-50/50 text-[#4B6BF5]"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                <span className="block font-semibold">
+                  {s === "local" ? "Local / Regional" : "National / Global"}
+                </span>
+                <span className="text-xs text-gray-500 font-normal">
+                  {s === "local"
+                    ? "Customers in a specific city or region"
+                    : "Customers across the country or worldwide"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-2">
+        <button
+          onClick={onBack}
+          className="text-sm text-gray-400 hover:text-black transition-colors"
+        >
+          ← Change URL
+        </button>
+        <button
+          onClick={onContinue}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+          style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+        >
+          Analyze my business →
+        </button>
+      </div>
     </div>
   )
 }

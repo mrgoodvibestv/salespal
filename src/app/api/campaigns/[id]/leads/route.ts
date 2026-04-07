@@ -386,7 +386,7 @@ export async function POST(
     const { data, error: insertError } = await supabase
       .from("leads")
       .insert(leadRows)
-      .select("id, full_name, job_title, linkedin_url, tier, unlocked, email, phone, company_id")
+      .select("id, prospect_id, full_name, job_title, linkedin_url, tier, unlocked, email, phone, company_id")
     if (insertError) console.error("[leads] insert error:", insertError)
     insertedLeads = data ?? []
   }

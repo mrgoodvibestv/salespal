@@ -120,7 +120,7 @@ company_size: ${VALID_COMPANY_SIZES.join(", ")}
 job_level: ${VALID_JOB_LEVELS.join(", ")}
 job_department: ${VALID_JOB_DEPARTMENTS.join(", ")}
 country_code: lowercase ISO Alpha-2 codes (e.g. "us", "ca", "gb", "au")
-region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns.`,
+region_country_code: ISO 3166-2 subdivision codes in lowercase (e.g. "ca-on" for Ontario, "us-ny" for New York, "us-ca" for California, "gb-eng" for England). Use this when the business is local or regional — a Toronto wine festival targets "ca-on", a NYC agency targets "us-ny". Omit (empty array) for national or global campaigns. Note: when region_country_code is set, country_code is omitted — they are mutually exclusive. The leads pipeline uses include_operating_locations=false so only companies headquartered in the region are returned, not companies that merely have an office there.`,
       },
     ],
   }),

@@ -85,6 +85,7 @@ async function fetchBusinesses(
     page_size: MAX_COMPANIES,
     size: MAX_COMPANIES,
     page: 1,
+    include_operating_locations: false, // HQ-only — excludes companies that merely operate in the region
     filters: {
       ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
       ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),

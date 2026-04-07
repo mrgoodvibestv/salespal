@@ -654,12 +654,16 @@ function Step3({
       {/* ICP summary */}
       <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4 space-y-2">
         <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">ICP</p>
-        <p className="text-sm text-gray-700">{analysis.icp.description}</p>
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {analysis.icp.key_signals.map((s) => (
-            <span key={s} className="px-2 py-0.5 rounded-md bg-white border border-gray-200 text-gray-600 text-xs">{s}</span>
-          ))}
-        </div>
+        {angle.target_companies && (
+          <p className="text-sm text-gray-700">{angle.target_companies}</p>
+        )}
+        {angle.target_titles.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {angle.target_titles.map((t) => (
+              <span key={t} className="px-2 py-0.5 rounded-md bg-white border border-gray-200 text-gray-600 text-xs">{t}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {errorMsg && (

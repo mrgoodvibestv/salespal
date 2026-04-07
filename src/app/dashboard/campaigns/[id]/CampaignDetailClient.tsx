@@ -94,13 +94,15 @@ export default function CampaignDetailClient({
   initialCredits: number
   userEmail: string
 }) {
-  const [leads, setLeads]         = useState<Lead[]>(initialLeads)
-  const [credits, setCredits]     = useState(initialCredits)
-  const [status, setStatus]       = useState(campaign.status)
-  const [fetching, setFetching]   = useState(false)
-  const [fetchError, setFetchError] = useState("")
-  const [unlockingId, setUnlockingId] = useState<string | null>(null)
+  const [leads, setLeads]               = useState<Lead[]>(initialLeads)
+  const [credits, setCredits]           = useState(initialCredits)
+  const [status, setStatus]             = useState(campaign.status)
+  const [fetching, setFetching]         = useState(false)
+  const [fetchError, setFetchError]     = useState("")
+  const [unlockingId, setUnlockingId]   = useState<string | null>(null)
   const [unlockErrors, setUnlockErrors] = useState<Record<string, string>>({})
+  const [companiesFetched, setCompaniesFetched] = useState<number | null>(null)
+  const [contactsFound, setContactsFound]       = useState<number | null>(null)
 
   const hasLeads = leads.length > 0
   const isFetching = fetching || status === "fetching_companies"
@@ -127,7 +129,10 @@ export default function CampaignDetailClient({
         return
       }
 
-      setLeads(data.leads ?? [])
+      const fetchedLeads = data.leads ?? []
+      setLeads(fetchedLeads)
+      setCompaniesFetched(data.companies_fetched ?? null)
+      setContactsFound(fetchedLeads.length)
       setStatus("preview_ready")
       // Re-fetch authoritative credit balance from server
       fetch("/api/user/credits")
@@ -237,10 +242,12 @@ export default function CampaignDetailClient({
                 <p className="text-xs text-gray-400 italic">&ldquo;{tagline}&rdquo;</p>
               ) : null
             })()}
-            {campaign.stats_result && (
+            {(contactsFound !== null || campaign.stats_result) && (
               <p className="text-xs text-gray-400">
-                Market: ~{campaign.stats_result.estimated_contacts?.toLocaleString()} contacts
-                across {campaign.stats_result.companies?.toLocaleString()} companies
+                {contactsFound !== null
+                  ? `~${contactsFound} contacts across ${companiesFetched ?? "?"} companies`
+                  : `Market: ~${campaign.stats_result!.estimated_contacts?.toLocaleString()} contacts across ${campaign.stats_result!.companies?.toLocaleString()} companies`
+                }
               </p>
             )}
           </div>

@@ -33,9 +33,24 @@ interface ExploriumProspect {
   title?: string
   job_level?: string
   linkedin_url?: string
+  linkedin?: string
+  linkedin_profile?: string
+  linkedin_profile_url?: string
+  profile_url?: string
   business_id?: string
   company_id?: string
   [key: string]: unknown
+}
+
+function extractLinkedinUrl(p: ExploriumProspect): string {
+  return (
+    p.linkedin_url ??
+    p.linkedin ??
+    p.linkedin_profile ??
+    p.linkedin_profile_url ??
+    p.profile_url ??
+    ""
+  )
 }
 
 interface ScoredProspect {
@@ -176,7 +191,7 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       prospect_id: p.prospect_id ?? p.id ?? "",
       full_name:   p.full_name   ?? p.name ?? "Unknown",
       job_title:   p.job_title   ?? p.title ?? "",
-      linkedin_url: p.linkedin_url ?? "",
+      linkedin_url: extractLinkedinUrl(p),
       business_id:  p.business_id ?? p.company_id ?? "",
       tier: scoreTierByLevel(p.job_level ?? ""),
     }))
@@ -210,7 +225,7 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
       prospect_id:  id,
       full_name:    p.full_name  ?? p.name  ?? "Unknown",
       job_title:    p.job_title  ?? p.title ?? "",
-      linkedin_url: p.linkedin_url ?? "",
+      linkedin_url: extractLinkedinUrl(p),
       business_id:  p.business_id ?? p.company_id ?? "",
       tier: scoreMap.get(id) ?? scoreTierByLevel(p.job_level ?? ""),
     }
@@ -305,7 +320,7 @@ export async function POST(
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
-      console.log("[leads] first prospect sample:", JSON.stringify(prospects[0]))
+      console.log("[leads] first prospect full:", JSON.stringify(prospects[0]))
     }
 
     // ── Score with Claude ────────────────────────────────────────────────

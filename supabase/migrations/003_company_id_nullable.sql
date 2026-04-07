@@ -1,0 +1,1 @@
+ALTER TABLE leads ALTER COLUMN company_id DROP NOT NULL;

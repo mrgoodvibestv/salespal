@@ -88,8 +88,12 @@ async function fetchBusinesses(
     filters: {
       ...(ef.website_keywords?.length && { website_keywords: { values: ef.website_keywords } }),
       ...(ef.company_size?.length     && { company_size:     { values: ef.company_size } }),
-      ...(ef.country_code?.length     && { country_code:     { values: ef.country_code } }),
-      ...(ef.region_country_code?.length && { region_country_code: { values: ef.region_country_code } }),
+      // region_country_code and country_code are mutually exclusive — use region if present
+      ...(ef.region_country_code?.length
+        ? { region_country_code: { values: ef.region_country_code } }
+        : ef.country_code?.length
+          ? { country_code: { values: ef.country_code } }
+          : {}),
     },
   }
 

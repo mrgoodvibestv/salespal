@@ -1,13 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { validateBusinessEmail } from "@/lib/supabase/email-validation"
 
-export default function SignupPage() {
-  const router = useRouter()
+function SignupForm() {
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get("url") ?? ""
 
@@ -207,6 +206,14 @@ export default function SignupPage() {
         </p>
       </div>
     </CenteredShell>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   )
 }
 

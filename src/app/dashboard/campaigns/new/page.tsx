@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { Suspense, useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
@@ -43,7 +43,7 @@ const SCAN_STEPS = [
 ]
 
 // ── Main component ─────────────────────────────────────────────────────────
-export default function NewCampaignPage() {
+function NewCampaignContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialUrl = searchParams.get("url") ?? ""
@@ -688,5 +688,13 @@ function Step3({
         </button>
       </div>
     </div>
+  )
+}
+
+export default function NewCampaignPage() {
+  return (
+    <Suspense>
+      <NewCampaignContent />
+    </Suspense>
   )
 }

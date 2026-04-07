@@ -7,9 +7,9 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
-const MAX_COMPANIES_LOCAL    = 15
+const MAX_COMPANIES_LOCAL    = 7
 const MAX_COMPANIES_NATIONAL = 3
-const MAX_PROSPECTS_PER_COMPANY = 2
+const MAX_PROSPECTS_PER_COMPANY = 1
 const MIN_CREDITS_TO_RUN = 5
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -130,16 +130,16 @@ async function fetchBusinesses(
 // e.g. ["CA-ON"] for Ontario. This is the correct geo precision mechanism.
 async function fetchProspects(
   businessIds: string[],
-  filters: Record<string, unknown>
+  filters: Record<string, unknown>,
+  geoRegionCode?: string
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
     job_level?: string[]
     job_department?: string[]
-    region_country_code?: string[]
   }
 
   // Uppercase required by Explorium: "ca-on" → "CA-ON"
-  const prospectRegionCodes = ef.region_country_code?.map((c) => c.toUpperCase()) ?? []
+  const prospectRegionCodes = geoRegionCode ? [geoRegionCode.toUpperCase()] : []
 
   const body: Record<string, unknown> = {
     mode: "full",
@@ -318,12 +318,14 @@ export async function POST(
     {} as Record<string, unknown>
 
   // Determine geo scope → max companies to fetch
-  const geoScope = (icpJson?.geo as Record<string, unknown> | undefined)?.geo_scope as string | undefined
-  const maxCompanies = geoScope === "local" ? MAX_COMPANIES_LOCAL : MAX_COMPANIES_NATIONAL
+  const geoObj = icpJson?.geo as Record<string, unknown> | undefined
+  const geoScope      = geoObj?.geo_scope      as string | undefined
+  const geoRegionCode = geoObj?.geo_region_code as string | undefined
+  const maxCompanies  = geoScope === "local" ? MAX_COMPANIES_LOCAL : MAX_COMPANIES_NATIONAL
 
   console.log("[leads] campaign icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
   console.log("[leads] extracted filters:", JSON.stringify(angleFilters))
-  console.log("[leads] geo_scope:", geoScope ?? "none", "→ maxCompanies:", maxCompanies)
+  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none", "→ maxCompanies:", maxCompanies)
 
   let businesses: ExploriumBusiness[] = []
   let prospects: ExploriumProspect[] = []
@@ -345,7 +347,7 @@ export async function POST(
       .filter(Boolean)
 
     // ── Fetch prospects (region precision via prospect_region_country_code) ─
-    prospects = await fetchProspects(businessIds, angleFilters)
+    prospects = await fetchProspects(businessIds, angleFilters, geoRegionCode)
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))

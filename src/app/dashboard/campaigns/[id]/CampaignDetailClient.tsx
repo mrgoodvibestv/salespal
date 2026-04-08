@@ -570,7 +570,7 @@ export default function CampaignDetailClient({
                 const unlockErr = unlockErrors[lead.id]
                 return (
                   <div key={lead.id} className={`p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <InitialsAvatar name={lead.full_name} size="sm" />
                         <div className="min-w-0">
@@ -638,7 +638,7 @@ export default function CampaignDetailClient({
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Title</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tier</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Tier</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">LinkedIn</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</th>
@@ -663,8 +663,8 @@ export default function CampaignDetailClient({
                               : <span className="text-gray-300 text-xs">—</span>
                             }
                           </td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className={`inline-flex shrink-0 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${tier.className}`}>
                               {tier.label}
                             </span>
                           </td>

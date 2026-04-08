@@ -63,12 +63,14 @@ function NavContent({
   userEmail,
   isCampaigns,
   isNewCampaign,
+  isSequences,
   onNavClick,
 }: {
   credits?: number
   userEmail?: string
   isCampaigns: boolean
   isNewCampaign: boolean
+  isSequences: boolean
   onNavClick?: () => void
 }) {
   return (
@@ -107,9 +109,10 @@ function NavContent({
           Outreach
         </p>
         <NavItem
-          href="#"
+          href="/dashboard/sequences"
           label="Sequences"
-          active={false}
+          active={isSequences}
+          onClick={onNavClick}
           icon={
             <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -199,6 +202,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
   const isCampaigns =
     pathname === "/dashboard" ||
     (pathname.startsWith("/dashboard/campaigns/") && !isNewCampaign)
+  const isSequences = pathname === "/dashboard/sequences" || pathname.startsWith("/dashboard/sequences/")
 
   return (
     <>
@@ -259,6 +263,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
               userEmail={userEmail}
               isCampaigns={isCampaigns}
               isNewCampaign={isNewCampaign}
+              isSequences={isSequences}
               onNavClick={() => setMobileOpen(false)}
             />
           </div>
@@ -282,6 +287,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
           userEmail={userEmail}
           isCampaigns={isCampaigns}
           isNewCampaign={isNewCampaign}
+          isSequences={isSequences}
         />
       </aside>
     </>

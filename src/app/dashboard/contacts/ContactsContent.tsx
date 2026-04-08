@@ -148,24 +148,24 @@ export default function ContactsContent({
             </p>
           </div>
 
-          {/* Stats row */}
-          <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100">
-            <div className="flex items-center gap-2">
+          {/* Stats row — 2×2 grid on mobile, flex row on sm+ */}
+          <div className="grid grid-cols-2 sm:flex mb-6 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-r border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-black tabular-nums">{totalContacts}</span>
               <span className="text-xs text-gray-500">Total contacts</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-purple-600 tabular-nums">{campaignCount}</span>
               <span className="text-xs text-gray-500">Campaigns</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-3 border-r border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-blue-600 tabular-nums">{withEmail}</span>
               <span className="text-xs text-gray-500">With email</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-3">
               <span className="text-lg font-bold text-green-600 tabular-nums">{withPhone}</span>
               <span className="text-xs text-gray-500">With phone</span>
             </div>
@@ -201,15 +201,15 @@ export default function ContactsContent({
           {contacts.length > 0 && (
             <div className="space-y-8">
 
-              {/* Filter bar */}
+              {/* Filter bar — full width on mobile */}
               {campaignOptions.length > 1 && (
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400 shrink-0">Campaign</span>
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <span className="text-xs text-gray-400">Campaign</span>
+                  <div className="relative w-full sm:w-auto">
                     <select
                       value={campaignFilter}
                       onChange={(e) => setCampaignFilter(e.target.value)}
-                      className="text-sm font-medium pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/20 text-gray-700"
+                      className="w-full sm:w-auto text-sm font-medium pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/20 text-gray-700"
                     >
                       <option value="all">All campaigns</option>
                       {campaignOptions.map((c) => (
@@ -229,20 +229,22 @@ export default function ContactsContent({
               {/* Grouped contact sections */}
               {groups.map((group) => (
                 <div key={group.campaign_id}>
-                  {/* Section header */}
-                  <div className="flex items-center gap-3 mb-3">
+                  {/* Section header — truncate on mobile, angle pill hidden on mobile */}
+                  <div className="flex items-center gap-2 mb-3 min-w-0">
                     <Link
                       href={`/dashboard/campaigns/${group.campaign_id}`}
-                      className="font-semibold text-black hover:text-[#4B6BF5] transition-colors text-sm"
+                      className="font-semibold text-black hover:text-[#4B6BF5] transition-colors text-sm truncate max-w-[200px] sm:max-w-none"
                     >
                       {group.campaign_name}
                     </Link>
                     {group.angle_selected && (
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF1FE] text-[#4B6BF5]">
+                      <span className="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF1FE] text-[#4B6BF5]">
                         {group.angle_selected}
                       </span>
                     )}
-                    <span className="text-xs text-gray-400 ml-auto">{group.contacts.length} contact{group.contacts.length !== 1 ? "s" : ""}</span>
+                    <span className="text-xs text-gray-400 ml-auto shrink-0">
+                      {group.contacts.length} contact{group.contacts.length !== 1 ? "s" : ""}
+                    </span>
                   </div>
 
                   {/* Contact list */}
@@ -250,9 +252,11 @@ export default function ContactsContent({
                     {group.contacts.map((contact) => {
                       const tier = TIER_CONFIG[contact.tier] ?? TIER_CONFIG.influencer
                       return (
-                        <div key={contact.id} className="flex items-center gap-4 px-4 py-3.5 bg-white hover:bg-gray-50/50 transition-colors">
-                          {/* Avatar + name + title */}
+                        <div key={contact.id} className="flex items-center gap-3 px-4 py-3.5 bg-white hover:bg-gray-50/50 transition-colors">
+                          {/* Avatar */}
                           <InitialsAvatar name={contact.full_name} size="sm" />
+
+                          {/* Name + title + mobile email */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-semibold text-black text-sm truncate">{contact.full_name}</span>
@@ -261,9 +265,13 @@ export default function ContactsContent({
                               </span>
                             </div>
                             <p className="text-xs text-gray-500 truncate mt-0.5">{contact.job_title}</p>
+                            {/* Email shown inline on mobile (hidden on sm+) */}
+                            {contact.email && (
+                              <p className="text-xs text-gray-400 truncate mt-0.5 sm:hidden">{contact.email}</p>
+                            )}
                           </div>
 
-                          {/* Contact links */}
+                          {/* Contact links — hidden on mobile */}
                           <div className="hidden sm:flex items-center gap-3 shrink-0">
                             {contact.email ? (
                               <a

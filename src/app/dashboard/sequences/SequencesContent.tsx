@@ -53,11 +53,14 @@ function ChannelBadge({ channel }: { channel?: "email" | "linkedin" }) {
   )
 }
 
-function TouchCard({ touch, idx }: { touch: Touch; idx: number }) {
+function TouchCard({ touch }: { touch: Touch }) {
   const [copied, setCopied] = useState(false)
   const tone = TONE_CONFIG[touch.tone ?? "intro"] ?? TONE_CONFIG.intro
   const isLinkedIn = touch.channel === "linkedin"
   const isConnectionRequest = touch.type === "connection_request" || (isLinkedIn && touch.day === 1)
+
+  // Channel-coded left border accent
+  const borderAccent = isLinkedIn ? "border-l-2 border-blue-300" : "border-l-2 border-gray-200"
 
   function copy() {
     const text = touch.subject ? `Subject: ${touch.subject}\n\n${touch.body}` : touch.body
@@ -68,9 +71,9 @@ function TouchCard({ touch, idx }: { touch: Touch; idx: number }) {
   }
 
   return (
-    <div key={idx} className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+    <div className={`rounded-xl border border-gray-200 overflow-hidden shadow-sm max-w-full ${borderAccent}`}>
       <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span
             className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold text-white"
             style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
@@ -84,7 +87,7 @@ function TouchCard({ touch, idx }: { touch: Touch; idx: number }) {
         </div>
         <button
           onClick={copy}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+          className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
             copied
               ? "bg-green-50 text-green-600 border border-green-200"
               : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
@@ -112,14 +115,14 @@ function TouchCard({ touch, idx }: { touch: Touch; idx: number }) {
         {!isLinkedIn && touch.subject && (
           <div>
             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Subject</p>
-            <p className="text-sm font-semibold text-black">{touch.subject}</p>
+            <p className="text-sm font-semibold text-black break-words">{touch.subject}</p>
           </div>
         )}
         <div>
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
             {isLinkedIn ? (isConnectionRequest ? "Connection Note" : "Message") : "Body"}
           </p>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{touch.body}</p>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed break-words">{touch.body}</p>
           {isConnectionRequest && (
             <p className={`text-xs mt-1.5 tabular-nums ${touch.body.length > 300 ? "text-red-500 font-medium" : "text-gray-400"}`}>
               {touch.body.length}/300 characters
@@ -128,6 +131,33 @@ function TouchCard({ touch, idx }: { touch: Touch; idx: number }) {
         </div>
       </div>
     </div>
+  )
+}
+
+function RegenerateButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
+    >
+      {loading ? (
+        <>
+          <svg className="size-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Regenerating…
+        </>
+      ) : (
+        <>
+          <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Regenerate
+        </>
+      )}
+    </button>
   )
 }
 
@@ -181,10 +211,10 @@ export default function SequencesContent({
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 pt-[88px] md:pt-0 flex flex-col">
 
-        {/* Page header — above the split panel */}
+        {/* Page header */}
         <div className="px-6 md:px-8 pt-8 pb-4 border-b border-gray-100 shrink-0">
           <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
-            Outreach
+            OUTREACH
           </p>
           <h1 className="text-2xl font-bold text-black">Sequences</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -219,124 +249,162 @@ export default function SequencesContent({
           </div>
         )}
 
-        {/* Split panel */}
         {sequences.length > 0 && (
-          <div className="flex flex-1 min-h-0 h-[calc(100vh-160px)]">
-
-            {/* ── Left panel ── */}
-            <div className="w-64 shrink-0 border-r border-gray-100 overflow-y-auto">
-              <div className="px-4 pt-4 pb-2">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
-                  Campaigns
-                </p>
-              </div>
-              <div className="space-y-0.5 pb-4">
-                {sequences.map((seq) => {
-                  const isActive = seq.campaign_id === selectedId
-                  const touchCount = (sequenceMap[seq.campaign_id] ?? []).length
-                  return (
-                    <button
-                      key={seq.campaign_id}
-                      onClick={() => setSelectedId(seq.campaign_id)}
-                      className={`w-full text-left px-4 py-3 transition-colors relative ${
-                        isActive ? "bg-purple-50/50" : "hover:bg-gray-50"
-                      }`}
-                    >
-                      {/* Active left border */}
-                      {isActive && (
-                        <span
-                          className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full"
-                          style={{ background: "linear-gradient(to bottom, #4B6BF5, #7B4BF5)" }}
-                        />
-                      )}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className={`text-sm font-medium truncate ${isActive ? "text-[#4B6BF5]" : "text-black"}`}>
-                            {seq.campaign_name}
-                          </p>
-                          {seq.angle_selected && (
-                            <p className="text-xs text-gray-400 truncate mt-0.5">{seq.angle_selected}</p>
-                          )}
-                        </div>
-                        <span className="shrink-0 inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 whitespace-nowrap">
-                          {touchCount} touches
-                        </span>
-                      </div>
-                    </button>
-                  )
-                })}
+          <>
+            {/* ── MOBILE: campaign selector dropdown ── */}
+            <div className="md:hidden px-4 py-3 border-b border-gray-100 shrink-0">
+              <div className="relative">
+                <select
+                  value={selectedId ?? ""}
+                  onChange={(e) => setSelectedId(e.target.value)}
+                  className="w-full text-sm font-medium pl-3 pr-8 py-2 rounded-lg border border-gray-200 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/20 text-gray-700"
+                >
+                  {sequences.map((seq) => (
+                    <option key={seq.campaign_id} value={seq.campaign_id}>{seq.campaign_name}</option>
+                  ))}
+                </select>
+                <svg
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none text-gray-400"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
             </div>
 
-            {/* ── Right panel ── */}
-            <div className="flex-1 min-w-0 overflow-y-auto">
-              {!selectedSeq ? (
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
-                  <svg className="size-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            {/* ── MOBILE: touch cards ── */}
+            <div className="md:hidden flex-1 overflow-y-auto px-4 py-4">
+              {selectedSeq ? (
+                <div className="space-y-3">
+                  {/* Mobile panel header */}
+                  <div className="flex items-center justify-between gap-2 pb-3 border-b border-gray-100 mb-2">
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-400 mb-1">Generated sequence</p>
+                      {selectedSeq.angle_selected && (
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs text-gray-500 bg-gray-100">
+                          {selectedSeq.angle_selected}
+                        </span>
+                      )}
+                    </div>
+                    <RegenerateButton onClick={handleRegenerate} loading={regenerating} />
+                  </div>
+                  {regenError && (
+                    <div className="mb-3 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
+                      {regenError}
+                    </div>
+                  )}
+                  {touches.map((touch, idx) => (
+                    <TouchCard key={idx} touch={touch} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+                  <svg className="size-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <p className="text-sm text-gray-400">Select a campaign to view its sequence</p>
                 </div>
-              ) : (
-                <div className="p-6">
-                  {/* Right panel header */}
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    <div className="min-w-0">
-                      <h2 className="text-xl font-bold text-black truncate">{selectedSeq.campaign_name}</h2>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {selectedSeq.angle_selected && (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs text-gray-500 bg-gray-100">
-                            {selectedSeq.angle_selected}
-                          </span>
-                        )}
-                        <Link
-                          href={`/dashboard/campaigns/${selectedSeq.campaign_id}`}
-                          className="text-xs text-[#4B6BF5] hover:underline"
-                        >
-                          View campaign →
-                        </Link>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleRegenerate}
-                      disabled={regenerating}
-                      className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
-                    >
-                      {regenerating ? (
-                        <>
-                          <svg className="size-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          Regenerating…
-                        </>
-                      ) : (
-                        <>
-                          <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          Regenerate
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {regenError && (
-                    <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
-                      {regenError}
-                    </div>
-                  )}
-
-                  {/* Touch cards */}
-                  <div className="space-y-3">
-                    {touches.map((touch, idx) => (
-                      <TouchCard key={idx} touch={touch} idx={idx} />
-                    ))}
-                  </div>
-                </div>
               )}
             </div>
-          </div>
+
+            {/* ── DESKTOP: split panel ── */}
+            <div className="hidden md:flex flex-1 min-h-0 h-[calc(100vh-160px)]">
+
+              {/* Left panel */}
+              <div className="w-64 shrink-0 border-r border-gray-100 overflow-y-auto">
+                <div className="px-4 pt-4 pb-2">
+                  <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                    Campaigns
+                  </p>
+                </div>
+                <div className="space-y-0.5 pb-4">
+                  {sequences.map((seq) => {
+                    const isActive = seq.campaign_id === selectedId
+                    const touchCount = (sequenceMap[seq.campaign_id] ?? []).length
+                    return (
+                      <button
+                        key={seq.campaign_id}
+                        onClick={() => setSelectedId(seq.campaign_id)}
+                        className={`w-full text-left px-4 py-3 transition-colors relative ${
+                          isActive ? "bg-purple-50/50" : "hover:bg-gray-50"
+                        }`}
+                      >
+                        {/* Active left border accent */}
+                        {isActive && (
+                          <span
+                            className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full"
+                            style={{ background: "linear-gradient(to bottom, #4B6BF5, #7B4BF5)" }}
+                          />
+                        )}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-sm font-medium truncate ${isActive ? "text-[#4B6BF5]" : "text-black"}`}>
+                              {seq.campaign_name}
+                            </p>
+                            {seq.angle_selected && (
+                              <p className="text-xs text-gray-400 truncate mt-0.5">{seq.angle_selected}</p>
+                            )}
+                          </div>
+                          <span className="shrink-0 inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 whitespace-nowrap">
+                            {touchCount} touches
+                          </span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Right panel */}
+              <div className="flex-1 min-w-0 overflow-y-auto">
+                {!selectedSeq ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+                    <svg className="size-12 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-sm text-gray-400">Select a campaign to view its sequence</p>
+                  </div>
+                ) : (
+                  <div className="p-6">
+                    {/* Right panel header with border-b */}
+                    <div className="flex items-start justify-between gap-4 pb-4 mb-5 border-b border-gray-100">
+                      <div className="min-w-0">
+                        <h2 className="text-xl font-bold text-black truncate">{selectedSeq.campaign_name}</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Generated sequence</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {selectedSeq.angle_selected && (
+                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs text-gray-500 bg-gray-100">
+                              {selectedSeq.angle_selected}
+                            </span>
+                          )}
+                          <Link
+                            href={`/dashboard/campaigns/${selectedSeq.campaign_id}`}
+                            className="text-xs text-[#4B6BF5] hover:underline"
+                          >
+                            View campaign →
+                          </Link>
+                        </div>
+                      </div>
+                      <RegenerateButton onClick={handleRegenerate} loading={regenerating} />
+                    </div>
+
+                    {regenError && (
+                      <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
+                        {regenError}
+                      </div>
+                    )}
+
+                    {/* Touch cards */}
+                    <div className="space-y-3">
+                      {touches.map((touch, idx) => (
+                        <TouchCard key={idx} touch={touch} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </main>
     </div>

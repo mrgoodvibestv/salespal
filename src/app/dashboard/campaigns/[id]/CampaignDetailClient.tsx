@@ -312,7 +312,8 @@ export default function CampaignDetailClient({
     <div className="flex min-h-screen bg-white">
       <Sidebar credits={credits} userEmail={userEmail} />
 
-      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 py-8 space-y-6 sm:space-y-8">
+      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
 
         {/* Campaign header */}
         <div className="flex flex-col sm:flex-row items-start gap-4">
@@ -321,7 +322,7 @@ export default function CampaignDetailClient({
               Campaign
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-black">{campaign.name}</h1>
+              <h1 className="text-2xl font-bold text-black truncate max-w-[280px] sm:max-w-md">{campaign.name}</h1>
               <StatusBadge status={status} />
             </div>
             {campaign.angle_selected && (
@@ -585,9 +586,9 @@ export default function CampaignDetailClient({
 
                       return (
                         <tr key={lead.id} className={`hover:bg-gray-50/50 transition-colors ${lead.tier === "noise" ? "opacity-50" : ""}`}>
-                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap max-w-[150px] truncate">{lead.full_name}</td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap max-w-[180px] truncate">{lead.job_title}</td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap max-w-[150px] truncate">{companyName}</td>
+                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap min-w-[120px] max-w-[150px] truncate">{lead.full_name}</td>
+                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[160px] max-w-[200px] truncate">{lead.job_title}</td>
+                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[120px] max-w-[160px] truncate">{companyName}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {lead.geo_location
                               ? <span className="text-xs text-gray-400">{lead.geo_location}</span>
@@ -686,6 +687,7 @@ export default function CampaignDetailClient({
                     {/* Company size */}
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Company Size</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
                       {COMPANY_SIZE_OPTIONS.map(({ label, value }) => (
                         <label key={value} className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -699,11 +701,13 @@ export default function CampaignDetailClient({
                           <span className="text-sm text-gray-700">{label}</span>
                         </label>
                       ))}
+                      </div>
                     </div>
 
                     {/* Seniority */}
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seniority</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
                       {SENIORITY_OPTIONS.map(({ label, value }) => (
                         <label key={value} className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -717,6 +721,7 @@ export default function CampaignDetailClient({
                           <span className="text-sm text-gray-700">{label}</span>
                         </label>
                       ))}
+                      </div>
                     </div>
 
                     {/* City focus */}
@@ -806,6 +811,7 @@ export default function CampaignDetailClient({
             )}
           </div>
         )}
+        </div>
       </main>
 
       {/* ── Confirm re-fetch modal ── */}

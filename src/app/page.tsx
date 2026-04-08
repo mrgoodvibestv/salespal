@@ -53,7 +53,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-        <div className="max-w-2xl w-full mx-auto space-y-8">
+        <div className="max-w-3xl w-full mx-auto space-y-8">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-xs text-gray-500 bg-gray-50">
             <span

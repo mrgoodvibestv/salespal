@@ -33,7 +33,8 @@ export default async function DashboardPage() {
     <div className="flex min-h-screen bg-white">
       <Sidebar credits={credits} userEmail={user.email ?? ""} />
 
-      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 py-8">
+      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
+        <div className="max-w-5xl mx-auto">
         {/* Title row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -107,6 +108,7 @@ export default async function DashboardPage() {
             })}
           </div>
         )}
+        </div>
       </main>
     </div>
   )

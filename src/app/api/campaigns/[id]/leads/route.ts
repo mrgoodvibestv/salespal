@@ -231,7 +231,7 @@ function scoreTierByLevel(level: string): "decision_maker" | "influencer" | "noi
 
 // ── Route handler ──────────────────────────────────────────────────────────
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id: campaignId } = params
@@ -274,21 +274,36 @@ export async function POST(
     .update({ status: "fetching_companies" })
     .eq("id", campaignId)
 
+  // Read optional override params from request body
+  let overrides: { company_size?: string[]; job_level?: string[]; city_focus?: string } = {}
+  try {
+    const body = await request.json()
+    overrides = body?.overrides ?? {}
+  } catch { /* no body — fresh run */ }
+
   // Extract filters and geo from icp_json
   const icpJson = campaign.icp_json as Record<string, unknown> | null
-  const angleFilters: Record<string, unknown> =
+  const baseFilters: Record<string, unknown> =
     ((icpJson?.angle_data as Record<string, unknown>)?.explorium_filters as Record<string, unknown>) ??
     (icpJson?.explorium_filters as Record<string, unknown>) ??
     {}
 
+  // Merge overrides — caller values win
+  const angleFilters: Record<string, unknown> = {
+    ...baseFilters,
+    ...(overrides.company_size?.length && { company_size: overrides.company_size }),
+    ...(overrides.job_level?.length    && { job_level:    overrides.job_level }),
+  }
+
   const geoObj         = icpJson?.geo as Record<string, unknown> | undefined
   const geoScope       = geoObj?.geo_scope      as string | undefined
   const geoRegionCode  = geoObj?.geo_region_code as string | undefined
-  const pageSize       = geoScope === "local" ? PAGE_SIZE_LOCAL : PAGE_SIZE_NATIONAL
+  const cityFocus      = overrides.city_focus?.trim() ?? ""
 
   console.log("[leads] icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
   console.log("[leads] angleFilters:", JSON.stringify(angleFilters))
-  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none", "pageSize:", pageSize)
+  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none")
+  if (cityFocus) console.log("[leads] city_focus override:", cityFocus)
 
   let prospects: ExploriumProspect[] = []
   let scoredProspects: ScoredProspect[] = []
@@ -300,6 +315,14 @@ export async function POST(
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
       console.log("[leads] first prospect:", JSON.stringify(prospects[0]))
+    }
+
+    // ── Optional city post-filter ────────────────────────────────────────
+    if (cityFocus) {
+      const cf = cityFocus.toLowerCase()
+      const before = prospects.length
+      prospects = prospects.filter((p) => (p.city ?? "").toLowerCase().includes(cf))
+      console.log(`[leads/city] "${cityFocus}": ${prospects.length}/${before} kept`)
     }
 
     // ── Score with Claude ────────────────────────────────────────────────
@@ -318,12 +341,15 @@ export async function POST(
   }
 
   // ── Persist to DB ────────────────────────────────────────────────────────
+  // Delete existing leads before re-inserting (supports re-fetch / refine)
+  await supabase.from("leads").delete().eq("campaign_id", campaignId)
+
+  // Insert ALL prospects (noise included) — noise hidden by default in UI
   const tierOrder: Record<string, number> = { decision_maker: 0, influencer: 1, noise: 2 }
-  const qualified = scoredProspects
-    .filter((p) => p.tier !== "noise")
+  const allSorted = scoredProspects
     .sort((a, b) => (tierOrder[a.tier] ?? 2) - (tierOrder[b.tier] ?? 2))
 
-  const leadRows = qualified.map((p) => ({
+  const leadRows = allSorted.map((p) => ({
     campaign_id:     campaignId,
     company_id:      null,
     prospect_id:     p.prospect_id,
@@ -377,7 +403,7 @@ export async function POST(
     .eq("id", campaignId)
 
   // Build a map of prospect_id → scored data for response
-  const scoredMap = new Map(qualified.map((p) => [p.prospect_id, p]))
+  const scoredMap = new Map(allSorted.map((p) => [p.prospect_id, p]))
 
   const leadsWithCompany = insertedLeads.map((l) => {
     const scored = scoredMap.get(l.prospect_id)

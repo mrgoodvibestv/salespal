@@ -8,8 +8,8 @@ const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 
 // page_size for direct prospect query — no company intermediary
-const PAGE_SIZE_LOCAL    = 10
-const PAGE_SIZE_NATIONAL = 5
+const PAGE_SIZE_LOCAL    = 25
+const PAGE_SIZE_NATIONAL = 15
 const MIN_CREDITS_TO_RUN = 5
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -127,6 +127,11 @@ async function fetchProspectsDirect(
 
   const list: ExploriumProspect[] =
     data?.prospects ?? data?.data ?? data?.results ?? data?.items ?? []
+
+  // Diagnostic: log company size distribution to check if filter is working
+  console.log("[leads/prospects] company sizes:",
+    list.map((p) => (p as Record<string, unknown>).company_size ?? (p as Record<string, unknown>).number_of_employees ?? "unknown"))
+
   return list
 }
 
@@ -354,8 +359,8 @@ export async function POST(
     insertedLeads = data ?? []
   }
 
-  // ── Deduct credits (based on page_size — fixed, predictable cost per run) ─
-  const creditsToDeduct = pageSize
+  // ── Deduct credits (based on actual prospects returned) ─────────────────
+  const creditsToDeduct = Math.max(1, prospects.length)
   const { error: deductError } = await supabase.rpc("deduct_credits", {
     p_user_id:        user.id,
     p_amount:         creditsToDeduct,

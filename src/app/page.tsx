@@ -43,7 +43,8 @@ export default function LandingPage() {
           </Link>
           <Link
             href="/signup"
-            className="text-sm font-medium px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors"
+            className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
           >
             Get started
           </Link>
@@ -86,13 +87,13 @@ export default function LandingPage() {
                   setError("")
                 }}
                 placeholder="yourcompany.com"
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400"
+                className="flex-1 px-5 py-3.5 rounded-xl border border-gray-200 text-base outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400 shadow-sm"
                 autoComplete="off"
                 spellCheck={false}
               />
               <button
                 type="submit"
-                className="px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap"
+                className="px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap shadow-sm"
                 style={{
                   background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
                 }}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import Link from "next/link"
+import Sidebar from "@/components/Sidebar"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Company {
@@ -309,30 +309,10 @@ export default function CampaignDetailClient({
   const estimatedCredits = geoScope === "local" ? 25 : 15
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-gray-100 px-4 sm:px-6 md:px-8 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <Link href="/dashboard" className="text-xl font-bold tracking-tight shrink-0">
-              <span className="text-black">Sales</span>
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}>Pal</span>
-            </Link>
-            <span className="text-gray-200 shrink-0">/</span>
-            <span className="text-sm text-gray-600 truncate min-w-0">{campaign.name}</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-              <span className="size-2 rounded-full inline-block" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
-              <span className="text-sm font-semibold text-black tabular-nums">{credits.toLocaleString()}</span>
-              <span className="text-xs text-gray-500">credits</span>
-            </div>
-            <span className="text-sm text-gray-400 hidden sm:block truncate max-w-[160px]">{userEmail}</span>
-          </div>
-        </div>
-      </header>
+    <div className="flex min-h-screen bg-white">
+      <Sidebar credits={credits} userEmail={userEmail} />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 py-8 space-y-6 sm:space-y-8">
 
         {/* Campaign header */}
         <div className="flex flex-col sm:flex-row items-start gap-4">

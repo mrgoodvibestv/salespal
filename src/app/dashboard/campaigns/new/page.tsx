@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import Sidebar from "@/components/Sidebar"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface ExploriumFilters {
@@ -247,31 +247,26 @@ function NewCampaignContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-100 px-4 sm:px-6 md:px-8 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="text-sm text-gray-400 hover:text-black transition-colors"
-          >
-            ← Dashboard
-          </Link>
-          <span className="text-gray-200">/</span>
-          <span className="text-sm text-gray-600">New Campaign</span>
+    <div className="flex min-h-screen bg-white">
+      <Sidebar />
 
+      <main className="flex-1 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 py-8">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-black">New Campaign</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Enter your website URL to identify your best outbound angles
+            </p>
+          </div>
           {/* Step indicator */}
           {status === "ready" && (
-            <div className="ml-auto flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               {([2, 3] as const).map((s) => (
                 <div key={s} className="flex items-center gap-2">
                   <div
                     className={`size-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
-                      step === s
-                        ? "text-white"
-                        : step > s
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-100 text-gray-400"
+                      step === s ? "text-white" : step > s ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
                     }`}
                     style={step === s ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
                   >
@@ -283,9 +278,8 @@ function NewCampaignContent() {
             </div>
           )}
         </div>
-      </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
+        <div className="max-w-2xl">
         {/* ── Step 1a: URL entry ── */}
         {step === 1 && geoPhase === "url" && (
           <Step1
@@ -351,6 +345,7 @@ function NewCampaignContent() {
             onLaunch={handleLaunch}
           />
         )}
+        </div>
       </main>
     </div>
   )

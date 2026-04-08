@@ -18,6 +18,24 @@ interface Contact {
   angle_selected: string
 }
 
+function InitialsAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+  const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-blue-100 text-blue-700",
+    "bg-green-100 text-green-700",
+    "bg-orange-100 text-orange-700",
+    "bg-pink-100 text-pink-700",
+  ]
+  const color = colors[name.charCodeAt(0) % colors.length]
+  const sizeClass = size === "sm" ? "size-8 text-xs" : "size-10 text-sm"
+  return (
+    <div className={`${sizeClass} ${color} rounded-full flex items-center justify-center font-semibold shrink-0`}>
+      {initials}
+    </div>
+  )
+}
+
 const TIER_CONFIG = {
   decision_maker: { label: "Decision Maker", className: "bg-green-50 text-green-700 border border-green-200" },
   influencer:     { label: "Influencer",     className: "bg-blue-50 text-blue-700 border border-blue-100" },
@@ -177,9 +195,12 @@ export default function ContactsContent({
                   >
                     {/* Name + tier */}
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-black truncate">{contact.full_name}</p>
-                        <p className="text-sm text-gray-500 truncate mt-0.5">{contact.job_title}</p>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <InitialsAvatar name={contact.full_name} />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-black truncate">{contact.full_name}</p>
+                          <p className="text-sm text-gray-500 truncate mt-0.5">{contact.job_title}</p>
+                        </div>
                       </div>
                       <span className={`shrink-0 inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${tier.className}`}>
                         {tier.label}

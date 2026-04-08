@@ -45,6 +45,25 @@ interface Campaign {
   created_at: string
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+function InitialsAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+  const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-blue-100 text-blue-700",
+    "bg-green-100 text-green-700",
+    "bg-orange-100 text-orange-700",
+    "bg-pink-100 text-pink-700",
+  ]
+  const color = colors[name.charCodeAt(0) % colors.length]
+  const sizeClass = size === "sm" ? "size-8 text-xs" : "size-10 text-sm"
+  return (
+    <div className={`${sizeClass} ${color} rounded-full flex items-center justify-center font-semibold shrink-0`}>
+      {initials}
+    </div>
+  )
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 const TIER_CONFIG = {
   decision_maker: { label: "Decision Maker", className: "bg-green-50 text-green-700 border border-green-200" },
@@ -550,9 +569,12 @@ export default function CampaignDetailClient({
                 return (
                   <div key={lead.id} className={`p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-black truncate">{lead.full_name}</p>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">{lead.job_title}</p>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <InitialsAvatar name={lead.full_name} size="sm" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-black truncate">{lead.full_name}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{lead.job_title}</p>
+                        </div>
                       </div>
                       <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
                     </div>

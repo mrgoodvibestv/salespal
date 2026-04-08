@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Sidebar from "@/components/Sidebar"
+import SequencesTab from "./SequencesTab"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Company {
@@ -26,6 +27,13 @@ interface Lead {
   geo_location?: string
 }
 
+interface EmailSequence {
+  day: number
+  subject: string
+  body: string
+  tone: "intro" | "followup" | "breakup"
+}
+
 interface Campaign {
   id: string
   name: string
@@ -33,6 +41,7 @@ interface Campaign {
   angle_selected: string | null
   icp_json: Record<string, unknown> | null
   stats_result: { companies: number; estimated_contacts: number } | null
+  sequence_json: { emails: EmailSequence[] } | null
   created_at: string
 }
 
@@ -139,6 +148,7 @@ export default function CampaignDetailClient({
   const [unlockingId, setUnlockingId]   = useState<string | null>(null)
   const [unlockErrors, setUnlockErrors] = useState<Record<string, string>>({})
   const [contactsFound, setContactsFound] = useState<number | null>(null)
+  const [activeTab, setActiveTab]       = useState<"leads" | "sequences">("leads")
 
   // ── Filter state ──────────────────────────────────────────────────────
   const [tierFilter, setTierFilter]   = useState<"all" | "decision_maker" | "influencer">("all")
@@ -401,6 +411,40 @@ export default function CampaignDetailClient({
             </div>
           )
         })()}
+
+        {/* ── Tabs ── */}
+        <div className="flex items-center gap-1 border-b border-gray-200 pb-0">
+          {(["leads", "sequences"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2.5 text-sm font-semibold transition-all relative capitalize ${
+                activeTab === tab
+                  ? "text-[#4B6BF5]"
+                  : "text-gray-400 hover:text-gray-700"
+              }`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <span
+                  className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                  style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Sequences tab content ── */}
+        {activeTab === "sequences" && (
+          <SequencesTab
+            campaignId={campaign.id}
+            initialSequence={campaign.sequence_json?.emails ?? null}
+          />
+        )}
+
+        {/* ── Leads tab content ── */}
+        {activeTab === "leads" && <>
 
         {fetchError && (
           <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-red-50 border border-red-100">
@@ -811,6 +855,9 @@ export default function CampaignDetailClient({
             )}
           </div>
         )}
+        {/* Close leads tab */}
+        </>}
+
         </div>
       </main>
 

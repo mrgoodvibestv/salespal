@@ -377,9 +377,10 @@ export default function CampaignDetailClient({
             )}
             {hasLeads && (
               <button
-                onClick={() => setConfirmRefetch(true)}
+                onClick={() => handleFindLeads()}
                 disabled={isFetching || credits < 5}
                 className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                title={credits < 5 ? "You need at least 5 credits" : undefined}
               >
                 Refresh leads
               </button>

@@ -36,7 +36,11 @@ export async function POST(
     .select("id, prospect_id, full_name, job_title, tier")
     .eq("campaign_id", campaignId)
 
-  if (leadsError || !leads?.length) {
+  if (leadsError) {
+    console.error("[score] DB error fetching leads:", leadsError)
+    return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 })
+  }
+  if (!leads?.length) {
     return NextResponse.json({ error: "No leads found for this campaign" }, { status: 404 })
   }
 
@@ -89,8 +93,22 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
   try {
     scores = JSON.parse(raw)
   } catch {
-    console.error("[score] JSON parse failed:", raw)
-    return NextResponse.json({ error: "Scoring response invalid. Please try again." }, { status: 500 })
+    // Attempt to recover individual objects from a truncated array
+    const objectMatches = raw.match(/\{[^{}]*"id"\s*:\s*"[^"]*"[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*\}/g)
+      ?? raw.match(/\{[^{}]*"tier"\s*:\s*"[^"]*"[^{}]*"id"\s*:\s*"[^"]*"[^{}]*\}/g)
+      ?? []
+    if (objectMatches.length > 0) {
+      try {
+        scores = JSON.parse(`[${objectMatches.join(",")}]`)
+        console.warn(`[score] Recovered ${scores.length}/${leads.length} entries from truncated response`)
+      } catch {
+        console.error("[score] JSON recovery failed:", raw)
+        return NextResponse.json({ error: "Scoring response invalid. Please try again." }, { status: 500 })
+      }
+    } else {
+      console.error("[score] JSON parse failed, no recoverable objects:", raw)
+      return NextResponse.json({ error: "Scoring response invalid. Please try again." }, { status: 500 })
+    }
   }
 
   // Update each lead's tier in DB

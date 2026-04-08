@@ -342,7 +342,12 @@ export async function POST(
 
   // ── Persist to DB ────────────────────────────────────────────────────────
   // Delete existing leads before re-inserting (supports re-fetch / refine)
-  await supabase.from("leads").delete().eq("campaign_id", campaignId)
+  const { error: deleteError } = await supabase.from("leads").delete().eq("campaign_id", campaignId)
+  if (deleteError) {
+    console.error("[leads] delete existing leads error:", deleteError)
+    await supabase.from("campaigns").update({ status: "active" }).eq("id", campaignId)
+    return NextResponse.json({ error: "Failed to clear existing leads. Please try again." }, { status: 500 })
+  }
 
   // Insert ALL prospects (noise included) — noise hidden by default in UI
   const tierOrder: Record<string, number> = { decision_maker: 0, influencer: 1, noise: 2 }

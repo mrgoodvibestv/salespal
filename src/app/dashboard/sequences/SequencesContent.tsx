@@ -212,7 +212,7 @@ export default function SequencesContent({
       <main className="flex-1 min-w-0 ml-0 md:ml-64 pt-[88px] md:pt-0 flex flex-col">
 
         {/* Page header */}
-        <div className="px-6 md:px-8 pt-8 pb-4 border-b border-gray-100 shrink-0">
+        <div className="px-6 md:px-8 pt-0 md:pt-8 pb-4 border-b border-gray-100 shrink-0">
           <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
             OUTREACH
           </p>

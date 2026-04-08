@@ -160,13 +160,8 @@ function NavContent({
       {/* Bottom */}
       <div className="border-t border-gray-100 p-3 space-y-1">
         {/* AI Agent teaser */}
-        <div className="mx-3 mb-3 p-3 rounded-xl border border-dashed border-gray-200 cursor-not-allowed">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-gray-500">AI Agent Mode</p>
-            <span className="text-[8px] font-semibold tracking-wider uppercase bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">
-              Soon
-            </span>
-          </div>
+        <div className="mb-3 p-3 rounded-xl border border-dashed border-gray-200 cursor-not-allowed">
+          <p className="text-xs font-semibold text-gray-500">AI Agent Mode</p>
           <p className="text-[10px] text-gray-400 mt-0.5 leading-relaxed">
             Automated outreach on autopilot
           </p>

@@ -317,6 +317,9 @@ export default function CampaignDetailClient({
         {/* Campaign header */}
         <div className="flex flex-col sm:flex-row items-start gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+              Campaign
+            </p>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-black">{campaign.name}</h1>
               <StatusBadge status={status} />

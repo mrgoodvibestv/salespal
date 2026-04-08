@@ -37,7 +37,10 @@ export default async function DashboardPage() {
         {/* Title row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-black">Campaigns</h1>
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
+              Outreach Intelligence
+            </p>
+            <h1 className="text-2xl font-bold text-black">My Campaigns</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Your active outreach campaigns
             </p>

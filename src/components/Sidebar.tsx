@@ -13,11 +13,13 @@ function NavItem({
   icon,
   label,
   active,
+  soon,
 }: {
   href: string
   icon: React.ReactNode
   label: string
   active: boolean
+  soon?: boolean
 }) {
   return (
     <Link
@@ -31,6 +33,9 @@ function NavItem({
     >
       {icon}
       {label}
+      {soon && (
+        <span className="text-[9px] text-gray-400 ml-auto">soon</span>
+      )}
     </Link>
   )
 }
@@ -47,7 +52,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
     <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-100 flex-col z-40">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-100">
-        <Link href="/dashboard" className="inline-block">
+        <Link href="/dashboard" className="inline-flex items-center gap-2">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-black">Sales</span>
             <span
@@ -56,6 +61,9 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
             >
               Pal
             </span>
+          </span>
+          <span className="text-[9px] font-semibold tracking-wider uppercase text-[#4B6BF5] border border-[#4B6BF5]/30 px-1.5 py-0.5 rounded-md opacity-60">
+            BETA
           </span>
         </Link>
       </div>
@@ -87,6 +95,38 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
           }
         />
 
+        {/* OUTREACH */}
+        <p className="px-5 pt-6 pb-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+          Outreach
+        </p>
+        <NavItem
+          href="#"
+          label="Sequences"
+          active={false}
+          soon
+          icon={
+            <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          }
+        />
+
+        {/* CONTACTS */}
+        <p className="px-5 pt-6 pb-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+          Contacts
+        </p>
+        <NavItem
+          href="#"
+          label="Key Contacts"
+          active={false}
+          soon
+          icon={
+            <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          }
+        />
+
         {/* ACCOUNT */}
         <p className="px-5 pt-6 pb-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
           Account
@@ -112,6 +152,19 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
 
       {/* Bottom */}
       <div className="border-t border-gray-100 p-3 space-y-1">
+        {/* AI Agent teaser */}
+        <div className="mx-0 mb-3 p-3 rounded-xl border border-dashed border-gray-200 relative overflow-hidden cursor-not-allowed">
+          <div className="blur-[1px] select-none">
+            <p className="text-xs font-semibold text-gray-700">AI Agent Mode</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Automated outreach on autopilot</p>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[9px] font-semibold tracking-wider uppercase bg-gray-900 text-white px-2 py-1 rounded-full">
+              Coming Soon
+            </span>
+          </div>
+        </div>
+
         <button
           disabled
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-medium text-gray-600 cursor-not-allowed opacity-70"

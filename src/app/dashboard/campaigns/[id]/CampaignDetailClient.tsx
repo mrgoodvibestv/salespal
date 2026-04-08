@@ -313,7 +313,7 @@ export default function CampaignDetailClient({
       <Sidebar credits={credits} userEmail={userEmail} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-6xl w-full space-y-6 sm:space-y-8">
+        <div className="max-w-7xl w-full space-y-6 sm:space-y-8">
 
         {/* Campaign header */}
         <div className="flex flex-col sm:flex-row items-start gap-4">

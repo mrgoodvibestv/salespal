@@ -258,7 +258,7 @@ export default function NewCampaignContent({
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
         {/* Page header */}
-        <div className="flex items-center justify-between mb-8 max-w-5xl w-full">
+        <div className="flex items-center justify-between mb-8 max-w-6xl w-full">
           <div>
             <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
               New Campaign

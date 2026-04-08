@@ -29,7 +29,9 @@ interface Lead {
 
 interface EmailSequence {
   day: number
-  subject: string
+  channel?: "email" | "linkedin"
+  type?: string
+  subject: string | null
   body: string
   tone: "intro" | "followup" | "breakup"
 }

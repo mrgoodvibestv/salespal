@@ -5,9 +5,11 @@ import { retryWithBackoff } from "@/lib/ai/retry"
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-interface EmailSequence {
+interface Touch {
   day: number
-  subject: string
+  channel: "email" | "linkedin"
+  type: "connection_request" | "cold_intro" | "linkedin_followup" | "email_followup" | "breakup"
+  subject: string | null
   body: string
   tone: "intro" | "followup" | "breakup"
 }
@@ -49,41 +51,71 @@ export async function POST(
     .select("full_name, job_title, email")
     .eq("campaign_id", campaignId)
     .eq("unlocked", true)
-    .order("tier", { ascending: true }) // decision_maker sorts first alphabetically
+    .order("tier", { ascending: true })
     .limit(3)
 
   const leadsContext = (unlockedLeads ?? []).length > 0
-    ? (unlockedLeads ?? [])
-        .map((l) => `- ${l.full_name}, ${l.job_title}`)
-        .join("\n")
+    ? (unlockedLeads ?? []).map((l) => `- ${l.full_name}, ${l.job_title}`).join("\n")
     : "No unlocked leads yet — write to the target title persona."
 
-  // Build prompt
-  const systemPrompt = `You are an expert B2B cold email copywriter. Write punchy, human-sounding outreach — not corporate AI slop. Short sentences. No buzzwords. No "I hope this finds you well." Write a 3-email cold outreach sequence for this campaign.
+  const systemPrompt = `You are an expert B2B outreach copywriter. Write punchy, human-sounding copy — not corporate AI slop. Short sentences. No buzzwords. No "I hope this finds you well."
 
-Email 1 — Day 1: Cold intro. 3-4 sentences max. Lead with the problem or opportunity, not the product. End with a soft question.
+Generate a 5-touch multi-channel outreach sequence:
 
-Email 2 — Day 4: Follow-up. Reference Email 1. Add one concrete data point or insight. Different angle. 2-3 sentences + CTA.
+Touch 1 — Day 1 — LinkedIn connection request:
+Max 300 characters. Conversational, no pitch. End with a soft hook that makes them curious. Do NOT mention products or services directly.
 
-Email 3 — Day 9: Breakup email. Short, direct, slightly cheeky. One sentence pitch + offer to share something useful.
+Touch 2 — Day 3 — Cold email intro:
+3-4 sentences. Lead with the problem or opportunity, not the product. End with a soft question.
+
+Touch 3 — Day 6 — LinkedIn follow-up message:
+2-3 sentences. Reference something relevant about their role or company. Direct CTA.
+
+Touch 4 — Day 10 — Email follow-up:
+New angle, one concrete data point or insight. 2-3 sentences + CTA.
+
+Touch 5 — Day 14 — Breakup email:
+Short, slightly cheeky. One sentence pitch + offer to share something useful.
 
 Return ONLY valid JSON, no markdown:
 {
   "emails": [
     {
       "day": 1,
+      "channel": "linkedin",
+      "type": "connection_request",
+      "subject": null,
+      "body": "...",
+      "tone": "intro"
+    },
+    {
+      "day": 3,
+      "channel": "email",
+      "type": "cold_intro",
       "subject": "...",
       "body": "...",
       "tone": "intro"
     },
     {
-      "day": 4,
+      "day": 6,
+      "channel": "linkedin",
+      "type": "linkedin_followup",
+      "subject": null,
+      "body": "...",
+      "tone": "followup"
+    },
+    {
+      "day": 10,
+      "channel": "email",
+      "type": "email_followup",
       "subject": "...",
       "body": "...",
       "tone": "followup"
     },
     {
-      "day": 9,
+      "day": 14,
+      "channel": "email",
+      "type": "breakup",
       "subject": "...",
       "body": "...",
       "tone": "breakup"
@@ -99,15 +131,15 @@ Target titles: ${targetTitles.length ? targetTitles.join(", ") : "Senior decisio
 Sample contacts from this campaign:
 ${leadsContext}
 
-Write the 3-email sequence targeting these decision makers.`
+Write the 5-touch sequence targeting these decision makers.`
 
-  let emails: EmailSequence[] = []
+  let emails: Touch[] = []
 
   try {
     const message = await retryWithBackoff(
       () => anthropic.messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 2000,
+        max_tokens: 3000,
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
       }),

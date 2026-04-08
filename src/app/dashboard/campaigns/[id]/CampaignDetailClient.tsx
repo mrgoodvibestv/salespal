@@ -313,7 +313,7 @@ export default function CampaignDetailClient({
       <Sidebar credits={credits} userEmail={userEmail} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-6xl mx-auto w-full space-y-6 sm:space-y-8">
+        <div className="max-w-6xl w-full space-y-6 sm:space-y-8">
 
         {/* Campaign header */}
         <div className="flex flex-col sm:flex-row items-start gap-4">
@@ -379,7 +379,7 @@ export default function CampaignDetailClient({
           } | undefined
           if (!ad) return null
           return (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-sm text-sm">
               {ad.target_companies && (
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Target Companies</p>
@@ -561,7 +561,7 @@ export default function CampaignDetailClient({
             </div>
 
             {/* Desktop table (hidden below sm) */}
-            <div className="hidden sm:block rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="hidden sm:block rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>

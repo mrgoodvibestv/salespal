@@ -258,7 +258,7 @@ export default function NewCampaignContent({
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
         {/* Page header */}
-        <div className="flex items-center justify-between mb-8 max-w-5xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-8 max-w-5xl w-full">
           <div>
             <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
               New Campaign
@@ -288,7 +288,7 @@ export default function NewCampaignContent({
           )}
         </div>
 
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-2xl w-full">
         {/* ── Step 1a: URL entry ── */}
         {step === 1 && geoPhase === "url" && (
           <Step1
@@ -719,8 +719,8 @@ function AngleCard({
       onClick={onSelect}
       className={`text-left rounded-2xl border-2 p-5 transition-all space-y-4 ${
         selected
-          ? "border-[#4B6BF5] bg-blue-50/50"
-          : "border-gray-200 hover:border-gray-300 bg-white"
+          ? "border-[#4B6BF5] bg-blue-50/50 shadow-md"
+          : "border-gray-200 hover:border-gray-300 bg-white shadow-sm hover:shadow-md"
       }`}
     >
       {/* Badge */}
@@ -832,7 +832,7 @@ function Step3({
       </div>
 
       {/* Selected angle summary */}
-      <div className="rounded-2xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+      <div className="rounded-2xl border border-gray-200 divide-y divide-gray-100 overflow-hidden shadow-sm">
         <div className="px-5 py-4 bg-gray-50 flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Selected angle</p>

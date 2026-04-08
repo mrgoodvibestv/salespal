@@ -34,7 +34,7 @@ export default async function DashboardPage() {
       <Sidebar credits={credits} userEmail={user.email ?? ""} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-5xl mx-auto w-full">
+        <div className="max-w-5xl w-full">
         {/* Title row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
                 <Link
                   key={c.id}
                   href={`/dashboard/campaigns/${c.id}`}
-                  className="flex items-center justify-between gap-2 px-4 sm:px-5 py-4 rounded-2xl border border-gray-200 bg-white hover:border-[#4B6BF5]/30 hover:shadow-sm transition-all group overflow-hidden"
+                  className="flex items-center justify-between gap-2 px-4 sm:px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-[#4B6BF5]/20 transition-all group overflow-hidden"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div

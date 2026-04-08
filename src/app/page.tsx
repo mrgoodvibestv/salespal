@@ -156,7 +156,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6">
             <Link
               href="/login"
-              className="text-sm text-gray-500 hover:text-black transition-colors"
+              className="hidden sm:inline text-sm text-gray-500 hover:text-black transition-colors"
             >
               Sign in
             </Link>
@@ -171,7 +171,7 @@ export default function LandingPage() {
         </header>
 
         {/* ── Section 3: Hero ── */}
-        <section className="px-6 md:px-12 py-16 lg:py-24">
+        <section className="px-6 md:px-12 py-10 lg:py-16">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
@@ -287,21 +287,15 @@ export default function LandingPage() {
                     </span>
                   </div>
 
-                  {/* Column headers */}
-                  <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 px-3 pb-2 border-b border-gray-800">
-                    {["Name", "Title", "Company", "Tier"].map((h) => (
-                      <p key={h} className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{h}</p>
-                    ))}
-                  </div>
-
-                  {/* Lead rows */}
-                  <div className="divide-y divide-gray-800/60">
+                  {/* Lead cards */}
+                  <div className="space-y-2">
                     {MOCK_LEADS.map((lead) => (
-                      <div key={lead.name} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 items-center px-3 py-3.5">
-                        <p className="text-sm font-semibold text-white truncate">{lead.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{lead.title}</p>
-                        <p className="text-xs text-gray-400 truncate">{lead.company}</p>
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-900/60 text-green-400 whitespace-nowrap">
+                      <div key={lead.name} className="flex items-center justify-between p-3 rounded-xl bg-gray-900">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white">{lead.name}</p>
+                          <p className="text-xs text-gray-400">{lead.title} · {lead.company}</p>
+                        </div>
+                        <span className="shrink-0 ml-3 inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-900/60 text-green-400 whitespace-nowrap">
                           Decision Maker
                         </span>
                       </div>
@@ -451,7 +445,7 @@ export default function LandingPage() {
               Your next customer is already out there.
             </h2>
             <p className="text-gray-500 text-lg">
-              SalesPal finds them before your competitors do. Start with 10 free decision makers.
+              Start free. 10 real decision makers, no card required.
             </p>
             <Link
               href="/signup"

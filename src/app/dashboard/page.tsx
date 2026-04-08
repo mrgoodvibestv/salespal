@@ -71,9 +71,9 @@ export default async function DashboardPage() {
                 <Link
                   key={c.id}
                   href={`/dashboard/campaigns/${c.id}`}
-                  className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-gray-200 bg-white hover:border-[#4B6BF5]/30 hover:shadow-sm transition-all group"
+                  className="flex items-center justify-between gap-2 px-4 sm:px-5 py-4 rounded-2xl border border-gray-200 bg-white hover:border-[#4B6BF5]/30 hover:shadow-sm transition-all group overflow-hidden"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
                       className="size-9 rounded-xl flex items-center justify-center shrink-0"
                       style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
@@ -83,15 +83,15 @@ export default async function DashboardPage() {
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-black truncate group-hover:text-[#4B6BF5] transition-colors">
+                      <p className="font-semibold text-black truncate text-sm group-hover:text-[#4B6BF5] transition-colors">
                         {c.name}
                       </p>
                       {c.angle_selected && (
-                        <p className="text-xs text-gray-400 truncate mt-0.5">{c.angle_selected}</p>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{c.angle_selected}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.className}`}>
                       {status.label}
                     </span>

@@ -4,6 +4,98 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
+// ── Ticker data ──────────────────────────────────────────────────────────────
+const TICKER_ITEMS = [
+  "🟢 Maple Leaf Foods · 14 decision makers found",
+  "🟢 Shopify campaign · 3 contacts unlocked",
+  "🟢 RBC · VP People identified",
+  "🟢 Loblaws · Director HR surfaced",
+  "🟢 TD Bank · 7 new leads fetched",
+  "🟢 OpenText · Campaign angle generated",
+  "🟢 Manulife · 2 contacts unlocked",
+]
+
+// ── Pricing data ─────────────────────────────────────────────────────────────
+const PLANS = [
+  {
+    name: "Starter",
+    price: "$50",
+    credits: "100 credits",
+    features: [
+      "10 prospect fetches",
+      "10 email unlocks",
+      "All geographies",
+      "AI campaign angles",
+    ],
+    cta: "Get Started",
+    popular: false,
+  },
+  {
+    name: "Growth",
+    price: "$200",
+    credits: "500 credits",
+    features: [
+      "50 prospect fetches",
+      "50 email unlocks",
+      "All geographies",
+      "AI campaign angles",
+      "Priority support",
+    ],
+    cta: "Get Started",
+    popular: true,
+  },
+  {
+    name: "Pro",
+    price: "$600",
+    credits: "2,000 credits",
+    features: [
+      "200 prospect fetches",
+      "200 email unlocks",
+      "All geographies",
+      "AI campaign angles",
+      "Priority support",
+      "Sequences (coming soon)",
+    ],
+    cta: "Get Started",
+    popular: false,
+  },
+]
+
+// ── Steps data ────────────────────────────────────────────────────────────────
+const STEPS = [
+  {
+    num: "01",
+    icon: "🌐",
+    title: "Paste your URL",
+    desc: "Drop in your website. SalesPal reads your product, pricing, and who should be buying it.",
+  },
+  {
+    num: "02",
+    icon: "🎯",
+    title: "We find your ICP",
+    desc: "AI extracts your ideal customer profile and identifies two outbound campaign angles.",
+  },
+  {
+    num: "03",
+    icon: "👥",
+    title: "Decision makers surface",
+    desc: "We surface VP-level and Director-level contacts at companies that match your ICP.",
+  },
+  {
+    num: "04",
+    icon: "📧",
+    title: "Unlock and outreach",
+    desc: "Unlock verified emails and phone numbers. Sequences coming soon.",
+  },
+]
+
+// ── Mock leads for hero visual ────────────────────────────────────────────────
+const MOCK_LEADS = [
+  { name: "Sarah Chen", title: "VP People", company: "Shopify" },
+  { name: "Marcus Webb", title: "Director HR", company: "CIBC" },
+  { name: "Anna Kovacs", title: "Chief People Officer", company: "Manulife" },
+]
+
 export default function LandingPage() {
   const router = useRouter()
   const [url, setUrl] = useState("")
@@ -30,120 +122,335 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Nav */}
-      <header className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-6">
-        <Logo />
-        <div className="flex items-center gap-6">
-          <Link
-            href="/login"
-            className="text-sm text-gray-500 hover:text-black transition-colors"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90"
-            style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-          >
-            Get started
-          </Link>
-        </div>
-      </header>
+    <>
+      <style>{`
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 28s linear infinite;
+        }
+      `}</style>
 
-      {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-        <div className="max-w-3xl w-full mx-auto space-y-8">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-xs text-gray-500 bg-gray-50">
-            <span
-              className="size-1.5 rounded-full inline-block"
-              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-            />
-            AI-powered B2B prospecting
-          </div>
+      <div className="min-h-screen flex flex-col bg-white overflow-x-hidden">
 
-          {/* Headline */}
-          <div className="space-y-3">
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] text-black">
-              Ready to get
-              <br />
-              more sales?
-            </h1>
-            <p className="text-lg text-gray-500 max-w-md mx-auto leading-relaxed">
-              Enter your website. SalesPal finds your best campaign angle,
-              surfaces qualified leads, and writes your outreach — in minutes.
-            </p>
-          </div>
-
-          {/* URL input */}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value)
-                  setError("")
-                }}
-                placeholder="yourcompany.com"
-                className="flex-1 px-5 py-3.5 rounded-xl border border-gray-200 text-base outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400 shadow-sm"
-                autoComplete="off"
-                spellCheck={false}
-              />
-              <button
-                type="submit"
-                className="px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap shadow-sm"
-                style={{
-                  background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
-                }}
-              >
-                Analyze my website →
-              </button>
-            </div>
-            {error && (
-              <p className="text-sm text-red-500 text-center">{error}</p>
-            )}
-          </form>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 max-w-lg mx-auto">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-100" />
-          </div>
-
-          {/* Fallback */}
-          <div>
-            <Link
-              href="/signup?manual=true"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-black transition-colors group"
-            >
-              Tell us about your business
-              <span className="group-hover:translate-x-0.5 transition-transform">
-                →
+        {/* ── Section 1: Live Ticker ── */}
+        <div className="bg-gray-950 py-2.5 overflow-hidden">
+          <div className="flex animate-marquee whitespace-nowrap">
+            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+              <span key={i} className="inline-flex items-center gap-3 text-xs text-gray-300 px-6">
+                {item}
+                <span className="text-gray-600">·</span>
               </span>
-            </Link>
-            <p className="mt-1 text-xs text-gray-400">
-              For gated sites or if you&apos;d rather fill in the details yourself
-            </p>
+            ))}
           </div>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="px-4 sm:px-6 md:px-8 py-6 text-center">
-        <p className="text-xs text-gray-400">
-          Business email required to sign up.{" "}
-          <Link
-            href="/login"
-            className="hover:text-gray-600 transition-colors"
-          >
-            Already have an account?
-          </Link>
-        </p>
-      </footer>
-    </div>
+        {/* ── Section 2: Nav ── */}
+        <header className="border-b border-gray-100 px-6 md:px-12 py-5 flex items-center justify-between">
+          <Logo />
+          <div className="flex items-center gap-6">
+            <Link
+              href="/login"
+              className="text-sm text-gray-500 hover:text-black transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
+              className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+            >
+              Start free
+            </Link>
+          </div>
+        </header>
+
+        {/* ── Section 3: Hero ── */}
+        <section className="px-6 md:px-12 py-16 lg:py-24">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+              {/* Left column — 55% */}
+              <div className="flex-1 lg:max-w-[55%] space-y-8">
+                {/* Eyebrow badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-xs text-gray-500 bg-gray-50">
+                  <span
+                    className="size-1.5 rounded-full inline-block shrink-0"
+                    style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                  />
+                  AI-Powered B2B Outreach
+                </div>
+
+                {/* Headline */}
+                <div className="space-y-4">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-black">
+                    Ready to get
+                    <br />
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                    >
+                      more sales?
+                    </span>
+                  </h1>
+                  <p className="text-lg text-gray-500 max-w-md leading-relaxed">
+                    Enter your website. SalesPal finds your best campaign angle,
+                    surfaces qualified leads, and writes your outreach — in minutes.
+                  </p>
+                </div>
+
+                {/* URL form */}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="flex flex-col sm:flex-row gap-3 max-w-lg">
+                    <input
+                      type="text"
+                      value={url}
+                      onChange={(e) => { setUrl(e.target.value); setError("") }}
+                      placeholder="yourcompany.com"
+                      className="flex-1 px-5 py-4 rounded-xl border border-gray-200 text-base outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400 shadow-sm"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                    <button
+                      type="submit"
+                      className="w-full sm:w-auto px-7 py-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap shadow-sm"
+                      style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                    >
+                      Analyze my website →
+                    </button>
+                  </div>
+                  {error && <p className="text-sm text-red-500">{error}</p>}
+                </form>
+
+                {/* Trust signals */}
+                <p className="text-xs text-gray-400 flex flex-wrap gap-x-4 gap-y-1">
+                  <span>✓ No credit card required</span>
+                  <span>✓ 10 free leads</span>
+                  <span>✓ 2 min setup</span>
+                </p>
+
+                {/* Fallback */}
+                <div className="pt-2">
+                  <Link
+                    href="/signup?manual=true"
+                    className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-black transition-colors group"
+                  >
+                    Tell us about your business instead
+                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right column — 45% — hidden below lg */}
+              <div className="hidden lg:block lg:max-w-[45%] w-full">
+                <div className="bg-gray-950 rounded-2xl p-5 shadow-2xl">
+                  {/* Card header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs text-green-400 font-medium">
+                      ● 3 decision makers found
+                    </p>
+                    <span
+                      className="text-[10px] font-semibold px-2 py-1 rounded-full text-white"
+                      style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                    >
+                      Preview ready
+                    </span>
+                  </div>
+
+                  {/* Column headers */}
+                  <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-3 px-3 pb-2 border-b border-gray-800">
+                    {["Name", "Title", "Company", "Tier", ""].map((h) => (
+                      <p key={h} className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{h}</p>
+                    ))}
+                  </div>
+
+                  {/* Lead rows */}
+                  <div className="divide-y divide-gray-800/60">
+                    {MOCK_LEADS.map((lead) => (
+                      <div key={lead.name} className="grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-3 items-center px-3 py-3">
+                        <p className="text-sm font-semibold text-white truncate">{lead.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{lead.title}</p>
+                        <p className="text-xs text-gray-400 truncate">{lead.company}</p>
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-900/60 text-green-400 whitespace-nowrap">
+                          Decision Maker
+                        </span>
+                        <button
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white whitespace-nowrap"
+                          style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                        >
+                          <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                          </svg>
+                          Unlock
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Card footer */}
+                  <div className="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between">
+                    <p className="text-[11px] text-gray-500">Unlock for 2 credits per contact</p>
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="size-1.5 rounded-full"
+                          style={{ background: i === 0 ? "linear-gradient(to right, #4B6BF5, #7B4BF5)" : undefined }}
+                          // eslint-disable-next-line react/no-unknown-property
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 4: How It Works ── */}
+        <section className="bg-gray-50 px-6 md:px-12 py-24">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                How It Works
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-black">
+                From website to warm lead in 60 seconds
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              {STEPS.map((step, i) => (
+                <div key={step.num} className="relative">
+                  {/* Connector arrow — desktop only */}
+                  {i < STEPS.length - 1 && (
+                    <div className="hidden lg:block absolute top-8 left-[calc(100%+0px)] w-5 text-gray-300 text-xs z-10 text-center">
+                      →
+                    </div>
+                  )}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 h-full space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-gray-300 tabular-nums">{step.num}</span>
+                      <span className="text-2xl">{step.icon}</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      <h3 className="font-semibold text-black text-sm">{step.title}</h3>
+                      <p className="text-xs text-gray-500 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 5: Pricing ── */}
+        <section className="px-6 md:px-12 py-24">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                Pricing
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-black">
+                Buy credits, use them as you need.
+              </h2>
+              <p className="text-gray-500 mt-2 text-sm">No subscriptions. No lock-in. Buy when you need it.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {PLANS.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-2xl p-7 flex flex-col ${
+                    plan.popular
+                      ? "border-2 border-[#4B6BF5] shadow-lg bg-white"
+                      : "border border-gray-200 shadow-sm bg-white"
+                  }`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <span
+                        className="text-[10px] font-semibold tracking-wider uppercase text-white px-3 py-1 rounded-full"
+                        style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                      >
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-gray-500 mb-1">{plan.name}</p>
+                    <p className="text-4xl font-bold text-black">{plan.price}</p>
+                    <p className="text-xs text-gray-400 mt-1">{plan.credits}</p>
+                  </div>
+
+                  <ul className="space-y-2.5 flex-1 mb-7">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                        <svg className="size-4 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none">
+                          <path d="M7 10l2 2 4-4" stroke="#4B6BF5" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="10" cy="10" r="8" stroke="#4B6BF5" strokeWidth="1.5" />
+                        </svg>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/signup"
+                    className={`w-full flex items-center justify-center py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] ${
+                      plan.popular ? "text-white" : "text-gray-700 border border-gray-200 hover:border-gray-300 bg-white"
+                    }`}
+                    style={plan.popular ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 6: CTA Strip ── */}
+        <section
+          className="px-6 md:px-12 py-20 text-center"
+          style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
+        >
+          <div className="max-w-2xl mx-auto space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+              Your next customer is already out there.
+            </h2>
+            <p className="text-white/80 text-lg">
+              SalesPal finds them before your competitors do. Start with 10 free decision makers.
+            </p>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ color: "#4B6BF5" }}
+            >
+              Find My Buyers →
+            </Link>
+          </div>
+        </section>
+
+        {/* ── Section 7: Footer ── */}
+        <footer className="border-t border-gray-100 px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <span className="text-xs text-gray-400">© 2026 Good Vibes Enterprises</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Privacy</Link>
+            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Terms</Link>
+            <Link href="/login" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Sign in</Link>
+          </div>
+        </footer>
+
+      </div>
+    </>
   )
 }
 
@@ -153,9 +460,7 @@ function Logo() {
       <span className="text-black">Sales</span>
       <span
         className="bg-clip-text text-transparent"
-        style={{
-          backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
-        }}
+        style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
       >
         Pal
       </span>

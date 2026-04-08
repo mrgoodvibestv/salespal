@@ -15,7 +15,7 @@ export default async function CampaignDetailPage({
   // Fetch campaign (RLS enforces ownership)
   const { data: campaign, error: campaignError } = await supabase
     .from("campaigns")
-    .select("*")
+    .select("id, name, status, angle_selected, icp_json, stats_result, sequence_json, created_at")
     .eq("id", params.id)
     .single()
 

@@ -135,7 +135,7 @@ export default function ContactsContent({
       <Sidebar credits={credits} userEmail={userEmail} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-4xl w-full">
+        <div className="max-w-6xl w-full">
 
           {/* Page header */}
           <div className="mb-8">

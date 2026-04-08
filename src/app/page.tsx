@@ -32,7 +32,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Nav */}
-      <header className="flex items-center justify-between px-8 py-6">
+      <header className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-6">
         <Logo />
         <div className="flex items-center gap-6">
           <Link
@@ -51,7 +51,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
         <div className="max-w-2xl w-full mx-auto space-y-8">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 text-xs text-gray-500 bg-gray-50">
@@ -131,7 +131,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="px-8 py-6 text-center">
+      <footer className="px-4 sm:px-6 md:px-8 py-6 text-center">
         <p className="text-xs text-gray-400">
           Business email required to sign up.{" "}
           <Link

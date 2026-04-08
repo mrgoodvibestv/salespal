@@ -311,32 +311,32 @@ export default function CampaignDetailClient({
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-gray-100 px-8 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-xl font-bold tracking-tight">
+      <header className="border-b border-gray-100 px-4 sm:px-6 md:px-8 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/dashboard" className="text-xl font-bold tracking-tight shrink-0">
               <span className="text-black">Sales</span>
               <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}>Pal</span>
             </Link>
-            <span className="text-gray-200">/</span>
-            <span className="text-sm text-gray-600 max-w-xs truncate">{campaign.name}</span>
+            <span className="text-gray-200 shrink-0">/</span>
+            <span className="text-sm text-gray-600 truncate min-w-0">{campaign.name}</span>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
               <span className="size-2 rounded-full inline-block" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
               <span className="text-sm font-semibold text-black tabular-nums">{credits.toLocaleString()}</span>
               <span className="text-xs text-gray-500">credits</span>
             </div>
-            <span className="text-sm text-gray-400 hidden sm:block">{userEmail}</span>
+            <span className="text-sm text-gray-400 hidden sm:block truncate max-w-[160px]">{userEmail}</span>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-10 space-y-8">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
 
         {/* Campaign header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
+        <div className="flex flex-col sm:flex-row items-start gap-4">
+          <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-black">{campaign.name}</h1>
               <StatusBadge status={status} />
@@ -360,12 +360,12 @@ export default function CampaignDetailClient({
             )}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto sm:shrink-0">
             {!hasLeads && !isFetching && (
               <button
                 onClick={() => handleFindLeads()}
                 disabled={credits < 5}
-                className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                 title={credits < 5 ? "You need at least 5 credits" : undefined}
               >
@@ -379,7 +379,7 @@ export default function CampaignDetailClient({
               <button
                 onClick={() => handleFindLeads()}
                 disabled={isFetching || credits < 5}
-                className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 title={credits < 5 ? "You need at least 5 credits" : undefined}
               >
                 Refresh leads
@@ -486,7 +486,7 @@ export default function CampaignDetailClient({
                 ))}
               </div>
               {/* Noise toggle */}
-              <div className="flex items-center gap-2 pl-[88px]">
+              <div className="flex items-center gap-2 sm:pl-[88px]">
                 <button
                   onClick={() => setShowNoise((v) => !v)}
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showNoise ? "bg-[#4B6BF5]" : "bg-gray-200"}`}
@@ -498,22 +498,86 @@ export default function CampaignDetailClient({
             </div>
 
             {/* Stats bar */}
-            <div className="flex items-center gap-6 px-5 py-3 rounded-xl bg-gray-50 border border-gray-100">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 sm:px-5 py-3 rounded-xl bg-gray-50 border border-gray-100">
               <Stat label="Decision Makers" value={dmCount}    color="text-green-600" />
-              <div className="h-5 w-px bg-gray-200" />
+              <div className="hidden sm:block h-5 w-px bg-gray-200" />
               <Stat label="Influencers"     value={infCount}   color="text-blue-600" />
               {showNoise && <>
-                <div className="h-5 w-px bg-gray-200" />
+                <div className="hidden sm:block h-5 w-px bg-gray-200" />
                 <Stat label="Noise"         value={noiseCount} color="text-gray-400" />
               </>}
-              <div className="h-5 w-px bg-gray-200" />
+              <div className="hidden sm:block h-5 w-px bg-gray-200" />
               <Stat label="Unlocked"        value={unlockedCount} color="text-purple-600" />
-              <div className="h-5 w-px bg-gray-200" />
+              <div className="hidden sm:block h-5 w-px bg-gray-200" />
               <Stat label="Showing"         value={filteredLeads.length} color="text-black" />
             </div>
 
-            {/* Table */}
-            <div className="rounded-2xl border border-gray-200 overflow-hidden">
+            {/* Mobile card layout (hidden on sm+) */}
+            <div className="sm:hidden space-y-3">
+              {filteredLeads.map((lead) => {
+                const companyName = lead.companies?.name ?? lead.company_name ?? ""
+                const tier = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.influencer
+                const isUnlocking = unlockingId === lead.id
+                const unlockErr = unlockErrors[lead.id]
+                return (
+                  <div key={lead.id} className={`p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-black truncate">{lead.full_name}</p>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{lead.job_title}</p>
+                      </div>
+                      <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
+                    </div>
+                    {(companyName || lead.geo_location) && (
+                      <div className="text-xs text-gray-600 space-y-0.5">
+                        {companyName && <p className="truncate"><span className="text-gray-400">Company: </span>{companyName}</p>}
+                        {lead.geo_location && <p className="truncate"><span className="text-gray-400">Location: </span>{lead.geo_location}</p>}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 pt-0.5">
+                      {lead.linkedin_url && (
+                        <a href={lead.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-[#0A66C2] hover:opacity-80 transition-opacity shrink-0">
+                          <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                          </svg>
+                        </a>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        {lead.unlocked && lead.email
+                          ? <a href={`mailto:${lead.email}`} className="text-xs text-gray-700 hover:text-black truncate block">{lead.email}</a>
+                          : <LockedCell />
+                        }
+                      </div>
+                    </div>
+                    {lead.unlocked ? (
+                      <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                        <svg className="size-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                        Unlocked
+                      </span>
+                    ) : (
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => handleUnlock(lead)}
+                          disabled={!!unlockingId || credits < 2}
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                          style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                        >
+                          {isUnlocking ? (
+                            <><svg className="size-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Unlocking…</>
+                          ) : (
+                            <><svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>Unlock · 2 credits</>
+                          )}
+                        </button>
+                        {unlockErr && <span className="text-xs text-red-500">{unlockErr}</span>}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop table (hidden below sm) */}
+            <div className="hidden sm:block rounded-2xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -538,9 +602,9 @@ export default function CampaignDetailClient({
 
                       return (
                         <tr key={lead.id} className={`hover:bg-gray-50/50 transition-colors ${lead.tier === "noise" ? "opacity-50" : ""}`}>
-                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap">{lead.full_name}</td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{lead.job_title}</td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{companyName}</td>
+                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap max-w-[150px] truncate">{lead.full_name}</td>
+                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap max-w-[180px] truncate">{lead.job_title}</td>
+                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap max-w-[150px] truncate">{companyName}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {lead.geo_location
                               ? <span className="text-xs text-gray-400">{lead.geo_location}</span>
@@ -689,7 +753,7 @@ export default function CampaignDetailClient({
                   <button
                     onClick={() => setConfirmRefetch(true)}
                     disabled={isFetching || credits < 5}
-                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                   >
                     Re-fetch Leads with These Filters
@@ -729,7 +793,7 @@ export default function CampaignDetailClient({
                   <button
                     onClick={handleRescore}
                     disabled={rescoring}
-                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 flex items-center gap-2"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
                     style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                   >
                     {rescoring ? (
@@ -742,7 +806,7 @@ export default function CampaignDetailClient({
 
             {/* Run Full Campaign banner */}
             {status === "preview_ready" && campaign.stats_result && (
-              <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
                 <div className="space-y-0.5">
                   <p className="text-sm font-semibold text-black">
                     You&apos;re previewing {leads.length} of ~{campaign.stats_result.estimated_contacts?.toLocaleString()} available contacts.
@@ -751,7 +815,7 @@ export default function CampaignDetailClient({
                     Run full campaign to surface all decision makers across {campaign.stats_result.companies?.toLocaleString()} matching companies.
                   </p>
                 </div>
-                <button disabled className="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white opacity-60 cursor-not-allowed whitespace-nowrap"
+                <button disabled className="w-full sm:w-auto sm:shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white opacity-60 cursor-not-allowed whitespace-nowrap"
                   style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} title="Coming soon">
                   Run Full Campaign
                 </button>

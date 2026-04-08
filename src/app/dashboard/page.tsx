@@ -31,8 +31,8 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-gray-100 px-8 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <header className="border-b border-gray-100 px-4 sm:px-6 md:px-8 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           <Logo />
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
@@ -40,16 +40,16 @@ export default async function DashboardPage() {
               <span className="text-sm font-semibold text-black tabular-nums">{credits.toLocaleString()}</span>
               <span className="text-xs text-gray-500">credits</span>
             </div>
-            <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
+            <span className="text-sm text-gray-500 hidden sm:block truncate max-w-[180px]">{user.email}</span>
             <SignOutButton />
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-8 py-12">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 py-6 md:py-12">
         {/* Title row */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold text-black">Campaigns</h1>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </div>
           <Link
             href="/dashboard/campaigns/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

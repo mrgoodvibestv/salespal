@@ -249,7 +249,7 @@ function NewCampaignContent() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-gray-100 px-8 py-4">
+      <header className="border-b border-gray-100 px-4 sm:px-6 md:px-8 py-4">
         <div className="max-w-3xl mx-auto flex items-center gap-4">
           <Link
             href="/dashboard"
@@ -285,7 +285,7 @@ function NewCampaignContent() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-8 py-12">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
         {/* ── Step 1a: URL entry ── */}
         {step === 1 && geoPhase === "url" && (
           <Step1
@@ -469,7 +469,7 @@ function Step1({
         className="space-y-3"
       >
         <label className="text-sm font-medium text-black">Your website URL</label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={url}
@@ -484,7 +484,7 @@ function Step1({
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl text-sm font-semibold text-white whitespace-nowrap hover:opacity-90 transition-all"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-semibold text-white whitespace-nowrap hover:opacity-90 transition-all"
             style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
           >
             Analyze →
@@ -604,16 +604,16 @@ function GeoStep({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
         <button
           onClick={onBack}
-          className="text-sm text-gray-400 hover:text-black transition-colors"
+          className="text-sm text-gray-400 hover:text-black transition-colors text-center sm:text-left"
         >
           ← Change URL
         </button>
         <button
           onClick={onContinue}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
           style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
         >
           Analyze my business →
@@ -688,17 +688,17 @@ function Step2({
         />
       </div>
 
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
         <button
           onClick={onBack}
-          className="text-sm text-gray-400 hover:text-black transition-colors"
+          className="text-sm text-gray-400 hover:text-black transition-colors text-center sm:text-left"
         >
           ← Change URL
         </button>
         <button
           onClick={onNext}
           disabled={!selectedAngle}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
         >
           Continue with this angle →
@@ -864,21 +864,21 @@ function Step3({
         </div>
 
         {analysis.stats.companies > 0 && (
-          <div className="px-5 py-4 flex items-center gap-6">
+          <div className="px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-3">
             <div>
               <p className="text-2xl font-bold text-black tabular-nums">
                 {analysis.stats.companies.toLocaleString()}
               </p>
               <p className="text-xs text-gray-400">matching companies</p>
             </div>
-            <div className="h-8 w-px bg-gray-200" />
+            <div className="hidden sm:block h-8 w-px bg-gray-200" />
             <div>
               <p className="text-2xl font-bold text-black tabular-nums">
                 ~{analysis.stats.estimated_contacts.toLocaleString()}
               </p>
               <p className="text-xs text-gray-400">potential contacts</p>
             </div>
-            <div className="h-8 w-px bg-gray-200" />
+            <div className="hidden sm:block h-8 w-px bg-gray-200" />
             <div>
               <p className="text-2xl font-bold text-black">0</p>
               <p className="text-xs text-gray-400">credits to launch</p>
@@ -906,18 +906,18 @@ function Step3({
         <p className="text-sm text-red-500 text-center">{errorMsg}</p>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <button
           onClick={onBack}
           disabled={status === "creating"}
-          className="text-sm text-gray-400 hover:text-black transition-colors disabled:opacity-40"
+          className="text-sm text-gray-400 hover:text-black transition-colors disabled:opacity-40 text-center sm:text-left"
         >
           ← Change angle
         </button>
         <button
           onClick={onLaunch}
           disabled={status === "creating" || !campaignName.trim()}
-          className="px-8 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
         >
           {status === "creating" ? (

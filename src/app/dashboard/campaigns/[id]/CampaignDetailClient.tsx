@@ -574,7 +574,14 @@ export default function CampaignDetailClient({
                       <div className="flex items-center gap-2.5 min-w-0">
                         <InitialsAvatar name={lead.full_name} size="sm" />
                         <div className="min-w-0">
-                          <p className="font-semibold text-black truncate">{lead.full_name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-semibold text-black truncate">{lead.full_name}</p>
+                            {lead.unlocked && (
+                              <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                                Saved
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-500 truncate mt-0.5">{lead.job_title}</p>
                         </div>
                       </div>
@@ -654,7 +661,16 @@ export default function CampaignDetailClient({
 
                       return (
                         <tr key={lead.id} className={`hover:bg-gray-50/50 transition-colors ${lead.tier === "noise" ? "opacity-50" : ""}`}>
-                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap min-w-[120px] max-w-[150px] truncate">{lead.full_name}</td>
+                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap min-w-[120px] max-w-[180px]">
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="truncate">{lead.full_name}</span>
+                              {lead.unlocked && (
+                                <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                                  Saved
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[160px] max-w-[200px] truncate">{lead.job_title}</td>
                           <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[120px] max-w-[160px] truncate">{companyName}</td>
                           <td className="px-4 py-3 whitespace-nowrap">

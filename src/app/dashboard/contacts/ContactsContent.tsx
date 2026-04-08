@@ -49,15 +49,9 @@ const STATUS_OPTIONS = [
   { value: "converted", label: "Converted", className: "bg-green-50 text-green-700" },
 ]
 
-function StatusDropdown({
-  leadId,
-  currentStatus,
-}: {
-  leadId: string
-  currentStatus: string
-}) {
-  const [status, setStatus]   = useState(currentStatus)
-  const [saving, setSaving]   = useState(false)
+function StatusDropdown({ leadId, currentStatus }: { leadId: string; currentStatus: string }) {
+  const [status, setStatus] = useState(currentStatus)
+  const [saving, setSaving] = useState(false)
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value
@@ -70,7 +64,7 @@ function StatusDropdown({
         body: JSON.stringify({ status: next }),
       })
     } catch {
-      // Best-effort — status already updated optimistically
+      // optimistic — ignore errors
     } finally {
       setSaving(false)
     }
@@ -109,22 +103,44 @@ export default function ContactsContent({
   credits: number
   userEmail: string
 }) {
-  const totalContacts   = contacts.length
-  const campaignIds     = new Set(contacts.map((c) => c.campaign_id))
-  const withEmail       = contacts.filter((c) => c.email).length
-  const withPhone       = contacts.filter((c) => c.phone).length
+  const [campaignFilter, setCampaignFilter] = useState("all")
+
+  // Unique campaigns from the contacts list
+  const campaignOptions = Array.from(
+    new Map(contacts.map((c) => [c.campaign_id, { id: c.campaign_id, name: c.campaign_name }])).values()
+  )
+
+  const filtered = campaignFilter === "all"
+    ? contacts
+    : contacts.filter((c) => c.campaign_id === campaignFilter)
+
+  // Group filtered contacts by campaign
+  const groups: { campaign_id: string; campaign_name: string; angle_selected: string; contacts: Contact[] }[] = []
+  filtered.forEach((c) => {
+    const existing = groups.find((g) => g.campaign_id === c.campaign_id)
+    if (existing) {
+      existing.contacts.push(c)
+    } else {
+      groups.push({ campaign_id: c.campaign_id, campaign_name: c.campaign_name, angle_selected: c.angle_selected, contacts: [c] })
+    }
+  })
+
+  const totalContacts = contacts.length
+  const campaignCount = new Set(contacts.map((c) => c.campaign_id)).size
+  const withEmail     = contacts.filter((c) => c.email).length
+  const withPhone     = contacts.filter((c) => c.phone).length
 
   return (
     <div className="flex min-h-screen bg-white overflow-x-hidden">
       <Sidebar credits={credits} userEmail={userEmail} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-6xl w-full">
+        <div className="max-w-4xl w-full">
 
           {/* Page header */}
           <div className="mb-8">
             <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
-              Contacts
+              CONTACTS
             </p>
             <h1 className="text-2xl font-bold text-black">Key Contacts</h1>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -140,7 +156,7 @@ export default function ContactsContent({
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-purple-600 tabular-nums">{campaignIds.size}</span>
+              <span className="text-lg font-bold text-purple-600 tabular-nums">{campaignCount}</span>
               <span className="text-xs text-gray-500">Campaigns</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
@@ -182,92 +198,107 @@ export default function ContactsContent({
             </div>
           )}
 
-          {/* Contact cards grid */}
           {contacts.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {contacts.map((contact) => {
-                const tier = TIER_CONFIG[contact.tier] ?? TIER_CONFIG.influencer
+            <div className="space-y-8">
 
-                return (
-                  <div
-                    key={contact.id}
-                    className="p-5 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all space-y-3"
-                  >
-                    {/* Name + tier */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <InitialsAvatar name={contact.full_name} />
-                        <div className="min-w-0">
-                          <p className="font-semibold text-black truncate">{contact.full_name}</p>
-                          <p className="text-sm text-gray-500 truncate mt-0.5">{contact.job_title}</p>
-                        </div>
-                      </div>
-                      <span className={`shrink-0 inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${tier.className}`}>
-                        {tier.label}
-                      </span>
-                    </div>
-
-                    {/* Campaign pill */}
-                    <div>
-                      <Link
-                        href={`/dashboard/campaigns/${contact.campaign_id}`}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#EEF1FE] text-[#4B6BF5] hover:bg-[#E0E5FD] transition-colors"
-                      >
-                        <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        {contact.campaign_name}
-                      </Link>
-                    </div>
-
-                    {/* Contact details */}
-                    <div className="space-y-1.5 pt-1">
-                      {contact.email && (
-                        <div className="flex items-center gap-2">
-                          <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          <a
-                            href={`mailto:${contact.email}`}
-                            className="text-xs text-gray-700 hover:text-black truncate"
-                          >
-                            {contact.email}
-                          </a>
-                        </div>
-                      )}
-                      {contact.phone && (
-                        <div className="flex items-center gap-2">
-                          <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                          <span className="text-xs text-gray-700">{contact.phone}</span>
-                        </div>
-                      )}
-                      {contact.linkedin_url && (
-                        <div className="flex items-center gap-2">
-                          <svg className="size-3.5 text-[#0A66C2] shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                          </svg>
-                          <a
-                            href={contact.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-[#0A66C2] hover:opacity-80 truncate"
-                          >
-                            LinkedIn profile
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Status dropdown */}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <span className="text-xs text-gray-400">Status</span>
-                      <StatusDropdown leadId={contact.id} currentStatus={contact.status} />
-                    </div>
+              {/* Filter bar */}
+              {campaignOptions.length > 1 && (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-400 shrink-0">Campaign</span>
+                  <div className="relative">
+                    <select
+                      value={campaignFilter}
+                      onChange={(e) => setCampaignFilter(e.target.value)}
+                      className="text-sm font-medium pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/20 text-gray-700"
+                    >
+                      <option value="all">All campaigns</option>
+                      {campaignOptions.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <svg
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none text-gray-400"
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
-                )
-              })}
+                </div>
+              )}
+
+              {/* Grouped contact sections */}
+              {groups.map((group) => (
+                <div key={group.campaign_id}>
+                  {/* Section header */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <Link
+                      href={`/dashboard/campaigns/${group.campaign_id}`}
+                      className="font-semibold text-black hover:text-[#4B6BF5] transition-colors text-sm"
+                    >
+                      {group.campaign_name}
+                    </Link>
+                    {group.angle_selected && (
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF1FE] text-[#4B6BF5]">
+                        {group.angle_selected}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-400 ml-auto">{group.contacts.length} contact{group.contacts.length !== 1 ? "s" : ""}</span>
+                  </div>
+
+                  {/* Contact list */}
+                  <div className="rounded-2xl border border-gray-200 divide-y divide-gray-100 overflow-hidden shadow-sm">
+                    {group.contacts.map((contact) => {
+                      const tier = TIER_CONFIG[contact.tier] ?? TIER_CONFIG.influencer
+                      return (
+                        <div key={contact.id} className="flex items-center gap-4 px-4 py-3.5 bg-white hover:bg-gray-50/50 transition-colors">
+                          {/* Avatar + name + title */}
+                          <InitialsAvatar name={contact.full_name} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-black text-sm truncate">{contact.full_name}</span>
+                              <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${tier.className}`}>
+                                {tier.label}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 truncate mt-0.5">{contact.job_title}</p>
+                          </div>
+
+                          {/* Contact links */}
+                          <div className="hidden sm:flex items-center gap-3 shrink-0">
+                            {contact.email ? (
+                              <a
+                                href={`mailto:${contact.email}`}
+                                className="text-xs text-gray-600 hover:text-black truncate max-w-[200px]"
+                              >
+                                {contact.email}
+                              </a>
+                            ) : (
+                              <span className="text-xs text-gray-300">—</span>
+                            )}
+                            {contact.linkedin_url && (
+                              <a
+                                href={contact.linkedin_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#0A66C2] hover:opacity-70 transition-opacity shrink-0"
+                              >
+                                <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                </svg>
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Status dropdown */}
+                          <div className="shrink-0">
+                            <StatusDropdown leadId={contact.id} currentStatus={contact.status} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

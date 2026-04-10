@@ -11,6 +11,10 @@ interface Touch {
   tone: "intro" | "followup" | "breakup"
 }
 
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`shimmer rounded-md ${className ?? ""}`} />
+}
+
 const TONE_CONFIG: Record<string, { label: string; className: string }> = {
   intro:    { label: "Intro",      className: "bg-blue-50 text-blue-600 border border-blue-100" },
   followup: { label: "Follow-up",  className: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
@@ -94,6 +98,45 @@ export default function SequencesTab({
     })
   }
 
+  if (!emails && generating) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs text-gray-400 font-medium mb-4">Writing your sequence...</p>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            {/* Card header */}
+            <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-12 rounded-full" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-14 rounded-full" />
+              </div>
+              <Skeleton className="h-6 w-14 rounded-lg" />
+            </div>
+            {/* Card body */}
+            <div className="px-4 py-3 space-y-3">
+              {i !== 0 && i !== 2 && (
+                <div className="space-y-1.5">
+                  <Skeleton className="h-2 w-14" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <Skeleton className="h-2 w-10" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-5/6" />
+                <Skeleton className="h-3 w-4/5" />
+                {i !== 0 && i !== 2 && (
+                  <Skeleton className="h-3 w-2/3" />
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   if (!emails) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center space-y-5">
@@ -114,26 +157,13 @@ export default function SequencesTab({
         {error && <p className="text-sm text-red-500 max-w-sm">{error}</p>}
         <button
           onClick={generate}
-          disabled={generating}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
           style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
         >
-          {generating ? (
-            <>
-              <svg className="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Writing your sequence…
-            </>
-          ) : (
-            <>
-              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Generate Sequence
-            </>
-          )}
+          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Generate Sequence
         </button>
       </div>
     )

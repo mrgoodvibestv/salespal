@@ -48,6 +48,10 @@ interface Campaign {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`shimmer rounded-md ${className ?? ""}`} />
+}
+
 function InitialsAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
   const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
   const colors = [
@@ -476,18 +480,66 @@ export default function CampaignDetailClient({
           </div>
         )}
 
-        {/* Loading */}
+        {/* Loading skeleton */}
         {isFetching && (
-          <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
-            <div className="relative size-14">
-              <div className="absolute inset-0 rounded-full animate-spin" style={{ background: "conic-gradient(from 0deg, #4B6BF5, #7B4BF5, transparent)", mask: "radial-gradient(farthest-side, transparent calc(100% - 3px), black 0)", WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 3px), black 0)" }} />
-              <div className="absolute inset-1.5 rounded-full" style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }} />
+          <div className="space-y-4">
+            {/* Skeleton stats bar */}
+            <div className="flex items-center gap-6 px-1 py-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-8" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ))}
             </div>
-            <div className="space-y-1">
-              <p className="font-semibold text-black">Finding your leads…</p>
-              <p className="text-sm text-gray-500">Scoring contacts and filtering decision makers</p>
+
+            {/* Desktop table skeleton */}
+            <div className="hidden sm:block rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex gap-6">
+                {[80, 120, 100, 80, 70].map((w, i) => (
+                  <Skeleton key={i} className={`h-2.5 w-[${w}px]`} />
+                ))}
+              </div>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`flex items-center gap-4 px-4 py-3 border-b border-gray-100 ${i % 2 === 1 ? "bg-gray-50/40" : ""}`}
+                >
+                  <Skeleton className="size-8 rounded-full shrink-0" />
+                  <Skeleton className="h-3.5 w-28" />
+                  <Skeleton className="h-3 w-36" />
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-24 rounded-full ml-auto" />
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-7 w-16 rounded-lg" />
+                </div>
+              ))}
             </div>
-            <p className="text-xs text-gray-400">This usually takes 20–40 seconds</p>
+
+            {/* Mobile card skeleton */}
+            <div className="sm:hidden space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-4 rounded-2xl border border-gray-200 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="size-8 rounded-full shrink-0" />
+                      <div className="space-y-1.5">
+                        <Skeleton className="h-3.5 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-5 w-20 rounded-full shrink-0" />
+                  </div>
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <div className="flex justify-end pt-1">
+                    <Skeleton className="h-8 w-20 rounded-xl" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

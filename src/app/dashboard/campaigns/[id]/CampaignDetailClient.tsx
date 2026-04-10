@@ -109,7 +109,7 @@ function StatusBadge({ status }: { status: string }) {
     archived:           { label: "Archived",         className: "bg-gray-100 text-gray-500" },
   }
   const cfg = map[status] ?? { label: status, className: "bg-gray-100 text-gray-500" }
-  return <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${cfg.className}`}>{cfg.label}</span>
+  return <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${cfg.className}`}>{cfg.label}</span>
 }
 
 function LockedCell() {
@@ -142,9 +142,9 @@ function Pill({
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className={`text-lg font-bold tabular-nums ${color}`}>{value}</span>
-      <span className="text-xs text-gray-500">{label}</span>
+    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+      <span className={`text-xl font-bold tabular-nums ${color}`}>{value}</span>
+      <span className="text-xs text-gray-400 font-medium">{label}</span>
     </div>
   )
 }
@@ -353,7 +353,7 @@ export default function CampaignDetailClient({
               Campaign
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-black truncate max-w-[280px] sm:max-w-md">{campaign.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 truncate max-w-[280px] sm:max-w-md">{campaign.name}</h1>
               <StatusBadge status={status} />
             </div>
             {campaign.angle_selected && (
@@ -413,19 +413,19 @@ export default function CampaignDetailClient({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-sm text-sm">
               {ad.target_companies && (
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Target Companies</p>
+                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Target Companies</p>
                   <p className="text-gray-700">{ad.target_companies}</p>
                 </div>
               )}
               {ad.target_titles?.length && (
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Target Titles</p>
+                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Target Titles</p>
                   <p className="text-gray-700">{ad.target_titles.join(" · ")}</p>
                 </div>
               )}
               {ad.pitch_summary && (
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pitch</p>
+                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Pitch</p>
                   <p className="text-gray-700">{ad.pitch_summary}</p>
                 </div>
               )}
@@ -441,7 +441,7 @@ export default function CampaignDetailClient({
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 text-sm font-semibold transition-all relative capitalize ${
                 activeTab === tab
-                  ? "text-[#4B6BF5]"
+                  ? "text-gray-900"
                   : "text-gray-400 hover:text-gray-700"
               }`}
             >
@@ -575,7 +575,7 @@ export default function CampaignDetailClient({
                         <InitialsAvatar name={lead.full_name} size="sm" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <p className="font-semibold text-black truncate">{lead.full_name}</p>
+                            <p className="font-semibold text-gray-900 truncate">{lead.full_name}</p>
                             {lead.unlocked && (
                               <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-600 border border-green-200">
                                 Saved
@@ -588,7 +588,7 @@ export default function CampaignDetailClient({
                       <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
                     </div>
                     {(companyName || lead.geo_location) && (
-                      <div className="text-xs text-gray-600 space-y-0.5">
+                      <div className="text-xs text-gray-500 space-y-0.5">
                         {companyName && <p className="truncate"><span className="text-gray-400">Company: </span>{companyName}</p>}
                         {lead.geo_location && <p className="truncate"><span className="text-gray-400">Location: </span>{lead.geo_location}</p>}
                       </div>
@@ -641,15 +641,15 @@ export default function CampaignDetailClient({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Title</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Tier</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">LinkedIn</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</th>
-                      <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Unlock</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Name</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Title</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Company</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Location</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400 whitespace-nowrap">Tier</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">LinkedIn</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Email</th>
+                      <th className="text-left px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Phone</th>
+                      <th className="text-right px-4 py-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Unlock</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -661,7 +661,7 @@ export default function CampaignDetailClient({
 
                       return (
                         <tr key={lead.id} className={`hover:bg-gray-50/50 transition-colors ${lead.tier === "noise" ? "opacity-50" : ""}`}>
-                          <td className="px-4 py-3 font-medium text-black whitespace-nowrap min-w-[120px] max-w-[180px]">
+                          <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap min-w-[120px] max-w-[180px]">
                             <div className="flex items-center gap-2 truncate">
                               <span className="truncate">{lead.full_name}</span>
                               {lead.unlocked && (
@@ -671,8 +671,8 @@ export default function CampaignDetailClient({
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[160px] max-w-[200px] truncate">{lead.job_title}</td>
-                          <td className="px-4 py-3 text-gray-600 whitespace-nowrap min-w-[120px] max-w-[160px] truncate">{companyName}</td>
+                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[160px] max-w-[200px] truncate">{lead.job_title}</td>
+                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[120px] max-w-[160px] truncate">{companyName}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {lead.geo_location
                               ? <span className="text-xs text-gray-400">{lead.geo_location}</span>
@@ -770,7 +770,7 @@ export default function CampaignDetailClient({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4">
                     {/* Company size */}
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Company Size</p>
+                      <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Company Size</p>
                       <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
                       {COMPANY_SIZE_OPTIONS.map(({ label, value }) => (
                         <label key={value} className="flex items-center gap-2 cursor-pointer">
@@ -790,7 +790,7 @@ export default function CampaignDetailClient({
 
                     {/* Seniority */}
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seniority</p>
+                      <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Seniority</p>
                       <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
                       {SENIORITY_OPTIONS.map(({ label, value }) => (
                         <label key={value} className="flex items-center gap-2 cursor-pointer">
@@ -810,7 +810,7 @@ export default function CampaignDetailClient({
 
                     {/* City focus */}
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">City Focus</p>
+                      <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">City Focus</p>
                       <input
                         type="text"
                         placeholder="e.g. Toronto"

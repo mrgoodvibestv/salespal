@@ -139,11 +139,11 @@ export default function ContactsContent({
 
           {/* Page header */}
           <div className="mb-8">
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
-              CONTACTS
+            <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400 mb-1">
+              Contacts
             </p>
-            <h1 className="text-2xl font-bold text-black">Key Contacts</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">Key Contacts</h1>
+            <p className="text-sm text-gray-400 mt-0.5">
               All unlocked decision makers across your campaigns
             </p>
           </div>
@@ -152,22 +152,22 @@ export default function ContactsContent({
           <div className="grid grid-cols-2 sm:flex mb-6 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-r border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-black tabular-nums">{totalContacts}</span>
-              <span className="text-xs text-gray-500">Total contacts</span>
+              <span className="text-xs text-gray-400">Total contacts</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
             <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-purple-600 tabular-nums">{campaignCount}</span>
-              <span className="text-xs text-gray-500">Campaigns</span>
+              <span className="text-xs text-gray-400">Campaigns</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
             <div className="flex items-center gap-2 px-4 py-3 border-r border-gray-100 sm:border-0">
               <span className="text-lg font-bold text-blue-600 tabular-nums">{withEmail}</span>
-              <span className="text-xs text-gray-500">With email</span>
+              <span className="text-xs text-gray-400">With email</span>
             </div>
             <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
             <div className="flex items-center gap-2 px-4 py-3">
               <span className="text-lg font-bold text-green-600 tabular-nums">{withPhone}</span>
-              <span className="text-xs text-gray-500">With phone</span>
+              <span className="text-xs text-gray-400">With phone</span>
             </div>
           </div>
 
@@ -259,12 +259,12 @@ export default function ContactsContent({
                           {/* Name + title + mobile email */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-black text-sm truncate">{contact.full_name}</span>
+                              <span className="font-semibold text-gray-900 text-sm truncate">{contact.full_name}</span>
                               <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${tier.className}`}>
                                 {tier.label}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 truncate mt-0.5">{contact.job_title}</p>
+                            <p className="text-xs text-gray-400 truncate mt-0.5">{contact.job_title}</p>
                             {/* Email shown inline on mobile (hidden on sm+) */}
                             {contact.email && (
                               <p className="text-xs text-gray-400 truncate mt-0.5 sm:hidden">{contact.email}</p>

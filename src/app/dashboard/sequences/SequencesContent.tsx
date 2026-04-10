@@ -114,15 +114,15 @@ function TouchCard({ touch }: { touch: Touch }) {
       <div className="px-4 py-3 space-y-2.5">
         {!isLinkedIn && touch.subject && (
           <div>
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Subject</p>
-            <p className="text-sm font-semibold text-black break-words">{touch.subject}</p>
+            <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400 mb-0.5">Subject</p>
+            <p className="text-sm font-semibold text-gray-900 break-words">{touch.subject}</p>
           </div>
         )}
         <div>
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400 mb-0.5">
             {isLinkedIn ? (isConnectionRequest ? "Connection Note" : "Message") : "Body"}
           </p>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed break-words">{touch.body}</p>
+          <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed break-words">{touch.body}</p>
           {isConnectionRequest && (
             <p className={`text-xs mt-1.5 tabular-nums ${touch.body.length > 300 ? "text-red-500 font-medium" : "text-gray-400"}`}>
               {touch.body.length}/300 characters
@@ -213,11 +213,11 @@ export default function SequencesContent({
 
         {/* Page header */}
         <div className="px-6 md:px-8 pt-0 md:pt-8 pb-4 border-b border-gray-100 shrink-0">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
-            OUTREACH
+          <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400 mb-1">
+            Outreach
           </p>
-          <h1 className="text-2xl font-bold text-black">Sequences</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Sequences</h1>
+          <p className="text-sm text-gray-400 mt-0.5">
             Your saved outreach sequences across all campaigns
           </p>
         </div>
@@ -313,7 +313,7 @@ export default function SequencesContent({
               {/* Left panel */}
               <div className="w-64 shrink-0 border-r border-gray-100 overflow-y-auto">
                 <div className="px-4 pt-4 pb-2">
-                  <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                  <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400">
                     Campaigns
                   </p>
                 </div>
@@ -338,7 +338,7 @@ export default function SequencesContent({
                         )}
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className={`text-sm font-medium truncate ${isActive ? "text-[#4B6BF5]" : "text-black"}`}>
+                            <p className={`text-sm font-semibold truncate ${isActive ? "text-[#4B6BF5]" : "text-gray-900"}`}>
                               {seq.campaign_name}
                             </p>
                             {seq.angle_selected && (
@@ -369,7 +369,7 @@ export default function SequencesContent({
                     {/* Right panel header with border-b */}
                     <div className="flex items-start justify-between gap-4 pb-4 mb-5 border-b border-gray-100">
                       <div className="min-w-0">
-                        <h2 className="text-xl font-bold text-black truncate">{selectedSeq.campaign_name}</h2>
+                        <h2 className="text-xl font-bold tracking-tight text-gray-900 truncate">{selectedSeq.campaign_name}</h2>
                         <p className="text-xs text-gray-400 mt-0.5">Generated sequence</p>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {selectedSeq.angle_selected && (

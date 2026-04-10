@@ -545,17 +545,36 @@ export default function CampaignDetailClient({
 
         {/* Empty state */}
         {!isFetching && !hasLeads && (
-          <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
-            <div className="size-14 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}>
-              <svg className="size-7 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto">
+            <div
+              className="size-16 rounded-2xl flex items-center justify-center mb-5"
+              style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
+            >
+              <svg className="size-8 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
             </div>
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-black">No leads yet</h2>
-              <p className="text-sm text-gray-500 max-w-xs">Click <strong>Find Leads</strong> to fetch qualified contacts. Costs 1 credit per prospect returned.</p>
-            </div>
-            {credits < 5 && <p className="text-xs text-red-500">You need at least 5 credits to run a search.</p>}
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Ready to find your buyers</h2>
+            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+              SalesPal will surface VP-level and Director-level decision makers at companies that match your ICP. Costs 10 credits per fetch.
+            </p>
+            <button
+              onClick={() => handleFindLeads()}
+              disabled={credits < 5}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+            >
+              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              Find decision makers
+            </button>
+            {credits < 5 && (
+              <p className="text-xs text-red-400 mt-3">You need at least 5 credits to run a search</p>
+            )}
+            {credits >= 5 && (
+              <p className="text-xs text-gray-300 mt-4">{credits} credits available · 10 credits per fetch</p>
+            )}
           </div>
         )}
 

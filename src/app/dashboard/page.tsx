@@ -38,11 +38,11 @@ export default async function DashboardPage() {
         {/* Title row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">
+            <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400 mb-1">
               Outreach Intelligence
             </p>
-            <h1 className="text-2xl font-bold text-black">My Campaigns</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Campaigns</h1>
+            <p className="text-sm text-gray-400 mt-0.5">
               Your active outreach campaigns
             </p>
           </div>
@@ -87,15 +87,15 @@ export default async function DashboardPage() {
                         {c.name}
                       </p>
                       {c.angle_selected && (
-                        <p className="text-xs text-gray-500 truncate mt-0.5">{c.angle_selected}</p>
+                        <p className="text-xs text-gray-400 truncate mt-0.5">{c.angle_selected}</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.className}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${status.className}`}>
                       {status.label}
                     </span>
-                    <span className="text-xs text-gray-400 hidden sm:block">{date}</span>
+                    <span className="text-xs text-gray-300 tabular-nums hidden sm:block">{date}</span>
                     <svg
                       className="size-4 text-gray-300 group-hover:text-[#4B6BF5] transition-colors"
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -116,41 +116,30 @@ export default async function DashboardPage() {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
+    <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto">
       <div
         className="size-16 rounded-2xl flex items-center justify-center mb-5"
         style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
       >
-        <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="url(#grad)" strokeWidth={1.5}>
-          <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#4B6BF5" />
-              <stop offset="100%" stopColor="#7B4BF5" />
-            </linearGradient>
-          </defs>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        <svg className="size-8 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold text-black mb-1">No campaigns yet</h2>
-      <p className="text-sm text-gray-500 max-w-xs leading-relaxed mb-6">
-        Start your first campaign to find qualified leads and generate personalized outreach.
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">No campaigns yet</h2>
+      <p className="text-sm text-gray-400 leading-relaxed mb-6">
+        Paste your website URL and SalesPal will identify your best outbound angle and surface decision makers who need what you sell.
       </p>
       <Link
         href="/dashboard/campaigns/new"
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
         style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
       >
-        <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
-        New Campaign
+        Start your first campaign
       </Link>
-      <div className="mt-8 px-5 py-4 rounded-xl border border-gray-100 bg-gray-50 max-w-sm text-left">
-        <p className="text-xs font-semibold text-black mb-1">Your 10 free trial credits are ready</p>
-        <p className="text-xs text-gray-500 leading-relaxed">
-          Trial credits cover 10 company fetches with top 3 contacts each — enough to see real decision makers before you buy.
-        </p>
-      </div>
+      <p className="text-xs text-gray-300 mt-4">Uses 0 credits to analyze your website</p>
     </div>
   )
 }

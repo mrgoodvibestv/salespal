@@ -173,28 +173,27 @@ export default function ContactsContent({
 
           {/* Empty state */}
           {contacts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
+            <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto">
               <div
-                className="size-14 rounded-2xl flex items-center justify-center"
+                className="size-16 rounded-2xl flex items-center justify-center mb-5"
                 style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
               >
-                <svg className="size-7 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg className="size-8 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-black">No unlocked contacts yet</h2>
-                <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
-                  Unlock contacts from your campaign lead lists to see them here.
-                </p>
-              </div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">No unlocked contacts yet</h2>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6">
+                When you unlock a lead inside a campaign, their verified email, phone, and LinkedIn appear here — ready to outreach.
+              </p>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                 style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
               >
-                Go to Campaigns
+                Go to campaigns
               </Link>
+              <p className="text-xs text-gray-300 mt-4">2 credits per contact unlock</p>
             </div>
           )}
 

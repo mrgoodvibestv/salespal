@@ -224,28 +224,27 @@ export default function SequencesContent({
 
         {/* No sequences at all */}
         {sequences.length === 0 && (
-          <div className="flex flex-col items-center justify-center flex-1 py-24 text-center space-y-4">
+          <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto px-6">
             <div
-              className="size-14 rounded-2xl flex items-center justify-center"
+              className="size-16 rounded-2xl flex items-center justify-center mb-5"
               style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
             >
-              <svg className="size-7 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg className="size-8 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51l-4.66-2.51m0 0l-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0l-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z" />
               </svg>
             </div>
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-black">No sequences yet</h2>
-              <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
-                Open a campaign and generate a sequence from the Sequences tab.
-              </p>
-            </div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">No sequences generated yet</h2>
+            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+              Open a campaign, go to the Sequences tab, and generate a 5-touch LinkedIn + email outreach sequence tailored to your campaign angle and leads.
+            </p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
               style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             >
-              Go to Campaigns
+              Go to campaigns
             </Link>
+            <p className="text-xs text-gray-300 mt-4">Sequences are free to generate</p>
           </div>
         )}
 

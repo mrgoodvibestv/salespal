@@ -27,7 +27,7 @@ interface AnalysisResult {
     industries: string[]
   }
   target_titles: string[]
-  campaign_angles: { angle: string; pitch: string }[]
+  campaign_angles: { angle: string; pitch: string; why_now: string; hook: string }[]
   tagline: string
 }
 
@@ -198,25 +198,24 @@ export default function LandingPage() {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-black">
               Paste your website.
               <br />
-              Find your{" "}
               <span
-                className="serif-italic bg-clip-text text-transparent"
+                className="serif-italic"
                 style={{
-                  backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                  background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                   fontSize: "1.05em",
                 }}
               >
-                buyers.
+                Find your buyers.
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
-              SalesPal finds your best campaign angle,
-              surfaces qualified leads, and writes your outreach — in minutes.
+              SalesPal, our AI agent for outbound sales, finds your best campaign angle,
+              surfaces qualified leads, and writes your outreach copy... within seconds.
             </p>
 
             {/* URL form */}
@@ -347,9 +346,9 @@ export default function LandingPage() {
                         />
                       </div>
                       <div className="text-center space-y-2">
-                        <p className="font-semibold text-gray-900">Analyzing your website</p>
+                        <p className="font-semibold text-gray-900">Finding your buyers</p>
                         <p className="text-sm text-gray-400 max-w-xs">
-                          Claude is reading your site and mapping your ideal customer profile…
+                          Our AI agent is reading your site and identifying your ideal customer profile…
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -448,11 +447,11 @@ export default function LandingPage() {
                           {result.campaign_angles.map((angle, i) => (
                             <div
                               key={angle.angle}
-                              className={`p-3 rounded-xl border ${
+                              className={`p-4 rounded-xl border ${
                                 i === 0 ? "border-[#4B6BF5]/20 bg-[#EEF1FE]/50" : "border-gray-100 bg-gray-50/50"
                               }`}
                             >
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-2 mb-2">
                                 <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
                                 {i === 0 && (
                                   <span
@@ -463,38 +462,50 @@ export default function LandingPage() {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-500">{angle.pitch}</p>
+                              <p className="text-xs text-gray-600 mb-2">{angle.pitch}</p>
+                              {angle.why_now && (
+                                <p className="text-[10px] text-gray-400 mb-2 italic">
+                                  Why now: {angle.why_now}
+                                </p>
+                              )}
+                              {angle.hook && (
+                                <div className="bg-white border border-gray-100 rounded-lg px-3 py-2">
+                                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+                                    Opening hook
+                                  </p>
+                                  <p className="text-xs text-gray-700 leading-relaxed italic">
+                                    &ldquo;{angle.hook}&rdquo;
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      {/* Gated CTA */}
-                      <div
-                        className="rounded-xl p-5 text-center space-y-3"
-                        style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
-                      >
+                      {/* Inline CTA */}
+                      <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                          <p className="text-white font-bold">Your leads are ready</p>
-                          <p className="text-white/75 text-sm mt-1">
-                            Sign up or log in to unlock verified contact info for decision makers that match this ICP.
+                          <p className="text-sm font-semibold text-gray-900">Your leads are ready</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Sign up or log in to unlock verified contact info for these decision makers.
                           </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                           <Link
                             href="/signup"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-[#4B6BF5] hover:bg-gray-50 transition-colors active:scale-[0.98]"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-opacity active:scale-[0.98]"
+                            style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                           >
                             Sign up free →
                           </Link>
                           <Link
                             href="/login"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors active:scale-[0.98]"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors active:scale-[0.98]"
                           >
                             Log in
                           </Link>
                         </div>
-                        <p className="text-white/40 text-xs">10 free credits · No card required</p>
                       </div>
 
                     </div>

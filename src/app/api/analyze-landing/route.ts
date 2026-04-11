@@ -73,19 +73,34 @@ export async function POST(request: NextRequest) {
 Based on this website, return ONLY valid JSON:
 {
   "company_name": "inferred name",
-  "what_they_sell": "one sentence",
+  "what_they_sell": "one concise sentence",
   "ideal_customer_profile": {
-    "company_type": "description",
+    "company_type": "description of target companies",
     "company_size": "e.g. 50-500 employees",
     "industries": ["industry1", "industry2", "industry3"]
   },
-  "target_titles": ["Title 1", "Title 2", "Title 3", "Title 4"],
+  "target_titles": ["Primary Title", "Secondary Title", "Third Title", "Fourth Title"],
   "campaign_angles": [
-    { "angle": "name", "pitch": "one sentence" },
-    { "angle": "name", "pitch": "one sentence" },
-    { "angle": "name", "pitch": "one sentence" }
+    {
+      "angle": "Short angle name",
+      "pitch": "One sharp sentence — the core value prop for this angle",
+      "why_now": "One sentence on why this angle is timely or urgent",
+      "hook": "A cold outreach opening line for this angle"
+    },
+    {
+      "angle": "Short angle name",
+      "pitch": "One sharp sentence — the core value prop for this angle",
+      "why_now": "One sentence on why this angle is timely or urgent",
+      "hook": "A cold outreach opening line for this angle"
+    },
+    {
+      "angle": "Short angle name",
+      "pitch": "One sharp sentence — the core value prop for this angle",
+      "why_now": "One sentence on why this angle is timely or urgent",
+      "hook": "A cold outreach opening line for this angle"
+    }
   ],
-  "tagline": "punchy outbound tagline under 10 words"
+  "tagline": "A punchy one-liner outbound tagline"
 }`,
     }],
   })

@@ -269,14 +269,6 @@ export async function POST(
     )
   }
 
-  // Mark campaign as fetching (page 1 only — subsequent pages don't reset status)
-  if (page === 1) {
-    await supabase
-      .from("campaigns")
-      .update({ status: "fetching_companies" })
-      .eq("id", campaignId)
-  }
-
   // Read optional override params and page from request body
   let overrides: { company_size?: string[]; job_level?: string[]; city_focus?: string } = {}
   let page = 1
@@ -285,6 +277,14 @@ export async function POST(
     overrides = reqBody?.overrides ?? {}
     page = typeof reqBody?.page === "number" ? Math.max(1, reqBody.page) : 1
   } catch { /* no body — fresh run */ }
+
+  // Mark campaign as fetching (page 1 only — subsequent pages don't reset status)
+  if (page === 1) {
+    await supabase
+      .from("campaigns")
+      .update({ status: "fetching_companies" })
+      .eq("id", campaignId)
+  }
 
   // Extract filters and geo from icp_json
   const icpJson = campaign.icp_json as Record<string, unknown> | null

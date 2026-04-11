@@ -72,9 +72,9 @@ function InitialsAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const TIER_CONFIG = {
-  decision_maker: { label: "Decision Maker", className: "bg-green-50 text-green-700 border border-green-200" },
-  influencer:     { label: "Influencer",     className: "bg-blue-50 text-blue-700 border border-blue-100" },
-  noise:          { label: "Noise",          className: "bg-gray-100 text-gray-400" },
+  decision_maker: { label: "Decision Maker", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  influencer:     { label: "Influencer",     className: "bg-violet-50 text-violet-700 border border-violet-200" },
+  noise:          { label: "Noise",          className: "bg-gray-50 text-gray-400 border border-gray-100" },
 }
 
 const COMPANY_SIZE_OPTIONS = [
@@ -104,16 +104,22 @@ function matchesDept(title: string, dept: string): boolean {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
+const STATUS_BADGE_CONFIG = {
+  preview_ready:      { label: "Preview ready",   className: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
+  fetching_companies: { label: "Fetching leads…", className: "bg-amber-50 text-amber-700 border border-amber-200",     dot: "bg-amber-400 animate-pulse" },
+  active:             { label: "Active",           className: "bg-gray-100 text-gray-600 border border-gray-200",       dot: null },
+  draft:              { label: "Draft",            className: "bg-gray-50 text-gray-400 border border-gray-200",        dot: null },
+  archived:           { label: "Archived",         className: "bg-gray-50 text-gray-400 border border-gray-200",        dot: null },
+}
+
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; className: string }> = {
-    active:             { label: "Active",          className: "bg-blue-50 text-blue-600 border border-blue-100" },
-    fetching_companies: { label: "Fetching leads…", className: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
-    preview_ready:      { label: "Preview ready",   className: "bg-green-50 text-green-700 border border-green-200" },
-    draft:              { label: "Draft",            className: "bg-gray-100 text-gray-500" },
-    archived:           { label: "Archived",         className: "bg-gray-100 text-gray-500" },
-  }
-  const cfg = map[status] ?? { label: status, className: "bg-gray-100 text-gray-500" }
-  return <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${cfg.className}`}>{cfg.label}</span>
+  const cfg = STATUS_BADGE_CONFIG[status as keyof typeof STATUS_BADGE_CONFIG] ?? STATUS_BADGE_CONFIG.active
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap ${cfg.className}`}>
+      {cfg.dot && <span className={`size-1.5 rounded-full shrink-0 ${cfg.dot}`} />}
+      {cfg.label}
+    </span>
+  )
 }
 
 function LockedCell() {
@@ -128,15 +134,15 @@ function LockedCell() {
 }
 
 function Pill({
-  active, onClick, children,
-}: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  active, onClick, children, activeClassName,
+}: { active: boolean; onClick: () => void; children: React.ReactNode; activeClassName?: string }) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+      className={`px-3 py-1 rounded-full text-xs font-medium transition-all border ${
         active
-          ? "bg-[#4B6BF5] text-white"
-          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+          ? activeClassName ?? "bg-[#4B6BF5] text-white border-transparent"
+          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
       }`}
     >
       {children}
@@ -588,8 +594,8 @@ export default function CampaignDetailClient({
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-gray-400 w-20 shrink-0">Tier</span>
                 <Pill active={tierFilter === "all"} onClick={() => setTierFilter("all")}>All</Pill>
-                <Pill active={tierFilter === "decision_maker"} onClick={() => setTierFilter("decision_maker")}>Decision Maker</Pill>
-                <Pill active={tierFilter === "influencer"} onClick={() => setTierFilter("influencer")}>Influencer</Pill>
+                <Pill active={tierFilter === "decision_maker"} onClick={() => setTierFilter("decision_maker")} activeClassName="bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold">Decision Maker</Pill>
+                <Pill active={tierFilter === "influencer"} onClick={() => setTierFilter("influencer")} activeClassName="bg-violet-50 text-violet-700 border-violet-300 font-semibold">Influencer</Pill>
               </div>
               {/* Dept pills */}
               <div className="flex items-center gap-2 flex-wrap">
@@ -648,7 +654,7 @@ export default function CampaignDetailClient({
                           <div className="flex items-center gap-1.5">
                             <p className="font-semibold text-gray-900 truncate">{lead.full_name}</p>
                             {lead.unlocked && (
-                              <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                              <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 Saved
                               </span>
                             )}
@@ -736,7 +742,7 @@ export default function CampaignDetailClient({
                             <div className="flex items-center gap-2 truncate">
                               <span className="truncate">{lead.full_name}</span>
                               {lead.unlocked && (
-                                <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                                <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   Saved
                                 </span>
                               )}

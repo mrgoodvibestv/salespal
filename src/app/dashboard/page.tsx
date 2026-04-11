@@ -3,12 +3,22 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import Sidebar from "@/components/Sidebar"
 
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  active:             { label: "Active",           className: "bg-blue-50 text-blue-600 border border-blue-100" },
-  fetching_companies: { label: "Fetching leads…",  className: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
-  preview_ready:      { label: "Preview ready",    className: "bg-green-50 text-green-700 border border-green-200" },
-  draft:              { label: "Draft",             className: "bg-gray-100 text-gray-500" },
-  archived:           { label: "Archived",          className: "bg-gray-100 text-gray-500" },
+const STATUS_CONFIG = {
+  preview_ready:      { label: "Preview ready",   className: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
+  fetching_companies: { label: "Fetching leads…", className: "bg-amber-50 text-amber-700 border border-amber-200",     dot: "bg-amber-400 animate-pulse" },
+  active:             { label: "Active",           className: "bg-gray-100 text-gray-600 border border-gray-200",       dot: null },
+  draft:              { label: "Draft",            className: "bg-gray-50 text-gray-400 border border-gray-200",        dot: null },
+  archived:           { label: "Archived",         className: "bg-gray-50 text-gray-400 border border-gray-200",        dot: null },
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.active
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap ${config.className}`}>
+      {config.dot && <span className={`size-1.5 rounded-full shrink-0 ${config.dot}`} />}
+      {config.label}
+    </span>
+  )
 }
 
 export default async function DashboardPage() {
@@ -63,7 +73,6 @@ export default async function DashboardPage() {
         ) : (
           <div className="space-y-3">
             {campaignList.map((c) => {
-              const status = STATUS_CONFIG[c.status] ?? { label: c.status, className: "bg-gray-100 text-gray-500" }
               const date = new Date(c.created_at).toLocaleDateString("en-US", {
                 month: "short", day: "numeric", year: "numeric",
               })
@@ -92,9 +101,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${status.className}`}>
-                      {status.label}
-                    </span>
+                    <StatusBadge status={c.status} />
                     <span className="text-xs text-gray-300 tabular-nums hidden sm:block">{date}</span>
                     <svg
                       className="size-4 text-gray-300 group-hover:text-[#4B6BF5] group-hover:translate-x-0.5 transition-all duration-150"

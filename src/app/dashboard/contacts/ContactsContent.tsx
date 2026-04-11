@@ -37,17 +37,17 @@ function InitialsAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md
 }
 
 const TIER_CONFIG = {
-  decision_maker: { label: "Decision Maker", className: "bg-green-50 text-green-700 border border-green-200" },
-  influencer:     { label: "Influencer",     className: "bg-blue-50 text-blue-700 border border-blue-100" },
-  noise:          { label: "Noise",          className: "bg-gray-100 text-gray-400" },
+  decision_maker: { label: "Decision Maker", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  influencer:     { label: "Influencer",     className: "bg-violet-50 text-violet-700 border border-violet-200" },
+  noise:          { label: "Noise",          className: "bg-gray-50 text-gray-400 border border-gray-100" },
 }
 
-const STATUS_OPTIONS = [
-  { value: "new",       label: "New",       className: "bg-gray-100 text-gray-500" },
-  { value: "contacted", label: "Contacted", className: "bg-blue-50 text-blue-600" },
-  { value: "replied",   label: "Replied",   className: "bg-yellow-50 text-yellow-700" },
-  { value: "converted", label: "Converted", className: "bg-green-50 text-green-700" },
-]
+const STATUS_STYLES: Record<string, string> = {
+  new:       "bg-gray-100 text-gray-600 border-gray-200",
+  contacted: "bg-blue-50 text-blue-700 border-blue-200",
+  replied:   "bg-amber-50 text-amber-700 border-amber-200",
+  converted: "bg-emerald-50 text-emerald-700 border-emerald-200",
+}
 
 function StatusDropdown({ leadId, currentStatus }: { leadId: string; currentStatus: string }) {
   const [status, setStatus] = useState(currentStatus)
@@ -70,19 +70,18 @@ function StatusDropdown({ leadId, currentStatus }: { leadId: string; currentStat
     }
   }
 
-  const cfg = STATUS_OPTIONS.find((o) => o.value === status) ?? STATUS_OPTIONS[0]
-
   return (
     <div className="relative">
       <select
         value={status}
         onChange={handleChange}
         disabled={saving}
-        className={`text-xs font-medium px-2.5 py-1 rounded-full border-0 appearance-none pr-6 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/20 disabled:opacity-60 ${cfg.className}`}
+        className={`text-[11px] font-semibold pl-2.5 pr-7 py-1 rounded-full border appearance-none cursor-pointer focus:outline-none transition-colors duration-150 disabled:opacity-60 ${STATUS_STYLES[status] ?? STATUS_STYLES.new}`}
       >
-        {STATUS_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="replied">Replied</option>
+        <option value="converted">Converted</option>
       </select>
       <svg
         className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3 pointer-events-none opacity-50"

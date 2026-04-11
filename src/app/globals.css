@@ -41,6 +41,28 @@
   }
 }
 
+/* Card lift — subtle y-translate + shadow increase on hover */
+.card-lift {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Button press — scale down on active */
+.btn-press {
+  transition: transform 100ms ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Smooth border color transition */
+.border-animate {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }

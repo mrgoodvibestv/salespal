@@ -232,7 +232,7 @@ export default function ContactsContent({
                   <div className="flex items-center gap-2 mb-3 min-w-0">
                     <Link
                       href={`/dashboard/campaigns/${group.campaign_id}`}
-                      className="font-semibold text-black hover:text-[#4B6BF5] transition-colors text-sm truncate max-w-[200px] sm:max-w-none"
+                      className="font-semibold text-black hover:text-[#4B6BF5] transition-colors duration-150 text-sm truncate max-w-[200px] sm:max-w-none"
                     >
                       {group.campaign_name}
                     </Link>
@@ -251,7 +251,7 @@ export default function ContactsContent({
                     {group.contacts.map((contact) => {
                       const tier = TIER_CONFIG[contact.tier] ?? TIER_CONFIG.influencer
                       return (
-                        <div key={contact.id} className="flex items-center gap-3 px-4 py-3.5 bg-white hover:bg-gray-50/50 transition-colors">
+                        <div key={contact.id} className="flex items-center gap-3 px-4 py-3.5 bg-white hover:bg-[#EEF1FE]/20 transition-colors duration-150">
                           {/* Avatar */}
                           <InitialsAvatar name={contact.full_name} size="sm" />
 

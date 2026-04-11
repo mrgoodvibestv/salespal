@@ -28,7 +28,7 @@ function NavItem({
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 mx-2 rounded-xl text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 px-3 py-2 mx-2 rounded-xl text-[13px] font-medium transition-colors duration-150 ${
         active
           ? "text-white"
           : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
@@ -144,8 +144,8 @@ function NavContent({
             <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="tabular-nums font-medium text-black">{credits.toLocaleString()}</span>
-            <span className="text-gray-400 truncate">credits</span>
+            <span className="tabular-nums font-bold text-gray-900">{credits.toLocaleString()}</span>
+            <span className="text-xs text-gray-400 truncate">credits</span>
           </div>
         )}
         {userEmail && (
@@ -153,7 +153,7 @@ function NavContent({
             <svg className="size-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className="text-xs text-gray-400 truncate">{userEmail}</span>
+            <span className="text-[11px] text-gray-400 truncate">{userEmail}</span>
           </div>
         )}
       </nav>

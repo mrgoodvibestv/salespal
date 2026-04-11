@@ -71,7 +71,7 @@ function TouchCard({ touch }: { touch: Touch }) {
   }
 
   return (
-    <div className={`rounded-xl border border-gray-200 overflow-hidden shadow-sm max-w-full ${borderAccent}`}>
+    <div className={`card-lift rounded-xl border border-gray-200 overflow-hidden shadow-sm max-w-full ${borderAccent}`}>
       <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2 flex-wrap">
           <span
@@ -87,7 +87,7 @@ function TouchCard({ touch }: { touch: Touch }) {
         </div>
         <button
           onClick={copy}
-          className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+          className={`btn-press shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
             copied
               ? "bg-green-50 text-green-600 border border-green-200"
               : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
@@ -139,7 +139,7 @@ function RegenerateButton({ onClick, loading }: { onClick: () => void; loading: 
     <button
       onClick={onClick}
       disabled={loading}
-      className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
+      className="btn-press shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
     >
       {loading ? (
         <>
@@ -324,8 +324,8 @@ export default function SequencesContent({
                       <button
                         key={seq.campaign_id}
                         onClick={() => setSelectedId(seq.campaign_id)}
-                        className={`w-full text-left px-4 py-3 transition-colors relative ${
-                          isActive ? "bg-purple-50/50" : "hover:bg-gray-50"
+                        className={`w-full text-left px-4 py-3 transition-colors duration-150 relative ${
+                          isActive ? "bg-purple-50/50" : "hover:bg-[#EEF1FE]/30"
                         }`}
                       >
                         {/* Active left border accent */}

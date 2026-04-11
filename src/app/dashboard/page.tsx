@@ -71,7 +71,7 @@ export default async function DashboardPage() {
                 <Link
                   key={c.id}
                   href={`/dashboard/campaigns/${c.id}`}
-                  className="flex items-center justify-between gap-2 px-4 sm:px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-[#4B6BF5]/20 transition-all group overflow-hidden"
+                  className="card-lift flex items-center justify-between gap-2 px-4 sm:px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-[#4B6BF5]/20 transition-all group overflow-hidden"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
                     </span>
                     <span className="text-xs text-gray-300 tabular-nums hidden sm:block">{date}</span>
                     <svg
-                      className="size-4 text-gray-300 group-hover:text-[#4B6BF5] transition-colors"
+                      className="size-4 text-gray-300 group-hover:text-[#4B6BF5] group-hover:translate-x-0.5 transition-all duration-150"
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

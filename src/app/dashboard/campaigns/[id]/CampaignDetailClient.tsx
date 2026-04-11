@@ -640,7 +640,7 @@ export default function CampaignDetailClient({
                 const isUnlocking = unlockingId === lead.id
                 const unlockErr = unlockErrors[lead.id]
                 return (
-                  <div key={lead.id} className={`p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
+                  <div key={lead.id} className={`card-lift p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <InitialsAvatar name={lead.full_name} size="sm" />
@@ -689,7 +689,7 @@ export default function CampaignDetailClient({
                         <button
                           onClick={() => handleUnlock(lead)}
                           disabled={!!unlockingId || credits < 2}
-                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="btn-press w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                           style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                         >
                           {isUnlocking ? (
@@ -731,7 +731,7 @@ export default function CampaignDetailClient({
                       const unlockErr = unlockErrors[lead.id]
 
                       return (
-                        <tr key={lead.id} className={`hover:bg-gray-50/50 transition-colors ${lead.tier === "noise" ? "opacity-50" : ""}`}>
+                        <tr key={lead.id} className={`hover:bg-[#EEF1FE]/30 transition-colors duration-150 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
                           <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap min-w-[120px] max-w-[180px]">
                             <div className="flex items-center gap-2 truncate">
                               <span className="truncate">{lead.full_name}</span>
@@ -794,7 +794,7 @@ export default function CampaignDetailClient({
                                 <button
                                   onClick={() => handleUnlock(lead)}
                                   disabled={!!unlockingId || credits < 2}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                                  className="btn-press inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                                   style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                                 >
                                   {isUnlocking ? (
@@ -823,7 +823,7 @@ export default function CampaignDetailClient({
             <div className="rounded-2xl border border-gray-200">
               <button
                 onClick={() => setRefineOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black hover:bg-gray-50/50 transition-colors rounded-2xl"
+                className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black hover:bg-gray-50/50 transition-colors duration-150 rounded-2xl"
               >
                 <span className="flex items-center gap-2">
                   <svg className="size-4 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -909,7 +909,7 @@ export default function CampaignDetailClient({
             <div className="rounded-2xl border border-gray-200">
               <button
                 onClick={() => setRescoreOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black hover:bg-gray-50/50 transition-colors rounded-2xl"
+                className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black hover:bg-gray-50/50 transition-colors duration-150 rounded-2xl"
               >
                 <span className="flex items-center gap-2">
                   <svg className="size-4 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

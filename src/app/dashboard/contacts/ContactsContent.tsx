@@ -149,21 +149,21 @@ export default function ContactsContent({
 
           {/* Stats row */}
           <div className="flex items-stretch gap-2 mb-6 overflow-x-auto pb-0.5">
-            <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px]">
               <span className="text-3xl font-bold text-gray-900 tabular-nums leading-none tracking-tight">{totalContacts}</span>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-[0.1em] leading-tight">Con-<br/>tacts</span>
+              <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Contacts</span>
             </div>
-            <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px]">
               <span className="text-3xl font-bold text-violet-700 tabular-nums leading-none tracking-tight">{campaignCount}</span>
-              <span className="text-xs font-semibold text-violet-600 uppercase tracking-[0.1em] leading-tight">Cam-<br/>paigns</span>
+              <span className="text-[10px] font-semibold text-violet-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Campaigns</span>
             </div>
-            <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px]">
               <span className="text-3xl font-bold text-blue-700 tabular-nums leading-none tracking-tight">{withEmail}</span>
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-[0.1em] leading-tight">With<br/>Email</span>
+              <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">With Email</span>
             </div>
-            <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px]">
               <span className="text-3xl font-bold text-emerald-700 tabular-nums leading-none tracking-tight">{withPhone}</span>
-              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-[0.1em] leading-tight">With<br/>Phone</span>
+              <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">With Phone</span>
             </div>
           </div>
 

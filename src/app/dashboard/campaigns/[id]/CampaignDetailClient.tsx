@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import Sidebar from "@/components/Sidebar"
 import SequencesTab from "./SequencesTab"
+import { downloadCsv } from "@/lib/exportCsv"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Company {
@@ -393,6 +394,24 @@ export default function CampaignDetailClient({
     } finally {
       setRescoring(false)
     }
+  }
+
+  // ── Export CSV ───────────────────────────────────────────────────────
+  function handleExportLeads() {
+    const rows = filteredLeads.map((lead) => ({
+      "Name":     lead.full_name,
+      "Job Title": lead.job_title ?? "",
+      "Company":  lead.companies?.name ?? lead.company_name ?? "",
+      "Location": lead.geo_location ?? "",
+      "Tier":     lead.tier === "decision_maker" ? "Decision Maker" : lead.tier === "influencer" ? "Influencer" : "Noise",
+      "LinkedIn": lead.linkedin_url ?? "",
+      "Email":    lead.email ?? "",
+      "Phone":    lead.phone ?? "",
+    }))
+    downloadCsv(
+      `salespal-leads-${campaign.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.csv`,
+      rows
+    )
   }
 
   // ── Stats (from filtered leads) ───────────────────────────────────────
@@ -880,9 +899,21 @@ export default function CampaignDetailClient({
               </div>
             </div>
 
-            <p className="text-xs text-gray-400 text-center">
-              Showing {filteredLeads.length} of {leads.length} total leads · noise {showNoise ? "visible" : "hidden"}
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs text-gray-400">
+                Showing {filteredLeads.length} of {leads.length} total leads · noise {showNoise ? "visible" : "hidden"}
+              </p>
+              <button
+                onClick={handleExportLeads}
+                disabled={filteredLeads.length === 0}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
 
             {/* ── Pagination bar ── */}
             {(leadCurrentPage > 1 || leadNextPageCached || leadHasMore) && (

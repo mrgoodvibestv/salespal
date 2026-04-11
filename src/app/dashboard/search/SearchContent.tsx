@@ -844,7 +844,15 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                   }
                   style={nextPageCached ? {} : { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                 >
-                  {nextPageCached ? "Next →" : "Next page — 5 credits"}
+                  {searching && !nextPageCached ? (
+                    <>
+                      <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      Loading…
+                    </>
+                  ) : nextPageCached ? "Next →" : "Load more prospects — 5 credits"}
                 </button>
               )}
             </div>

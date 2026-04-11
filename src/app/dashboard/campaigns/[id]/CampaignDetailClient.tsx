@@ -150,15 +150,6 @@ function Pill({
   )
 }
 
-function Stat({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-      <span className={`text-xl font-bold tabular-nums ${color}`}>{value}</span>
-      <span className="text-xs text-gray-400 font-medium">{label}</span>
-    </div>
-  )
-}
-
 // ── Main component ─────────────────────────────────────────────────────────
 export default function CampaignDetailClient({
   campaign,
@@ -184,7 +175,7 @@ export default function CampaignDetailClient({
   // ── Lead pagination state ─────────────────────────────────────────────
   const [leadPageCache, setLeadPageCache] = useState<Record<number, Lead[]>>({ 1: initialLeads })
   const [leadCurrentPage, setLeadCurrentPage] = useState(1)
-  const [leadHasMore, setLeadHasMore]     = useState(false)
+  const [leadHasMore, setLeadHasMore]     = useState(initialLeads.length > 0)
   const [fetchingNextPage, setFetchingNextPage] = useState(false)
 
   // ── Filter state ──────────────────────────────────────────────────────
@@ -314,6 +305,10 @@ export default function CampaignDetailClient({
       }
 
       const newLeads = data.leads ?? []
+      if (newLeads.length === 0) {
+        setLeadHasMore(false)
+        return
+      }
       setLeads(newLeads)
       setLeadPageCache((prev) => ({ ...prev, [nextPage]: newLeads }))
       setLeadHasMore(data.hasMore ?? false)
@@ -403,7 +398,6 @@ export default function CampaignDetailClient({
   // ── Stats (from filtered leads) ───────────────────────────────────────
   const dmCount       = filteredLeads.filter((l) => l.tier === "decision_maker").length
   const infCount      = filteredLeads.filter((l) => l.tier === "influencer").length
-  const noiseCount    = filteredLeads.filter((l) => l.tier === "noise").length
   const unlockedCount = filteredLeads.filter((l) => l.unlocked).length
 
   // Credit cost estimate for refine modal
@@ -939,7 +933,7 @@ export default function CampaignDetailClient({
                           </svg>
                           Loading…
                         </>
-                      ) : leadNextPageCached ? "Next →" : "Next page — 10 credits"}
+                      ) : leadNextPageCached ? "Next →" : "Load more leads — 10 credits"}
                     </button>
                   )}
                 </div>

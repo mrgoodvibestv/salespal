@@ -157,5 +157,5 @@ export async function POST(request: NextRequest) {
   const tierOrder: Record<string, number> = { decision_maker: 0, influencer: 1, noise: 2 }
   results.sort((a, b) => (tierOrder[a.tier] ?? 2) - (tierOrder[b.tier] ?? 2))
 
-  return NextResponse.json({ results, page, hasMore: results.length === PAGE_SIZE, credits_deducted: SEARCH_COST })
+  return NextResponse.json({ results, page, hasMore: results.length > 0, credits_deducted: SEARCH_COST })
 }

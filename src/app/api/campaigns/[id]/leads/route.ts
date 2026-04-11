@@ -399,9 +399,7 @@ export async function POST(
   }
 
   // ── Compute hasMore before deducting ────────────────────────────────────
-  const isLocal = geoScope === "local" && !!geoRegionCode
-  const pageSize = isLocal ? PAGE_SIZE_LOCAL : PAGE_SIZE_NATIONAL
-  const hasMore = prospects.length >= pageSize
+  const hasMore = prospects.length > 0
 
   // ── Deduct credits (flat 10 per page fetch) ──────────────────────────────
   const creditsToDeduct = 10

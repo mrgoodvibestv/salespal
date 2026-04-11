@@ -679,19 +679,19 @@ export default function CampaignDetailClient({
 
             {/* Stats bar */}
             <div className="flex items-stretch gap-2 mb-5 overflow-x-auto pb-0.5">
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px]">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px] lg:flex-1">
                 <span className="text-3xl font-bold text-emerald-700 tabular-nums leading-none tracking-tight">{dmCount}</span>
                 <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Decision Makers</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px]">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px] lg:flex-1">
                 <span className="text-3xl font-bold text-violet-700 tabular-nums leading-none tracking-tight">{infCount}</span>
                 <span className="text-[10px] font-semibold text-violet-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Influencers</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px]">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px] lg:flex-1">
                 <span className="text-3xl font-bold text-blue-700 tabular-nums leading-none tracking-tight">{unlockedCount}</span>
                 <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Unlocked</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px]">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px] lg:flex-1">
                 <span className="text-3xl font-bold text-gray-700 tabular-nums leading-none tracking-tight">{filteredLeads.length}</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Showing</span>
               </div>
@@ -886,7 +886,7 @@ export default function CampaignDetailClient({
 
             {/* ── Pagination bar ── */}
             {(leadCurrentPage > 1 || leadNextPageCached || leadHasMore) && (
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100 mt-2">
                 <span className="text-xs text-gray-400">
                   Page {leadCurrentPage} · {totalLeadsLoaded} leads loaded
                 </span>

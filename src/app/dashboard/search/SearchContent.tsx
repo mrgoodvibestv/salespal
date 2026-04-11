@@ -415,7 +415,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
             <button
               onClick={handleSearch}
               disabled={searching}
-              className="btn-press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+              className="btn-press w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             >
               {searching ? (
@@ -820,7 +820,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
           </div>
 
           {/* ── Pagination bar ── */}
-          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100 mt-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 border-t border-gray-100 mt-0">
             <span className="text-xs text-gray-400">
               Page {currentPage} · {totalLoaded} prospects loaded
             </span>

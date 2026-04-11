@@ -10,7 +10,7 @@ const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 // page_size for direct prospect query — no company intermediary
 const PAGE_SIZE_LOCAL    = 25
 const PAGE_SIZE_NATIONAL = 15
-const MIN_CREDITS_TO_RUN = 5
+const MIN_CREDITS_TO_RUN = 10
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface ExploriumProspect {
@@ -72,7 +72,8 @@ function normalizeLinkedinUrl(raw: string): string {
 async function fetchProspectsDirect(
   filters: Record<string, unknown>,
   geoScope: string | undefined,
-  geoRegionCode: string | undefined
+  geoRegionCode: string | undefined,
+  page: number = 1
 ): Promise<ExploriumProspect[]> {
   const ef = filters as {
     country_code?: string[]
@@ -98,7 +99,7 @@ async function fetchProspectsDirect(
     mode: "full",
     page_size: pageSize,
     size: pageSize,
-    page: 1,
+    page: page,
     filters: {
       ...geoFilter,
       ...(ef.company_size?.length   && { company_size:   { values: ef.company_size } }),
@@ -268,17 +269,21 @@ export async function POST(
     )
   }
 
-  // Mark campaign as fetching
-  await supabase
-    .from("campaigns")
-    .update({ status: "fetching_companies" })
-    .eq("id", campaignId)
+  // Mark campaign as fetching (page 1 only — subsequent pages don't reset status)
+  if (page === 1) {
+    await supabase
+      .from("campaigns")
+      .update({ status: "fetching_companies" })
+      .eq("id", campaignId)
+  }
 
-  // Read optional override params from request body
+  // Read optional override params and page from request body
   let overrides: { company_size?: string[]; job_level?: string[]; city_focus?: string } = {}
+  let page = 1
   try {
-    const body = await request.json()
-    overrides = body?.overrides ?? {}
+    const reqBody = await request.json()
+    overrides = reqBody?.overrides ?? {}
+    page = typeof reqBody?.page === "number" ? Math.max(1, reqBody.page) : 1
   } catch { /* no body — fresh run */ }
 
   // Extract filters and geo from icp_json
@@ -310,7 +315,7 @@ export async function POST(
 
   try {
     // ── Direct prospect fetch ────────────────────────────────────────────
-    prospects = await fetchProspectsDirect(angleFilters, geoScope, geoRegionCode)
+    prospects = await fetchProspectsDirect(angleFilters, geoScope, geoRegionCode, page)
     console.log("[leads] prospects fetched:", prospects.length)
     if (prospects.length > 0) {
       console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
@@ -341,12 +346,15 @@ export async function POST(
   }
 
   // ── Persist to DB ────────────────────────────────────────────────────────
-  // Delete existing leads before re-inserting (supports re-fetch / refine)
-  const { error: deleteError } = await supabase.from("leads").delete().eq("campaign_id", campaignId)
-  if (deleteError) {
-    console.error("[leads] delete existing leads error:", deleteError)
-    await supabase.from("campaigns").update({ status: "active" }).eq("id", campaignId)
-    return NextResponse.json({ error: "Failed to clear existing leads. Please try again." }, { status: 500 })
+  // Page 1: delete existing leads before re-inserting (supports re-fetch / refine)
+  // Page 2+: append new leads (don't wipe existing unlocked contacts)
+  if (page === 1) {
+    const { error: deleteError } = await supabase.from("leads").delete().eq("campaign_id", campaignId)
+    if (deleteError) {
+      console.error("[leads] delete existing leads error:", deleteError)
+      await supabase.from("campaigns").update({ status: "active" }).eq("id", campaignId)
+      return NextResponse.json({ error: "Failed to clear existing leads. Please try again." }, { status: 500 })
+    }
   }
 
   // Insert ALL prospects (noise included) — noise hidden by default in UI
@@ -390,8 +398,13 @@ export async function POST(
     insertedLeads = data ?? []
   }
 
-  // ── Deduct credits (based on actual prospects returned) ─────────────────
-  const creditsToDeduct = Math.max(1, prospects.length)
+  // ── Compute hasMore before deducting ────────────────────────────────────
+  const isLocal = geoScope === "local" && !!geoRegionCode
+  const pageSize = isLocal ? PAGE_SIZE_LOCAL : PAGE_SIZE_NATIONAL
+  const hasMore = prospects.length >= pageSize
+
+  // ── Deduct credits (flat 10 per page fetch) ──────────────────────────────
+  const creditsToDeduct = 10
   const { error: deductError } = await supabase.rpc("deduct_credits", {
     p_user_id:        user.id,
     p_amount:         creditsToDeduct,
@@ -401,11 +414,13 @@ export async function POST(
   })
   if (deductError) console.error("[leads] deduct_credits error:", deductError)
 
-  // ── Update campaign status ───────────────────────────────────────────────
-  await supabase
-    .from("campaigns")
-    .update({ status: "preview_ready" })
-    .eq("id", campaignId)
+  // ── Update campaign status (page 1 only) ────────────────────────────────
+  if (page === 1) {
+    await supabase
+      .from("campaigns")
+      .update({ status: "preview_ready" })
+      .eq("id", campaignId)
+  }
 
   // Build a map of prospect_id → scored data for response
   const scoredMap = new Map(allSorted.map((p) => [p.prospect_id, p]))
@@ -421,7 +436,9 @@ export async function POST(
 
   return NextResponse.json({
     leads:             leadsWithCompany,
-    companies_fetched: prospects.length,  // repurposed: total prospects fetched
+    page,
+    hasMore,
+    companies_fetched: prospects.length,
     credits_deducted:  creditsToDeduct,
   })
 }

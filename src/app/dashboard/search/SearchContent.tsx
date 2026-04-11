@@ -117,12 +117,20 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
   const [hasEmail, setHasEmail]                       = useState(false)
   const [hasPhone, setHasPhone]                       = useState(false)
 
-  // Results state
-  const [results, setResults]           = useState<SearchLead[] | null>(null)
+  // Pagination state
+  const [pageCache, setPageCache]     = useState<Record<number, SearchLead[]>>({})
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore]         = useState(false)
+
+  // UI state
   const [searching, setSearching]       = useState(false)
   const [searchError, setSearchError]   = useState("")
   const [unlockingId, setUnlockingId]   = useState<string | null>(null)
   const [unlockErrors, setUnlockErrors] = useState<Record<string, string>>({})
+
+  // Derived
+  const displayResults = pageCache[currentPage] ?? null
+  const totalLoaded    = Object.values(pageCache).reduce((sum, p) => sum + p.length, 0)
 
   function toggleSeniority(v: string) {
     setSelectedSeniorities((prev) =>
@@ -130,24 +138,29 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
     )
   }
 
+  function buildFilters(): Record<string, unknown> {
+    const filters: Record<string, unknown> = {}
+    if (selectedSeniorities.length) filters.job_level      = selectedSeniorities
+    if (selectedDepartment)          filters.job_department = [selectedDepartment]
+    if (selectedSize)                filters.company_size   = [selectedSize]
+    if (countryInput.trim())         filters.country_code   = [countryInput.trim().toLowerCase()]
+    if (hasEmail)                    filters.has_email      = true
+    if (hasPhone)                    filters.has_phone_number = true
+    return filters
+  }
+
   async function handleSearch() {
     setSearching(true)
     setSearchError("")
-    setResults(null)
-
-    const filters: Record<string, unknown> = {}
-    if (selectedSeniorities.length) filters.job_level = selectedSeniorities
-    if (selectedDepartment)          filters.job_department = [selectedDepartment]
-    if (selectedSize)                filters.company_size = [selectedSize]
-    if (countryInput.trim())         filters.country_code = [countryInput.trim().toLowerCase()]
-    if (hasEmail)                    filters.has_email = true
-    if (hasPhone)                    filters.has_phone_number = true
+    setPageCache({})
+    setCurrentPage(1)
+    setHasMore(false)
 
     try {
       const res = await fetch("/api/search/prospects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filters }),
+        body: JSON.stringify({ filters: buildFilters(), page: 1 }),
       })
       const data = await res.json()
 
@@ -160,12 +173,51 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
         return
       }
 
-      setResults(data.results ?? [])
-      // Refresh credit balance
-      fetch("/api/user/credits")
-        .then((r) => r.json())
-        .then((d) => { if (typeof d.credits === "number") setCredits(d.credits) })
-        .catch(() => {})
+      const newResults = data.results ?? []
+      setPageCache({ 1: newResults })
+      setHasMore(data.hasMore ?? false)
+      refreshCredits()
+    } catch {
+      setSearchError("Search failed. Please try again.")
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  async function handleNextPage() {
+    const nextPage = currentPage + 1
+
+    // If already cached, navigate instantly
+    if (pageCache[nextPage]) {
+      setCurrentPage(nextPage)
+      return
+    }
+
+    setSearching(true)
+    setSearchError("")
+
+    try {
+      const res = await fetch("/api/search/prospects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filters: buildFilters(), page: nextPage }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (res.status === 402) {
+          setSearchError(`Not enough credits. Each page costs 5 credits. Current balance: ${data.balance ?? credits}.`)
+        } else {
+          setSearchError(data.error ?? "Search failed. Please try again.")
+        }
+        return
+      }
+
+      const newResults = data.results ?? []
+      setPageCache((prev) => ({ ...prev, [nextPage]: newResults }))
+      setHasMore(data.hasMore ?? false)
+      setCurrentPage(nextPage)
+      refreshCredits()
     } catch {
       setSearchError("Search failed. Please try again.")
     } finally {
@@ -198,19 +250,15 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
         return
       }
 
-      setResults((prev) =>
-        prev
-          ? prev.map((l) =>
-              l.prospect_id === prospect_id
-                ? { ...l, unlocked: true, email: data.email, phone: data.phone }
-                : l
-            )
-          : prev
-      )
-      fetch("/api/user/credits")
-        .then((r) => r.json())
-        .then((d) => { if (typeof d.credits === "number") setCredits(d.credits) })
-        .catch(() => {})
+      setPageCache((prev) => ({
+        ...prev,
+        [currentPage]: (prev[currentPage] ?? []).map((l) =>
+          l.prospect_id === prospect_id
+            ? { ...l, unlocked: true, email: data.email, phone: data.phone }
+            : l
+        ),
+      }))
+      refreshCredits()
     } catch {
       setUnlockErrors((prev) => ({ ...prev, [prospect_id]: "Unlock failed" }))
     } finally {
@@ -218,9 +266,18 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
     }
   }
 
-  const dmCount = results?.filter((r) => r.tier === "decision_maker").length ?? 0
-  const influencerCount = results?.filter((r) => r.tier === "influencer").length ?? 0
-  const unlockedCount = results?.filter((r) => r.unlocked).length ?? 0
+  function refreshCredits() {
+    fetch("/api/user/credits")
+      .then((r) => r.json())
+      .then((d) => { if (typeof d.credits === "number") setCredits(d.credits) })
+      .catch(() => {})
+  }
+
+  const dmCount        = displayResults?.filter((r) => r.tier === "decision_maker").length ?? 0
+  const influencerCount = displayResults?.filter((r) => r.tier === "influencer").length ?? 0
+  const unlockedCount  = displayResults?.filter((r) => r.unlocked).length ?? 0
+
+  const nextPageCached = !!pageCache[currentPage + 1]
 
   return (
     <>
@@ -387,7 +444,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
       </div>
 
       {/* ── Pre-search empty state ── */}
-      {!searching && results === null && (
+      {!searching && displayResults === null && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="size-14 rounded-2xl bg-[#EEF1FE] flex items-center justify-center mb-4">
             <svg className="size-7 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -396,7 +453,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
           </div>
           <p className="text-base font-semibold text-gray-700 mb-1">Search for your ideal prospects</p>
           <p className="text-sm text-gray-400 max-w-sm">
-            Filter by seniority, department, company size, and country. Each search returns up to 20 results and costs 5 credits.
+            Filter by seniority, department, company size, and country. Each search returns up to 25 results per page and costs 5 credits.
           </p>
         </div>
       )}
@@ -466,7 +523,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
       )}
 
       {/* ── Zero results ── */}
-      {!searching && results !== null && results.length === 0 && (
+      {!searching && displayResults !== null && displayResults.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="size-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
             <svg className="size-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -481,12 +538,12 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
       )}
 
       {/* ── Results table ── */}
-      {!searching && results !== null && results.length > 0 && (
+      {!searching && displayResults !== null && displayResults.length > 0 && (
         <div className="rounded-2xl border border-gray-100 overflow-hidden">
 
           {/* Stats bar */}
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-5 text-xs flex-wrap">
-            <span className="font-semibold text-gray-900 tabular-nums">{results.length}</span>
+            <span className="font-semibold text-gray-900 tabular-nums">{displayResults.length}</span>
             <span className="text-gray-400">prospects</span>
             <span className="text-gray-200">·</span>
             <span className="font-semibold text-emerald-600 tabular-nums">{dmCount}</span>
@@ -518,7 +575,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                 </tr>
               </thead>
               <tbody>
-                {results.map((lead) => {
+                {displayResults.map((lead) => {
                   const tierCfg = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.noise
                   const isUnlocking = unlockingId === lead.prospect_id
                   const unlockErr = unlockErrors[lead.prospect_id]
@@ -659,7 +716,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
 
           {/* Mobile cards */}
           <div className="md:hidden divide-y divide-gray-50">
-            {results.map((lead) => {
+            {displayResults.map((lead) => {
               const tierCfg = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.noise
               const isUnlocking = unlockingId === lead.prospect_id
               const unlockErr = unlockErrors[lead.prospect_id]
@@ -761,6 +818,38 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
               )
             })}
           </div>
+
+          {/* ── Pagination bar ── */}
+          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100 mt-0">
+            <span className="text-xs text-gray-400">
+              Page {currentPage} · {totalLoaded} prospects loaded
+            </span>
+            <div className="flex items-center gap-2">
+              {currentPage > 1 && (
+                <button
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                >
+                  ← Previous
+                </button>
+              )}
+              {(nextPageCached || hasMore) && (
+                <button
+                  onClick={handleNextPage}
+                  disabled={searching || (!nextPageCached && credits < 5)}
+                  className={
+                    nextPageCached
+                      ? "px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40"
+                      : "btn-press inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  }
+                  style={nextPageCached ? {} : { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                >
+                  {nextPageCached ? "Next →" : "Next page — 5 credits"}
+                </button>
+              )}
+            </div>
+          </div>
+
         </div>
       )}
     </>

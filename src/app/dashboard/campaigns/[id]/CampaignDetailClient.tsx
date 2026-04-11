@@ -181,6 +181,12 @@ export default function CampaignDetailClient({
   const [contactsFound, setContactsFound] = useState<number | null>(null)
   const [activeTab, setActiveTab]       = useState<"leads" | "sequences">("leads")
 
+  // ── Lead pagination state ─────────────────────────────────────────────
+  const [leadPageCache, setLeadPageCache] = useState<Record<number, Lead[]>>({ 1: initialLeads })
+  const [leadCurrentPage, setLeadCurrentPage] = useState(1)
+  const [leadHasMore, setLeadHasMore]     = useState(false)
+  const [fetchingNextPage, setFetchingNextPage] = useState(false)
+
   // ── Filter state ──────────────────────────────────────────────────────
   const [tierFilter, setTierFilter]   = useState<"all" | "decision_maker" | "influencer">("all")
   const [deptFilter, setDeptFilter]   = useState("all")
@@ -234,7 +240,7 @@ export default function CampaignDetailClient({
 
       if (!res.ok) {
         if (res.status === 402) {
-          setFetchError(`Not enough credits. You need at least 5 credits. Current balance: ${data.balance ?? credits}.`)
+          setFetchError(`Not enough credits. You need at least 10 credits. Current balance: ${data.balance ?? credits}.`)
         } else {
           setFetchError(data.error ?? "Failed to fetch leads")
         }
@@ -244,6 +250,9 @@ export default function CampaignDetailClient({
 
       const fetchedLeads = data.leads ?? []
       setLeads(fetchedLeads)
+      setLeadPageCache({ 1: fetchedLeads })
+      setLeadCurrentPage(1)
+      setLeadHasMore(data.hasMore ?? false)
       setContactsFound(fetchedLeads.length)
       setStatus("preview_ready")
       fetch("/api/user/credits")
@@ -274,6 +283,52 @@ export default function CampaignDetailClient({
     })
   }
 
+  // ── Lead pagination ───────────────────────────────────────────────────
+  async function handleLeadNextPage() {
+    const nextPage = leadCurrentPage + 1
+
+    if (leadPageCache[nextPage]) {
+      setLeads(leadPageCache[nextPage])
+      setLeadCurrentPage(nextPage)
+      return
+    }
+
+    setFetchingNextPage(true)
+    setFetchError("")
+
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page: nextPage }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (res.status === 402) {
+          setFetchError(`Not enough credits. You need at least 10 credits. Current balance: ${data.balance ?? credits}.`)
+        } else {
+          setFetchError(data.error ?? "Failed to fetch leads")
+        }
+        return
+      }
+
+      const newLeads = data.leads ?? []
+      setLeads(newLeads)
+      setLeadPageCache((prev) => ({ ...prev, [nextPage]: newLeads }))
+      setLeadHasMore(data.hasMore ?? false)
+      setLeadCurrentPage(nextPage)
+      fetch("/api/user/credits")
+        .then((r) => r.json())
+        .then((d) => { if (typeof d.credits === "number") setCredits(d.credits) })
+        .catch(() => {})
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setFetchingNextPage(false)
+    }
+  }
+
   // ── Unlock contact ────────────────────────────────────────────────────
   async function handleUnlock(lead: Lead) {
     if (unlockingId) return
@@ -299,6 +354,12 @@ export default function CampaignDetailClient({
       setLeads((prev) =>
         prev.map((l) => l.id === lead.id ? { ...l, email: data.email, phone: data.phone, unlocked: true } : l)
       )
+      setLeadPageCache((prev) => ({
+        ...prev,
+        [leadCurrentPage]: (prev[leadCurrentPage] ?? []).map((l) =>
+          l.id === lead.id ? { ...l, email: data.email, phone: data.phone, unlocked: true } : l
+        ),
+      }))
       if (!data.already_unlocked) setCredits((c) => Math.max(0, c - 2))
     } catch (err) {
       setUnlockErrors((e) => ({ ...e, [lead.id]: err instanceof Error ? err.message : "Unlock failed" }))
@@ -349,6 +410,10 @@ export default function CampaignDetailClient({
   const geoScope = (campaign.icp_json?.geo as Record<string, unknown> | undefined)?.geo_scope as string | undefined
   const estimatedCredits = geoScope === "local" ? 25 : 15
 
+  // Lead pagination derived
+  const totalLeadsLoaded = Object.values(leadPageCache).reduce((sum, p) => sum + p.length, 0)
+  const leadNextPageCached = !!leadPageCache[leadCurrentPage + 1]
+
   return (
     <div className="flex min-h-screen bg-white overflow-x-hidden">
       <Sidebar credits={credits} userEmail={userEmail} />
@@ -384,10 +449,10 @@ export default function CampaignDetailClient({
             {!hasLeads && !isFetching && (
               <button
                 onClick={() => handleFindLeads()}
-                disabled={credits < 5}
+                disabled={credits < 10}
                 className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-                title={credits < 5 ? "You need at least 5 credits" : undefined}
+                title={credits < 10 ? "You need at least 10 credits" : undefined}
               >
                 <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -398,9 +463,9 @@ export default function CampaignDetailClient({
             {hasLeads && (
               <button
                 onClick={() => handleFindLeads()}
-                disabled={isFetching || credits < 5}
+                disabled={isFetching || credits < 10}
                 className="w-full sm:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                title={credits < 5 ? "You need at least 5 credits" : undefined}
+                title={credits < 10 ? "You need at least 10 credits" : undefined}
               >
                 Refresh leads
               </button>
@@ -561,7 +626,7 @@ export default function CampaignDetailClient({
             </p>
             <button
               onClick={() => handleFindLeads()}
-              disabled={credits < 5}
+              disabled={credits < 10}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             >
@@ -570,10 +635,10 @@ export default function CampaignDetailClient({
               </svg>
               Find decision makers
             </button>
-            {credits < 5 && (
-              <p className="text-xs text-red-400 mt-3">You need at least 5 credits to run a search</p>
+            {credits < 10 && (
+              <p className="text-xs text-red-400 mt-3">You need at least 10 credits to run a search</p>
             )}
-            {credits >= 5 && (
+            {credits >= 10 && (
               <p className="text-xs text-gray-300 mt-4">{credits} credits available · 10 credits per fetch</p>
             )}
           </div>
@@ -820,6 +885,50 @@ export default function CampaignDetailClient({
               Showing {filteredLeads.length} of {leads.length} total leads · noise {showNoise ? "visible" : "hidden"}
             </p>
 
+            {/* ── Pagination bar ── */}
+            {(leadCurrentPage > 1 || leadNextPageCached || leadHasMore) && (
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
+                <span className="text-xs text-gray-400">
+                  Page {leadCurrentPage} · {totalLeadsLoaded} leads loaded
+                </span>
+                <div className="flex items-center gap-2">
+                  {leadCurrentPage > 1 && (
+                    <button
+                      onClick={() => {
+                        setLeads(leadPageCache[leadCurrentPage - 1] ?? [])
+                        setLeadCurrentPage((p) => p - 1)
+                      }}
+                      className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      ← Previous
+                    </button>
+                  )}
+                  {(leadNextPageCached || leadHasMore) && (
+                    <button
+                      onClick={handleLeadNextPage}
+                      disabled={fetchingNextPage || (!leadNextPageCached && credits < 10)}
+                      className={
+                        leadNextPageCached
+                          ? "px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40"
+                          : "btn-press inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                      }
+                      style={leadNextPageCached ? {} : { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                    >
+                      {fetchingNextPage ? (
+                        <>
+                          <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                          </svg>
+                          Loading…
+                        </>
+                      ) : leadNextPageCached ? "Next →" : "Next page — 10 credits"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* ── Refine Search panel ── */}
             <div className="rounded-2xl border border-gray-200">
               <button
@@ -896,7 +1005,7 @@ export default function CampaignDetailClient({
 
                   <button
                     onClick={() => setConfirmRefetch(true)}
-                    disabled={isFetching || credits < 5}
+                    disabled={isFetching || credits < 10}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                   >

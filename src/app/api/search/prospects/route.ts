@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 const EXPLORIUM_BASE = "https://api.explorium.ai"
 const EXPLORIUM_KEY = process.env.EXPLORIUM_API_KEY
 const SEARCH_COST = 5
-const PAGE_SIZE = 20
+const PAGE_SIZE = 25
 
 interface ExploriumProspect {
   prospect_id?: string
@@ -74,9 +74,11 @@ export async function POST(request: NextRequest) {
     has_email?: boolean
     has_phone_number?: boolean
   } = {}
+  let page = 1
   try {
     const body = await request.json()
     filters = body?.filters ?? {}
+    page = typeof body?.page === "number" ? Math.max(1, body.page) : 1
   } catch { /* empty body */ }
 
   // Build Explorium request — only send filters that are populated
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
     mode: "full",
     page_size: PAGE_SIZE,
     size: PAGE_SIZE,
-    page: 1,
+    page: page,
     filters: exploriumFilters,
   }
 
@@ -155,5 +157,5 @@ export async function POST(request: NextRequest) {
   const tierOrder: Record<string, number> = { decision_maker: 0, influencer: 1, noise: 2 }
   results.sort((a, b) => (tierOrder[a.tier] ?? 2) - (tierOrder[b.tier] ?? 2))
 
-  return NextResponse.json({ results, credits_deducted: SEARCH_COST })
+  return NextResponse.json({ results, page, hasMore: results.length === PAGE_SIZE, credits_deducted: SEARCH_COST })
 }

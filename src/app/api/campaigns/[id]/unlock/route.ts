@@ -66,7 +66,6 @@ export async function POST(
   // Docs: POST /v1/prospects/contacts_information/enrich
   // Body: { prospect_id: string, parameters: { contact_types: [...] } }
   // Response: { response_context, data: { professions_email, mobile_phone, emails: [...], phone_numbers: [...] } }
-  console.log("[unlock] enriching prospect_id:", prospect_id)
   const enrichRes = await fetch(
     `${EXPLORIUM_BASE}/v1/prospects/contacts_information/enrich`,
     {
@@ -88,10 +87,7 @@ export async function POST(
     // Don't block the unlock — deduct credits and mark unlocked even if enrich fails
   } else {
     const enrichData = await enrichRes.json()
-    console.log("[unlock] enrich full response:", JSON.stringify(enrichData))
-
     const d = enrichData?.data ?? {}
-    console.log("[unlock] data keys:", Object.keys(d))
 
     // Primary fields (flat, confirmed by Explorium docs)
     email = d.professions_email ?? null
@@ -107,9 +103,6 @@ export async function POST(
       phone = typeof first === "string" ? first : (first?.phone ?? first?.value ?? first?.number ?? null)
     }
 
-    console.log("[unlock] extracted email:", email ?? "null")
-    console.log("[unlock] extracted phone:", phone ?? "null")
-    console.log("[unlock] request_status:", enrichData?.response_context?.request_status ?? "unknown")
   }
 
   // Deduct 2 credits atomically via deduct_credits RPC
@@ -145,7 +138,5 @@ export async function POST(
     console.error("[unlock] lead update error:", updateError)
   }
 
-  const responsePayload = { email, phone }
-  console.log("[unlock] returning to client:", JSON.stringify(responsePayload))
-  return NextResponse.json(responsePayload)
+  return NextResponse.json({ email, phone })
 }

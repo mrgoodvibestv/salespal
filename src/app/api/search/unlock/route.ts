@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
   }
 
   // Call Explorium enrich
-  console.log("[search/unlock] enriching prospect_id:", prospect_id)
   const enrichRes = await fetch(
     `${EXPLORIUM_BASE}/v1/prospects/contacts_information/enrich`,
     {
@@ -68,7 +67,6 @@ export async function POST(request: NextRequest) {
       phone = typeof first === "string" ? first : (first?.phone ?? first?.value ?? first?.number ?? null)
     }
 
-    console.log("[search/unlock] email:", email ?? "null", "phone:", phone ?? "null")
   }
 
   // Deduct 2 credits

@@ -122,6 +122,5 @@ Return ONLY a JSON array, no markdown: [{"id":"...","tier":"decision_maker|influ
     console.error("[score] some updates failed:", updateErrors.map((r) => r.error))
   }
 
-  console.log("[score] re-scored", scores.length, "leads")
   return NextResponse.json({ leads: scores })
 }

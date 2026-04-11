@@ -108,8 +108,6 @@ async function fetchProspectsDirect(
     },
   }
 
-  console.log("[leads/prospects] direct fetch request:", JSON.stringify(body))
-
   const res = await fetch(`${EXPLORIUM_BASE}/v1/prospects`, {
     method: "POST",
     headers: { "Content-Type": "application/json", API_KEY: EXPLORIUM_KEY ?? "" },
@@ -123,15 +121,8 @@ async function fetchProspectsDirect(
   }
 
   const data = await res.json()
-  console.log("[leads/prospects] response keys:", Object.keys(data))
-  console.log("[leads/prospects] total_results:", data?.total_results ?? "unknown")
-
   const list: ExploriumProspect[] =
     data?.prospects ?? data?.data ?? data?.results ?? data?.items ?? []
-
-  // Diagnostic: log company size distribution to check if filter is working
-  console.log("[leads/prospects] company sizes:",
-    list.map((p) => (p as Record<string, unknown>).company_size ?? (p as Record<string, unknown>).number_of_employees ?? "unknown"))
 
   return list
 }
@@ -236,7 +227,6 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const { id: campaignId } = params
-  console.log("[leads] EXPLORIUM_API_KEY defined:", !!process.env.EXPLORIUM_API_KEY)
   const supabase = await createClient()
 
   // Auth
@@ -305,36 +295,23 @@ export async function POST(
   const geoRegionCode  = geoObj?.geo_region_code as string | undefined
   const cityFocus      = overrides.city_focus?.trim() ?? ""
 
-  console.log("[leads] icp_json keys:", icpJson ? Object.keys(icpJson) : "null")
-  console.log("[leads] angleFilters:", JSON.stringify(angleFilters))
-  console.log("[leads] geo_scope:", geoScope ?? "none", "geo_region_code:", geoRegionCode ?? "none")
-  if (cityFocus) console.log("[leads] city_focus override:", cityFocus)
-
   let prospects: ExploriumProspect[] = []
   let scoredProspects: ScoredProspect[] = []
 
   try {
     // ── Direct prospect fetch ────────────────────────────────────────────
     prospects = await fetchProspectsDirect(angleFilters, geoScope, geoRegionCode, page)
-    console.log("[leads] prospects fetched:", prospects.length)
-    if (prospects.length > 0) {
-      console.log("[leads] first prospect keys:", Object.keys(prospects[0]))
-      console.log("[leads] first prospect:", JSON.stringify(prospects[0]))
-    }
 
     // ── Optional city post-filter ────────────────────────────────────────
     if (cityFocus) {
       const cf = cityFocus.toLowerCase()
-      const before = prospects.length
       prospects = prospects.filter((p) => (p.city ?? "").toLowerCase().includes(cf))
-      console.log(`[leads/city] "${cityFocus}": ${prospects.length}/${before} kept`)
     }
 
     // ── Score with Claude ────────────────────────────────────────────────
     const angleTitle = (campaign.angle_selected as string | null) ?? ""
     const pitch = ((icpJson?.angle_data as Record<string, unknown> | undefined)?.pitch_summary as string | null) ?? ""
     scoredProspects = await scoreProspects(prospects, { angleTitle, pitch })
-    console.log("[leads] scored:", scoredProspects.map((p) => `${p.job_title}→${p.tier}`))
 
   } catch (err) {
     console.error("[leads] pipeline error:", err)

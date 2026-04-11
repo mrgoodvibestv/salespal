@@ -198,6 +198,7 @@ export default function LandingPage() {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-black">
               Paste your website.
               <br />
+              Find your{" "}
               <span
                 className="serif-italic"
                 style={{
@@ -205,17 +206,17 @@ export default function LandingPage() {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
-                  fontSize: "1.05em",
+                  fontSize: "1.15em",
                 }}
               >
-                Find your buyers.
+                buyers.
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
               SalesPal, our AI agent for outbound sales, finds your best campaign angle,
-              surfaces qualified leads, and writes your outreach copy... within seconds.
+              surfaces qualified leads, and writes your outreach copy.
             </p>
 
             {/* URL form */}

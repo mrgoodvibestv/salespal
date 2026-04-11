@@ -953,15 +953,15 @@ export default function CampaignDetailClient({
               )}
             </div>
 
-            {/* Run Full Campaign banner */}
-            {status === "preview_ready" && campaign.stats_result && (
+            {/* Unlock prompt banner */}
+            {status === "preview_ready" && (
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-semibold text-black">
-                    You&apos;re previewing {leads.length} of ~{campaign.stats_result.estimated_contacts?.toLocaleString()} available contacts.
+                  <p className="font-semibold text-black text-sm">
+                    {leads.length} decision makers found
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Run full campaign to surface all decision makers across {campaign.stats_result.companies?.toLocaleString()} matching companies.
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Unlock contacts to get verified emails, phone numbers, and LinkedIn profiles.
                   </p>
                 </div>
                 <button disabled className="w-full sm:w-auto sm:shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white opacity-60 cursor-not-allowed whitespace-nowrap"

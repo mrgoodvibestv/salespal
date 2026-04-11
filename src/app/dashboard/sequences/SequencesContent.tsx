@@ -311,12 +311,7 @@ export default function SequencesContent({
 
               {/* Left panel */}
               <div className="w-64 shrink-0 border-r border-gray-100 overflow-y-auto">
-                <div className="px-4 pt-4 pb-2">
-                  <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400">
-                    Campaigns
-                  </p>
-                </div>
-                <div className="space-y-0.5 pb-4">
+                <div className="space-y-0.5 pt-3 pb-4 border-b border-gray-100 mb-1">
                   {sequences.map((seq) => {
                     const isActive = seq.campaign_id === selectedId
                     const touchCount = (sequenceMap[seq.campaign_id] ?? []).length

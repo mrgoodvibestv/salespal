@@ -147,26 +147,35 @@ export default function ContactsContent({
             </p>
           </div>
 
-          {/* Stats row — 2×2 grid on mobile, flex row on sm+ */}
-          <div className="grid grid-cols-2 sm:flex mb-6 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-r border-gray-100 sm:border-0">
-              <span className="text-lg font-bold text-black tabular-nums">{totalContacts}</span>
-              <span className="text-xs text-gray-400">Total contacts</span>
+          {/* Stats row */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
+              <span className="text-2xl font-bold text-gray-900 tabular-nums leading-none">{totalContacts}</span>
+              <div>
+                <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Contacts</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Total unlocked</p>
+              </div>
             </div>
-            <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 sm:border-0">
-              <span className="text-lg font-bold text-purple-600 tabular-nums">{campaignCount}</span>
-              <span className="text-xs text-gray-400">Campaigns</span>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-100">
+              <span className="text-2xl font-bold text-violet-700 tabular-nums leading-none">{campaignCount}</span>
+              <div>
+                <p className="text-[11px] font-semibold text-violet-600 uppercase tracking-wide">Campaigns</p>
+                <p className="text-[10px] text-violet-500/70 mt-0.5">With contacts</p>
+              </div>
             </div>
-            <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2 px-4 py-3 border-r border-gray-100 sm:border-0">
-              <span className="text-lg font-bold text-blue-600 tabular-nums">{withEmail}</span>
-              <span className="text-xs text-gray-400">With email</span>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-100">
+              <span className="text-2xl font-bold text-blue-700 tabular-nums leading-none">{withEmail}</span>
+              <div>
+                <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-wide">With Email</p>
+                <p className="text-[10px] text-blue-500/70 mt-0.5">Verified</p>
+              </div>
             </div>
-            <div className="hidden sm:block h-5 w-px bg-gray-200 self-center" />
-            <div className="flex items-center gap-2 px-4 py-3">
-              <span className="text-lg font-bold text-green-600 tabular-nums">{withPhone}</span>
-              <span className="text-xs text-gray-400">With phone</span>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+              <span className="text-2xl font-bold text-emerald-700 tabular-nums leading-none">{withPhone}</span>
+              <div>
+                <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wide">With Phone</p>
+                <p className="text-[10px] text-emerald-500/70 mt-0.5">Direct line</p>
+              </div>
             </div>
           </div>
 

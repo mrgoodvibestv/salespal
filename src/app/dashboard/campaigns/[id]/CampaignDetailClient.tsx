@@ -684,18 +684,35 @@ export default function CampaignDetailClient({
             </div>
 
             {/* Stats bar */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 sm:px-5 py-3 rounded-xl bg-gray-50 border border-gray-100">
-              <Stat label="Decision Makers" value={dmCount}    color="text-green-600" />
-              <div className="hidden sm:block h-5 w-px bg-gray-200" />
-              <Stat label="Influencers"     value={infCount}   color="text-blue-600" />
-              {showNoise && <>
-                <div className="hidden sm:block h-5 w-px bg-gray-200" />
-                <Stat label="Noise"         value={noiseCount} color="text-gray-400" />
-              </>}
-              <div className="hidden sm:block h-5 w-px bg-gray-200" />
-              <Stat label="Unlocked"        value={unlockedCount} color="text-purple-600" />
-              <div className="hidden sm:block h-5 w-px bg-gray-200" />
-              <Stat label="Showing"         value={filteredLeads.length} color="text-black" />
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                <span className="text-2xl font-bold text-emerald-700 tabular-nums leading-none">{dmCount}</span>
+                <div>
+                  <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wide">Decision Makers</p>
+                  <p className="text-[10px] text-emerald-500/70 mt-0.5">Primary tier</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-100">
+                <span className="text-2xl font-bold text-violet-700 tabular-nums leading-none">{infCount}</span>
+                <div>
+                  <p className="text-[11px] font-semibold text-violet-600 uppercase tracking-wide">Influencers</p>
+                  <p className="text-[10px] text-violet-500/70 mt-0.5">Secondary tier</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-100">
+                <span className="text-2xl font-bold text-blue-700 tabular-nums leading-none">{unlockedCount}</span>
+                <div>
+                  <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-wide">Unlocked</p>
+                  <p className="text-[10px] text-blue-500/70 mt-0.5">Contacts saved</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
+                <span className="text-2xl font-bold text-gray-700 tabular-nums leading-none">{filteredLeads.length}</span>
+                <div>
+                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Showing</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">After filters</p>
+                </div>
+              </div>
             </div>
 
             {/* Mobile card layout (hidden on sm+) */}
@@ -1059,19 +1076,13 @@ export default function CampaignDetailClient({
 
             {/* Unlock prompt banner */}
             {status === "preview_ready" && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
-                <div className="space-y-0.5">
-                  <p className="font-semibold text-black text-sm">
-                    {leads.length} decision makers found
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Unlock contacts to get verified emails, phone numbers, and LinkedIn profiles.
-                  </p>
-                </div>
-                <button disabled className="w-full sm:w-auto sm:shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white opacity-60 cursor-not-allowed whitespace-nowrap"
-                  style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} title="Coming soon">
-                  Run Full Campaign
-                </button>
+              <div className="px-5 py-4 rounded-2xl border border-[#4B6BF5]/20 bg-gradient-to-r from-[#EEF1FE] to-[#F0EBFE]">
+                <p className="font-semibold text-black text-sm">
+                  {leads.length} decision makers found
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Unlock contacts to get verified emails, phone numbers, and LinkedIn profiles.
+                </p>
               </div>
             )}
           </div>

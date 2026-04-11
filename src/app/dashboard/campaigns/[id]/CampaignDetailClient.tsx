@@ -678,34 +678,22 @@ export default function CampaignDetailClient({
             </div>
 
             {/* Stats bar */}
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 mb-4">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                <span className="text-2xl font-bold text-emerald-700 tabular-nums leading-none">{dmCount}</span>
-                <div>
-                  <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wide">Decision Makers</p>
-                  <p className="text-[10px] text-emerald-500/70 mt-0.5">Primary tier</p>
-                </div>
+            <div className="flex items-stretch gap-2 mb-5 overflow-x-auto pb-0.5">
+              <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0">
+                <span className="text-3xl font-bold text-emerald-700 tabular-nums leading-none tracking-tight">{dmCount}</span>
+                <span className="text-xs font-semibold text-emerald-600 uppercase tracking-[0.1em] leading-tight">Decision<br/>Makers</span>
               </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-100">
-                <span className="text-2xl font-bold text-violet-700 tabular-nums leading-none">{infCount}</span>
-                <div>
-                  <p className="text-[11px] font-semibold text-violet-600 uppercase tracking-wide">Influencers</p>
-                  <p className="text-[10px] text-violet-500/70 mt-0.5">Secondary tier</p>
-                </div>
+              <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0">
+                <span className="text-3xl font-bold text-violet-700 tabular-nums leading-none tracking-tight">{infCount}</span>
+                <span className="text-xs font-semibold text-violet-600 uppercase tracking-[0.1em] leading-tight">Influ-<br/>encers</span>
               </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-100">
-                <span className="text-2xl font-bold text-blue-700 tabular-nums leading-none">{unlockedCount}</span>
-                <div>
-                  <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-wide">Unlocked</p>
-                  <p className="text-[10px] text-blue-500/70 mt-0.5">Contacts saved</p>
-                </div>
+              <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0">
+                <span className="text-3xl font-bold text-blue-700 tabular-nums leading-none tracking-tight">{unlockedCount}</span>
+                <span className="text-xs font-semibold text-blue-600 uppercase tracking-[0.1em] leading-tight">Un-<br/>locked</span>
               </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
-                <span className="text-2xl font-bold text-gray-700 tabular-nums leading-none">{filteredLeads.length}</span>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Showing</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">After filters</p>
-                </div>
+              <div className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0">
+                <span className="text-3xl font-bold text-gray-700 tabular-nums leading-none tracking-tight">{filteredLeads.length}</span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.1em] leading-tight">Show-<br/>ing</span>
               </div>
             </div>
 

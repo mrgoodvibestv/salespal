@@ -64,43 +64,57 @@ export async function POST(request: NextRequest) {
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 1200,
-    system: `You are a B2B sales strategist. Analyze the provided website and return ONLY valid JSON with no markdown, no explanation, no code fences — just the raw JSON object.`,
+    max_tokens: 1500,
+    system: `You are an elite B2B outbound sales strategist. Your job is to analyze a company's website and generate non-obvious, high-converting B2B campaign angles that most salespeople would miss. Return ONLY valid JSON with no markdown, no explanation, no code fences — just the raw JSON object.`,
     messages: [{
       role: "user",
       content: `${contextBlock}
 
-Based on this website, return ONLY valid JSON:
+CRITICAL THINKING RULES:
+1. Identify what this company SELLS or OFFERS
+2. Then ask: who has a BUDGET to buy access to what this company provides — not just the obvious buyer, but the adjacent ones
+3. For events/venues/experiences: always consider corporate buyers — HR leaders, People & Culture teams, Client Relations, Sales leadership — who have team experience, client entertainment, or employee appreciation budgets
+4. For media/content: consider B2B sponsors, advertisers, and distribution partners
+5. For marketplaces/platforms: consider both supply-side and demand-side B2B plays
+6. Always surface at least one NON-OBVIOUS angle that targets a buyer most people wouldn't think of
+7. Target titles should reflect WHO HAS THE BUDGET and SIGNS THE CHECK — not just who uses the product
+
+Return ONLY valid JSON:
 {
-  "company_name": "inferred name",
-  "what_they_sell": "one concise sentence",
+  "company_name": "inferred company name",
+  "what_they_sell": "one sharp sentence",
   "ideal_customer_profile": {
-    "company_type": "description of target companies",
-    "company_size": "e.g. 50-500 employees",
+    "company_type": "specific description of target company type for the PRIMARY angle",
+    "company_size": "e.g. 100-2,000 employees",
     "industries": ["industry1", "industry2", "industry3"]
   },
-  "target_titles": ["Primary Title", "Secondary Title", "Third Title", "Fourth Title"],
+  "target_titles": [
+    "Most direct budget holder",
+    "Secondary decision maker",
+    "Third title",
+    "Fourth title"
+  ],
   "campaign_angles": [
     {
-      "angle": "Short angle name",
-      "pitch": "One sharp sentence — the core value prop for this angle",
-      "why_now": "One sentence on why this angle is timely or urgent",
-      "hook": "A cold outreach opening line for this angle"
+      "angle": "Short descriptive angle name",
+      "pitch": "One sharp sentence — the core value prop for this buyer",
+      "why_now": "One sentence on urgency or timeliness",
+      "hook": "A specific cold outreach opening line — personalized, not generic"
     },
     {
-      "angle": "Short angle name",
-      "pitch": "One sharp sentence — the core value prop for this angle",
-      "why_now": "One sentence on why this angle is timely or urgent",
-      "hook": "A cold outreach opening line for this angle"
+      "angle": "Non-obvious angle name — the one most people miss",
+      "pitch": "Value prop for this lateral buyer",
+      "why_now": "Why this angle is timely",
+      "hook": "Cold outreach opening line"
     },
     {
-      "angle": "Short angle name",
-      "pitch": "One sharp sentence — the core value prop for this angle",
-      "why_now": "One sentence on why this angle is timely or urgent",
-      "hook": "A cold outreach opening line for this angle"
+      "angle": "Third angle name",
+      "pitch": "Value prop",
+      "why_now": "Urgency",
+      "hook": "Opening line"
     }
   ],
-  "tagline": "A punchy one-liner outbound tagline"
+  "tagline": "Punchy one-liner outbound tagline"
 }`,
     }],
   })

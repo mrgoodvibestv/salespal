@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 
 // ── Ticker data ───────────────────────────────────────────────────────────────
@@ -126,6 +126,29 @@ function DemoSection() {
   const [demoError, setDemoError] = useState("")
   const [analyzing, setAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [retryAfter, setRetryAfter] = useState(0)
+
+  // On mount — restore cooldown from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("sp_analyze_ts")
+    if (stored) {
+      const elapsed = Math.floor((Date.now() - Number(stored)) / 1000)
+      const remaining = 60 - elapsed
+      if (remaining > 0) setRetryAfter(remaining)
+    }
+  }, [])
+
+  // Countdown ticker
+  useEffect(() => {
+    if (retryAfter <= 0) return
+    const t = setInterval(() => {
+      setRetryAfter((s) => {
+        if (s <= 1) { clearInterval(t); return 0 }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(t)
+  }, [retryAfter])
 
   async function handleAnalyze(e: React.FormEvent) {
     e.preventDefault()
@@ -157,9 +180,16 @@ function DemoSection() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setDemoError(data.error ?? "Analysis failed. Please try again.")
+        if (res.status === 429) {
+          setRetryAfter(data.retryAfter ?? 60)
+          setDemoError("")
+        } else {
+          setDemoError(data.error ?? "Analysis failed. Please try again.")
+        }
         return
       }
+      localStorage.setItem("sp_analyze_ts", String(Date.now()))
+      setRetryAfter(60)
       setResult(data)
     } catch {
       setDemoError("Analysis failed. Please try again.")
@@ -199,7 +229,7 @@ function DemoSection() {
             />
             <button
               type="submit"
-              disabled={analyzing}
+              disabled={analyzing || retryAfter > 0}
               className="w-full sm:w-auto px-7 py-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap shadow-sm flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             >
@@ -217,6 +247,22 @@ function DemoSection() {
             </button>
           </div>
           {demoError && <p className="text-sm text-red-500 mt-3">{demoError}</p>}
+          {retryAfter > 0 && (
+            <p
+              className="text-xs text-center mt-3 font-medium tabular-nums"
+              style={{
+                background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              One analysis per minute · ready in{" "}
+              {Math.floor(retryAfter / 60) > 0
+                ? `${Math.floor(retryAfter / 60)}:${String(retryAfter % 60).padStart(2, "0")}`
+                : `0:${String(retryAfter).padStart(2, "0")}`}
+            </p>
+          )}
         </form>
 
         {/* Results */}

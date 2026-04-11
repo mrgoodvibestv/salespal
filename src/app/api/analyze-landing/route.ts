@@ -3,11 +3,37 @@ import Anthropic from "@anthropic-ai/sdk"
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+const ipCooldowns = new Map<string, number>()
+const COOLDOWN_MS = 60 * 1000 // 60 seconds
+
 export async function POST(request: NextRequest) {
   const { url } = await request.json().catch(() => ({})) as { url?: string }
 
   if (!url) {
     return NextResponse.json({ error: "url is required" }, { status: 400 })
+  }
+
+  // Extract IP
+  const forwarded = request.headers.get("x-forwarded-for")
+  const ip = forwarded ? forwarded.split(",")[0].trim() : "anonymous"
+
+  // Check cooldown
+  const lastCall = ipCooldowns.get(ip)
+  const now = Date.now()
+  if (lastCall && now - lastCall < COOLDOWN_MS) {
+    const retryAfter = Math.ceil((COOLDOWN_MS - (now - lastCall)) / 1000)
+    return NextResponse.json({ error: "rate_limited", retryAfter }, { status: 429 })
+  }
+
+  // Record this call
+  ipCooldowns.set(ip, now)
+
+  // Clean up old entries every ~500 requests to prevent memory growth
+  if (ipCooldowns.size > 500) {
+    const cutoff = now - COOLDOWN_MS
+    ipCooldowns.forEach((ts, key) => {
+      if (ts < cutoff) ipCooldowns.delete(key)
+    })
   }
 
   // Try to fetch the page HTML — fall back to URL-only if it fails

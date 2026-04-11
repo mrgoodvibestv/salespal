@@ -652,21 +652,21 @@ export default function CampaignDetailClient({
                         <InitialsAvatar name={lead.full_name} size="sm" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <p className="font-semibold text-gray-900 truncate">{lead.full_name}</p>
+                            <p className="font-semibold text-gray-900 truncate" title={lead.full_name}>{lead.full_name}</p>
                             {lead.unlocked && (
                               <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 Saved
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 truncate mt-0.5">{lead.job_title}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5" title={lead.job_title}>{lead.job_title}</p>
                         </div>
                       </div>
                       <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
                     </div>
                     {(companyName || lead.geo_location) && (
                       <div className="text-xs text-gray-500 space-y-0.5">
-                        {companyName && <p className="truncate"><span className="text-gray-400">Company: </span>{companyName}</p>}
+                        {companyName && <p className="truncate" title={companyName}><span className="text-gray-400">Company: </span>{companyName}</p>}
                         {lead.geo_location && <p className="truncate"><span className="text-gray-400">Location: </span>{lead.geo_location}</p>}
                       </div>
                     )}
@@ -740,7 +740,7 @@ export default function CampaignDetailClient({
                         <tr key={lead.id} className={`hover:bg-[#EEF1FE]/30 transition-colors duration-150 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
                           <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap min-w-[120px] max-w-[180px]">
                             <div className="flex items-center gap-2 truncate">
-                              <span className="truncate">{lead.full_name}</span>
+                              <span className="truncate" title={lead.full_name}>{lead.full_name}</span>
                               {lead.unlocked && (
                                 <span className="inline-flex shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   Saved
@@ -748,8 +748,8 @@ export default function CampaignDetailClient({
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[160px] max-w-[200px] truncate">{lead.job_title}</td>
-                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[120px] max-w-[160px] truncate">{companyName}</td>
+                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[160px] max-w-[200px] truncate" title={lead.job_title}>{lead.job_title}</td>
+                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap min-w-[120px] max-w-[160px] truncate" title={companyName}>{companyName}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {lead.geo_location
                               ? <span className="text-xs text-gray-400">{lead.geo_location}</span>

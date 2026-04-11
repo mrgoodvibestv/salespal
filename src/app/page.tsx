@@ -46,8 +46,8 @@ function Logo() {
   )
 }
 
-// ── Demo section ──────────────────────────────────────────────────────────────
-function DemoSection() {
+// ── Main page ─────────────────────────────────────────────────────────────────
+export default function LandingPage() {
   const [demoUrl, setDemoUrl] = useState("")
   const [demoError, setDemoError] = useState("")
   const [analyzing, setAnalyzing] = useState(false)
@@ -130,281 +130,6 @@ function DemoSection() {
   }
 
   return (
-    <section className="px-6 md:px-12 py-16 bg-gray-50/60 border-y border-gray-100">
-      <div className="max-w-3xl mx-auto">
-        {/* Section header */}
-        <div className="text-center mb-10">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-            Live Demo
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-black">
-            See your ICP in 10 seconds
-          </h2>
-          <p className="text-gray-500 mt-2 text-sm">
-            Paste any website URL. Claude reads it and maps your ideal customer profile.
-          </p>
-        </div>
-
-        {/* URL input */}
-        <form onSubmit={handleAnalyze}>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={demoUrl}
-              onChange={(e) => { setDemoUrl(e.target.value); setDemoError("") }}
-              placeholder="yourcompany.com"
-              className="flex-1 px-5 py-4 rounded-xl border border-gray-200 text-base outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400 bg-white shadow-sm"
-              autoComplete="off"
-              spellCheck={false}
-              disabled={analyzing}
-            />
-            <button
-              type="submit"
-              disabled={analyzing || retryAfter > 0}
-              className="w-full sm:w-auto px-7 py-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap shadow-sm flex items-center justify-center gap-2"
-              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-            >
-              Analyze my website →
-            </button>
-          </div>
-          {demoError && <p className="text-sm text-red-500 mt-3">{demoError}</p>}
-          {retryAfter > 0 && (
-            <p
-              className="text-xs text-center mt-3 font-medium tabular-nums"
-              style={{
-                background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              One analysis per minute · ready in{" "}
-              {Math.floor(retryAfter / 60) > 0
-                ? `${Math.floor(retryAfter / 60)}:${String(retryAfter % 60).padStart(2, "0")}`
-                : `0:${String(retryAfter).padStart(2, "0")}`}
-            </p>
-          )}
-        </form>
-      </div>
-
-      {/* ── Modal ── */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !analyzing) setModalOpen(false)
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-              <div>
-                <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
-                  {analyzing ? "Analyzing…" : "Your ICP Preview"}
-                </p>
-                {result && (
-                  <p className="text-sm font-semibold text-gray-900 mt-0.5">{result.company_name}</p>
-                )}
-              </div>
-              {!analyzing && (
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-
-            {/* Modal body */}
-            <div className="p-6">
-
-              {/* Loading state */}
-              {analyzing && (
-                <div className="flex flex-col items-center justify-center py-16 gap-6">
-                  <div className="relative">
-                    <div
-                      className="size-16 rounded-2xl flex items-center justify-center"
-                      style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
-                    >
-                      <svg className="size-8 text-[#4B6BF5] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                      </svg>
-                    </div>
-                    <div
-                      className="absolute inset-0 rounded-2xl border-2 border-transparent animate-spin"
-                      style={{ borderTopColor: "#4B6BF5", borderRightColor: "#7B4BF5", animationDuration: "1.2s" }}
-                    />
-                  </div>
-                  <div className="text-center space-y-2">
-                    <p className="font-semibold text-gray-900">Analyzing your website</p>
-                    <p className="text-sm text-gray-400 max-w-xs">
-                      Claude is reading your site and mapping your ideal customer profile…
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="size-2 rounded-full animate-bounce"
-                        style={{
-                          background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
-                          animationDelay: `${i * 0.15}s`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Results state */}
-              {!analyzing && result && (
-                <div className="space-y-4">
-
-                  {/* Company summary */}
-                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
-                        <p className="font-bold text-gray-900">{result.company_name}</p>
-                        <p className="text-sm text-gray-500 mt-0.5">{result.what_they_sell}</p>
-                      </div>
-                      {result.tagline && (
-                        <span className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20">
-                          &ldquo;{result.tagline}&rdquo;
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ICP */}
-                  <div className="rounded-xl border border-gray-100 p-4">
-                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                      Ideal Customer Profile
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
-                        <p className="text-gray-700 text-xs leading-relaxed">{result.ideal_customer_profile.company_type}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
-                        <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
-                        <div className="flex flex-wrap gap-1">
-                          {result.ideal_customer_profile.industries.map((ind) => (
-                            <span key={ind} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
-                              {ind}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Target titles */}
-                  <div className="rounded-xl border border-gray-100 p-4">
-                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                      Target Titles
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.target_titles.map((title, i) => (
-                        <span
-                          key={title}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
-                            i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
-                          }`}
-                          style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
-                        >
-                          {i === 0 && (
-                            <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          )}
-                          {title}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Campaign angles */}
-                  <div className="rounded-xl border border-gray-100 p-4">
-                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                      Campaign Angles
-                    </p>
-                    <div className="space-y-2">
-                      {result.campaign_angles.map((angle, i) => (
-                        <div
-                          key={angle.angle}
-                          className={`p-3 rounded-xl border ${
-                            i === 0 ? "border-[#4B6BF5]/20 bg-[#EEF1FE]/50" : "border-gray-100 bg-gray-50/50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
-                            {i === 0 && (
-                              <span
-                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
-                                style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-                              >
-                                Best fit
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-500">{angle.pitch}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Gated CTA */}
-                  <div
-                    className="rounded-xl p-5 text-center space-y-3"
-                    style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
-                  >
-                    <div>
-                      <p className="text-white font-bold">Your leads are ready</p>
-                      <p className="text-white/75 text-sm mt-1">
-                        Sign up or log in to unlock verified contact info for decision makers that match this ICP.
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                      <Link
-                        href="/signup"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-[#4B6BF5] hover:bg-gray-50 transition-colors active:scale-[0.98]"
-                      >
-                        Sign up free →
-                      </Link>
-                      <Link
-                        href="/login"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors active:scale-[0.98]"
-                      >
-                        Log in
-                      </Link>
-                    </div>
-                    <p className="text-white/40 text-xs">10 free credits · No card required</p>
-                  </div>
-
-                </div>
-              )}
-
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
-  )
-}
-
-// ── Main page ─────────────────────────────────────────────────────────────────
-export default function LandingPage() {
-  return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap');
@@ -474,7 +199,18 @@ export default function LandingPage() {
               Paste your website.
               <br />
               Find your{" "}
-              <span className="serif-italic" style={{ fontSize: "1.05em" }}>buyers.</span>
+              <span
+                className="serif-italic bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  fontSize: "1.05em",
+                }}
+              >
+                buyers.
+              </span>
             </h1>
 
             {/* Subheading */}
@@ -482,6 +218,47 @@ export default function LandingPage() {
               SalesPal finds your best campaign angle,
               surfaces qualified leads, and writes your outreach — in minutes.
             </p>
+
+            {/* URL form */}
+            <form onSubmit={handleAnalyze} className="max-w-lg mx-auto w-full">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={demoUrl}
+                  onChange={(e) => { setDemoUrl(e.target.value); setDemoError("") }}
+                  placeholder="yourcompany.com"
+                  className="flex-1 px-5 py-4 rounded-xl border border-gray-200 text-base outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 transition-all placeholder:text-gray-400 bg-white shadow-sm"
+                  autoComplete="off"
+                  spellCheck={false}
+                  disabled={analyzing}
+                />
+                <button
+                  type="submit"
+                  disabled={analyzing || retryAfter > 0}
+                  className="w-full sm:w-auto px-7 py-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap shadow-sm flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                >
+                  Analyze my website →
+                </button>
+              </div>
+              {demoError && <p className="text-sm text-red-500 mt-3">{demoError}</p>}
+              {retryAfter > 0 && (
+                <p
+                  className="text-xs text-center mt-3 font-medium tabular-nums"
+                  style={{
+                    background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  One analysis per minute · ready in{" "}
+                  {Math.floor(retryAfter / 60) > 0
+                    ? `${Math.floor(retryAfter / 60)}:${String(retryAfter % 60).padStart(2, "0")}`
+                    : `0:${String(retryAfter).padStart(2, "0")}`}
+                </p>
+              )}
+            </form>
 
             {/* Trust signals */}
             <p className="text-xs text-gray-400 flex flex-wrap justify-center gap-x-5 gap-y-1">
@@ -515,35 +292,225 @@ export default function LandingPage() {
             </div>
 
           </div>
+
+          {/* ── Modal ── */}
+          {modalOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget && !analyzing) setModalOpen(false)
+              }}
+            >
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+                {/* Modal header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+                  <div>
+                    <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
+                      {analyzing ? "Analyzing…" : "Your ICP Preview"}
+                    </p>
+                    {result && (
+                      <p className="text-sm font-semibold text-gray-900 mt-0.5">{result.company_name}</p>
+                    )}
+                  </div>
+                  {!analyzing && (
+                    <button
+                      onClick={() => setModalOpen(false)}
+                      className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                      <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Modal body */}
+                <div className="p-6">
+
+                  {/* Loading state */}
+                  {analyzing && (
+                    <div className="flex flex-col items-center justify-center py-16 gap-6">
+                      <div className="relative">
+                        <div
+                          className="size-16 rounded-2xl flex items-center justify-center"
+                          style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
+                        >
+                          <svg className="size-8 text-[#4B6BF5] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                        </div>
+                        <div
+                          className="absolute inset-0 rounded-2xl border-2 border-transparent animate-spin"
+                          style={{ borderTopColor: "#4B6BF5", borderRightColor: "#7B4BF5", animationDuration: "1.2s" }}
+                        />
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="font-semibold text-gray-900">Analyzing your website</p>
+                        <p className="text-sm text-gray-400 max-w-xs">
+                          Claude is reading your site and mapping your ideal customer profile…
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {[0, 1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="size-2 rounded-full animate-bounce"
+                            style={{
+                              background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                              animationDelay: `${i * 0.15}s`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Results state */}
+                  {!analyzing && result && (
+                    <div className="space-y-4">
+
+                      {/* Company summary */}
+                      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div>
+                            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
+                            <p className="font-bold text-gray-900">{result.company_name}</p>
+                            <p className="text-sm text-gray-500 mt-0.5">{result.what_they_sell}</p>
+                          </div>
+                          {result.tagline && (
+                            <span className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20">
+                              &ldquo;{result.tagline}&rdquo;
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ICP */}
+                      <div className="rounded-xl border border-gray-100 p-4">
+                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                          Ideal Customer Profile
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                          <div>
+                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
+                            <p className="text-gray-700 text-xs leading-relaxed">{result.ideal_customer_profile.company_type}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
+                            <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
+                            <div className="flex flex-wrap gap-1">
+                              {result.ideal_customer_profile.industries.map((ind) => (
+                                <span key={ind} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                                  {ind}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Target titles */}
+                      <div className="rounded-xl border border-gray-100 p-4">
+                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                          Target Titles
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {result.target_titles.map((title, i) => (
+                            <span
+                              key={title}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                                i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
+                              }`}
+                              style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
+                            >
+                              {i === 0 && (
+                                <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              )}
+                              {title}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Campaign angles */}
+                      <div className="rounded-xl border border-gray-100 p-4">
+                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                          Campaign Angles
+                        </p>
+                        <div className="space-y-2">
+                          {result.campaign_angles.map((angle, i) => (
+                            <div
+                              key={angle.angle}
+                              className={`p-3 rounded-xl border ${
+                                i === 0 ? "border-[#4B6BF5]/20 bg-[#EEF1FE]/50" : "border-gray-100 bg-gray-50/50"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
+                                {i === 0 && (
+                                  <span
+                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
+                                    style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                                  >
+                                    Best fit
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500">{angle.pitch}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Gated CTA */}
+                      <div
+                        className="rounded-xl p-5 text-center space-y-3"
+                        style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
+                      >
+                        <div>
+                          <p className="text-white font-bold">Your leads are ready</p>
+                          <p className="text-white/75 text-sm mt-1">
+                            Sign up or log in to unlock verified contact info for decision makers that match this ICP.
+                          </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                          <Link
+                            href="/signup"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-[#4B6BF5] hover:bg-gray-50 transition-colors active:scale-[0.98]"
+                          >
+                            Sign up free →
+                          </Link>
+                          <Link
+                            href="/login"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors active:scale-[0.98]"
+                          >
+                            Log in
+                          </Link>
+                        </div>
+                        <p className="text-white/40 text-xs">10 free credits · No card required</p>
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
-        {/* ── Live Demo ── */}
-        <DemoSection />
-
         {/* ── Footer ── */}
-        <footer className="px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Logo />
-            <span className="text-xs text-gray-400">
-              © 2026{" "}
-              <span
-                className="font-medium"
-                style={{
-                  background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                Good Vibes AI
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Privacy</Link>
-            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Terms</Link>
-            <Link href="/login" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Sign in</Link>
-          </div>
+        <footer className="py-6 flex items-center justify-center">
+          <p className="text-xs text-gray-400">
+            A product of Good Vibes AI
+          </p>
         </footer>
 
       </div>

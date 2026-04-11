@@ -64,6 +64,7 @@ function NavContent({
   isCampaigns,
   isNewCampaign,
   isSequences,
+  isSearch,
   onNavClick,
 }: {
   credits?: number
@@ -71,6 +72,7 @@ function NavContent({
   isCampaigns: boolean
   isNewCampaign: boolean
   isSequences: boolean
+  isSearch: boolean
   onNavClick?: () => void
 }) {
   return (
@@ -116,6 +118,17 @@ function NavContent({
           icon={
             <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          }
+        />
+        <NavItem
+          href="/dashboard/search"
+          label="Prospect Search"
+          active={isSearch}
+          onClick={onNavClick}
+          icon={
+            <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
           }
         />
@@ -203,6 +216,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
     pathname === "/dashboard" ||
     (pathname.startsWith("/dashboard/campaigns/") && !isNewCampaign)
   const isSequences = pathname === "/dashboard/sequences" || pathname.startsWith("/dashboard/sequences/")
+  const isSearch = pathname === "/dashboard/search"
 
   return (
     <>
@@ -264,6 +278,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
               isCampaigns={isCampaigns}
               isNewCampaign={isNewCampaign}
               isSequences={isSequences}
+              isSearch={isSearch}
               onNavClick={() => setMobileOpen(false)}
             />
           </div>
@@ -288,6 +303,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
           isCampaigns={isCampaigns}
           isNewCampaign={isNewCampaign}
           isSequences={isSequences}
+          isSearch={isSearch}
         />
       </aside>
     </>

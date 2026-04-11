@@ -375,13 +375,8 @@ export default function CampaignDetailClient({
               const tagline = (campaign.icp_json?.angle_data as Record<string, unknown> | undefined)?.tagline as string | undefined
               return tagline ? <p className="text-xs text-gray-400 italic">&ldquo;{tagline}&rdquo;</p> : null
             })()}
-            {(contactsFound !== null || campaign.stats_result) && (
-              <p className="text-xs text-gray-400">
-                {contactsFound !== null
-                  ? `~${contactsFound} contacts fetched`
-                  : `Market: ~${campaign.stats_result!.estimated_contacts?.toLocaleString()} contacts across ${campaign.stats_result!.companies?.toLocaleString()} companies`
-                }
-              </p>
+            {contactsFound !== null && (
+              <p className="text-xs text-gray-400">~{contactsFound} contacts fetched</p>
             )}
           </div>
 

@@ -53,6 +53,7 @@ function DemoSection() {
   const [analyzing, setAnalyzing] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [retryAfter, setRetryAfter] = useState(0)
+  const [modalOpen, setModalOpen] = useState(false)
 
   // On mount — restore cooldown from localStorage
   useEffect(() => {
@@ -97,6 +98,7 @@ function DemoSection() {
     setDemoError("")
     setAnalyzing(true)
     setResult(null)
+    setModalOpen(true)
 
     try {
       const res = await fetch("/api/analyze-landing", {
@@ -108,8 +110,10 @@ function DemoSection() {
       if (!res.ok) {
         if (res.status === 429) {
           setRetryAfter(data.retryAfter ?? 60)
+          setModalOpen(false)
           setDemoError("")
         } else {
+          setModalOpen(false)
           setDemoError(data.error ?? "Analysis failed. Please try again.")
         }
         return
@@ -118,6 +122,7 @@ function DemoSection() {
       setRetryAfter(60)
       setResult(data)
     } catch {
+      setModalOpen(false)
       setDemoError("Analysis failed. Please try again.")
     } finally {
       setAnalyzing(false)
@@ -159,17 +164,7 @@ function DemoSection() {
               className="w-full sm:w-auto px-7 py-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap shadow-sm flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
             >
-              {analyzing ? (
-                <>
-                  <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Analyzing…
-                </>
-              ) : (
-                "Analyze my website →"
-              )}
+              Analyze my website →
             </button>
           </div>
           {demoError && <p className="text-sm text-red-500 mt-3">{demoError}</p>}
@@ -190,134 +185,219 @@ function DemoSection() {
             </p>
           )}
         </form>
+      </div>
 
-        {/* Results */}
-        {result && (
-          <div className="mt-8 space-y-4">
+      {/* ── Modal ── */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !analyzing) setModalOpen(false)
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
-            {/* Company summary card */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
-                  <p className="text-lg font-bold text-gray-900">{result.company_name}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{result.what_they_sell}</p>
-                </div>
-                {result.tagline && (
-                  <span className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20">
-                    &ldquo;{result.tagline}&rdquo;
-                  </span>
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
+                  {analyzing ? "Analyzing…" : "Your ICP Preview"}
+                </p>
+                {result && (
+                  <p className="text-sm font-semibold text-gray-900 mt-0.5">{result.company_name}</p>
                 )}
               </div>
+              {!analyzing && (
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
 
-            {/* ICP card */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-4">
-                Ideal Customer Profile
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
-                  <p className="text-gray-700">{result.ideal_customer_profile.company_type}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Size</p>
-                  <p className="text-gray-700">{result.ideal_customer_profile.company_size}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {result.ideal_customer_profile.industries.map((ind) => (
-                      <span key={ind} className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                        {ind}
-                      </span>
+            {/* Modal body */}
+            <div className="p-6">
+
+              {/* Loading state */}
+              {analyzing && (
+                <div className="flex flex-col items-center justify-center py-16 gap-6">
+                  <div className="relative">
+                    <div
+                      className="size-16 rounded-2xl flex items-center justify-center"
+                      style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
+                    >
+                      <svg className="size-8 text-[#4B6BF5] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                      </svg>
+                    </div>
+                    <div
+                      className="absolute inset-0 rounded-2xl border-2 border-transparent animate-spin"
+                      style={{ borderTopColor: "#4B6BF5", borderRightColor: "#7B4BF5", animationDuration: "1.2s" }}
+                    />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="font-semibold text-gray-900">Analyzing your website</p>
+                    <p className="text-sm text-gray-400 max-w-xs">
+                      Claude is reading your site and mapping your ideal customer profile…
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="size-2 rounded-full animate-bounce"
+                        style={{
+                          background: "linear-gradient(to right, #4B6BF5, #7B4BF5)",
+                          animationDelay: `${i * 0.15}s`,
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Target titles */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-semibold tracking-widests uppercase text-gray-400 mb-4">
-                Target Titles
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {result.target_titles.map((title, i) => (
-                  <span
-                    key={title}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
-                      i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
-                    }`}
-                    style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
-                  >
-                    {i === 0 && (
-                      <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    )}
-                    {title}
-                  </span>
-                ))}
-              </div>
-            </div>
+              {/* Results state */}
+              {!analyzing && result && (
+                <div className="space-y-4">
 
-            {/* Campaign angles */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-4">
-                Campaign Angles
-              </p>
-              <div className="space-y-3">
-                {result.campaign_angles.map((angle, i) => (
-                  <div
-                    key={angle.angle}
-                    className={`p-4 rounded-xl border ${
-                      i === 0
-                        ? "border-[#4B6BF5]/30 bg-[#EEF1FE]/50"
-                        : "border-gray-100 bg-gray-50/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
-                      {i === 0 && (
-                        <span
-                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
-                          style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
-                        >
-                          Best fit
+                  {/* Company summary */}
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
+                        <p className="font-bold text-gray-900">{result.company_name}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">{result.what_they_sell}</p>
+                      </div>
+                      {result.tagline && (
+                        <span className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20">
+                          &ldquo;{result.tagline}&rdquo;
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">{angle.pitch}</p>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Gated CTA */}
-            <div
-              className="rounded-2xl p-6 text-center space-y-4"
-              style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
-            >
-              <div>
-                <p className="text-white font-bold text-lg">Your leads are ready</p>
-                <p className="text-white/80 text-sm mt-1">
-                  Sign up to see verified contacts at companies that match this ICP.
-                </p>
-              </div>
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-white text-[#4B6BF5] hover:bg-gray-50 transition-colors active:scale-[0.98]"
-              >
-                Sign up to unlock verified contacts →
-              </Link>
-              <p className="text-white/50 text-xs">10 free leads · No credit card required</p>
-            </div>
+                  {/* ICP */}
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                      Ideal Customer Profile
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
+                        <p className="text-gray-700 text-xs leading-relaxed">{result.ideal_customer_profile.company_type}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
+                        <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
+                        <div className="flex flex-wrap gap-1">
+                          {result.ideal_customer_profile.industries.map((ind) => (
+                            <span key={ind} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                              {ind}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
+                  {/* Target titles */}
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                      Target Titles
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.target_titles.map((title, i) => (
+                        <span
+                          key={title}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                            i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
+                          }`}
+                          style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
+                        >
+                          {i === 0 && (
+                            <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          )}
+                          {title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Campaign angles */}
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                      Campaign Angles
+                    </p>
+                    <div className="space-y-2">
+                      {result.campaign_angles.map((angle, i) => (
+                        <div
+                          key={angle.angle}
+                          className={`p-3 rounded-xl border ${
+                            i === 0 ? "border-[#4B6BF5]/20 bg-[#EEF1FE]/50" : "border-gray-100 bg-gray-50/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
+                            {i === 0 && (
+                              <span
+                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
+                                style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                              >
+                                Best fit
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">{angle.pitch}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Gated CTA */}
+                  <div
+                    className="rounded-xl p-5 text-center space-y-3"
+                    style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}
+                  >
+                    <div>
+                      <p className="text-white font-bold">Your leads are ready</p>
+                      <p className="text-white/75 text-sm mt-1">
+                        Sign up or log in to unlock verified contact info for decision makers that match this ICP.
+                      </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <Link
+                        href="/signup"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-[#4B6BF5] hover:bg-gray-50 transition-colors active:scale-[0.98]"
+                      >
+                        Sign up free →
+                      </Link>
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors active:scale-[0.98]"
+                      >
+                        Log in
+                      </Link>
+                    </div>
+                    <p className="text-white/40 text-xs">10 free credits · No card required</p>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   )
 }
@@ -376,7 +456,7 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* ── Hero (centered, no URL form) ── */}
+        {/* ── Hero ── */}
         <section className="px-6 md:px-12 py-10 lg:py-14">
           <div className="max-w-3xl mx-auto text-center space-y-8">
 
@@ -441,7 +521,7 @@ export default function LandingPage() {
         <DemoSection />
 
         {/* ── Footer ── */}
-        <footer className="border-t border-gray-100 px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <footer className="px-6 md:px-12 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo />
             <span className="text-xs text-gray-400">

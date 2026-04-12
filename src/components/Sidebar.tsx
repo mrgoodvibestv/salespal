@@ -184,16 +184,17 @@ function NavContent({
           </p>
         </div>
 
-        <button
-          disabled
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-medium text-gray-600 cursor-not-allowed opacity-70"
-          title="Coming soon"
+        <Link
+          href="/dashboard/credits"
+          onClick={onNavClick}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+          style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
         >
           <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
           Buy Credits
-        </button>
+        </Link>
         <form action="/auth/signout" method="post">
           <button
             type="submit"

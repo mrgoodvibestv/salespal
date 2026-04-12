@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
     const creditsToAdd = creditsStr ? parseInt(creditsStr, 10) : 0
 
     if (!userId || !creditsToAdd) {
-      console.error("[webhook] missing metadata — user_id or credits", session.metadata)
-      return NextResponse.json({ error: "Missing metadata" }, { status: 400 })
+      console.error("[webhook] Missing metadata:", session.id)
+      return NextResponse.json({ received: true, warning: "missing_metadata" }, { status: 200 })
     }
 
     const { error } = await supabase.rpc("add_credits", {

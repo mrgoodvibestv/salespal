@@ -99,8 +99,6 @@ export async function POST(request: NextRequest) {
     filters: exploriumFilters,
   }
 
-  console.log("[search/prospects] request:", JSON.stringify(body))
-
   let prospects: ExploriumProspect[] = []
   try {
     const res = await fetch(`${EXPLORIUM_BASE}/v1/prospects`, {
@@ -117,10 +115,19 @@ export async function POST(request: NextRequest) {
 
     const data = await res.json()
     prospects = data?.prospects ?? data?.data ?? data?.results ?? data?.items ?? []
-    console.log("[search/prospects] returned:", prospects.length)
   } catch (err) {
     console.error("[search/prospects] fetch error:", err)
     return NextResponse.json({ error: "Search failed. Please try again." }, { status: 500 })
+  }
+
+  // Don't charge credits if Explorium returned nothing
+  if (prospects.length === 0) {
+    return NextResponse.json({
+      results: [],
+      page,
+      hasMore: false,
+      credits_remaining: userData.credits_balance,
+    })
   }
 
   // Deduct 5 credits flat

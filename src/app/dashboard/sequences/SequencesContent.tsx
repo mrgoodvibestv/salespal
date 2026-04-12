@@ -37,14 +37,14 @@ function LinkedInIcon({ className }: { className?: string }) {
 function ChannelBadge({ channel }: { channel?: "email" | "linkedin" }) {
   if (channel === "linkedin") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] leading-none font-medium bg-blue-50 text-blue-700 border border-blue-100">
         <LinkedInIcon className="size-3" />
         LinkedIn
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] leading-none font-medium bg-gray-100 text-gray-600 border border-gray-200">
       <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
@@ -320,7 +320,7 @@ export default function SequencesContent({
                         key={seq.campaign_id}
                         onClick={() => setSelectedId(seq.campaign_id)}
                         className={`w-full text-left px-4 py-3 transition-colors duration-150 relative ${
-                          isActive ? "bg-purple-50/50" : "hover:bg-[#EEF1FE]/30"
+                          isActive ? "bg-purple-50/50 shadow-sm" : "hover:bg-[#EEF1FE]/30"
                         }`}
                       >
                         {/* Active left border accent */}
@@ -332,7 +332,7 @@ export default function SequencesContent({
                         )}
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className={`text-sm font-semibold truncate ${isActive ? "text-[#4B6BF5]" : "text-gray-900"}`}>
+                            <p className={`text-sm font-semibold truncate ${isActive ? "text-[#4B6BF5]" : "text-gray-900"}`} title={seq.campaign_name}>
                               {seq.campaign_name}
                             </p>
                             {seq.angle_selected && (

@@ -14,7 +14,7 @@ const STATUS_CONFIG = {
 function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.active
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide whitespace-nowrap ${config.className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold tracking-wide whitespace-nowrap ${config.className}`}>
       {config.dot && <span className={`size-1.5 rounded-full shrink-0 ${config.dot}`} />}
       {config.label}
     </span>
@@ -51,7 +51,12 @@ export default async function DashboardPage() {
             <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-400 mb-1">
               Outreach Intelligence
             </p>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Campaigns</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 flex items-center gap-2.5">
+              <svg className="size-7 text-[#4B6BF5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              My Campaigns
+            </h1>
             <p className="text-sm text-gray-400 mt-0.5">
               Your active outreach campaigns
             </p>
@@ -92,7 +97,7 @@ export default async function DashboardPage() {
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-black truncate text-sm group-hover:text-[#4B6BF5] transition-colors">
+                      <p className="font-semibold text-black truncate text-sm group-hover:text-[#4B6BF5] transition-colors" title={c.name}>
                         {c.name}
                       </p>
                       {c.angle_selected && (

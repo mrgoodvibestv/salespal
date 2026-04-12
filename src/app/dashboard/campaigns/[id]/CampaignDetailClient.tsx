@@ -496,19 +496,34 @@ export default function CampaignDetailClient({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-sm text-sm">
               {ad.target_companies && (
                 <div className="space-y-1">
-                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Target Companies</p>
+                  <p className="flex items-center gap-1 text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                    <svg className="size-3 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Target Companies
+                  </p>
                   <p className="text-gray-700">{ad.target_companies}</p>
                 </div>
               )}
               {ad.target_titles?.length && (
                 <div className="space-y-1">
-                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Target Titles</p>
+                  <p className="flex items-center gap-1 text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                    <svg className="size-3 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Target Titles
+                  </p>
                   <p className="text-gray-700">{ad.target_titles.join(" · ")}</p>
                 </div>
               )}
               {ad.pitch_summary && (
                 <div className="space-y-1">
-                  <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400">Pitch</p>
+                  <p className="flex items-center gap-1 text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                    <svg className="size-3 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Pitch
+                  </p>
                   <p className="text-gray-700">{ad.pitch_summary}</p>
                 </div>
               )}
@@ -698,19 +713,19 @@ export default function CampaignDetailClient({
 
             {/* Stats bar */}
             <div className="flex items-stretch gap-2 mb-5 overflow-x-auto pb-0.5">
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px] lg:flex-1">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
                 <span className="text-3xl font-bold text-emerald-700 tabular-nums leading-none tracking-tight">{dmCount}</span>
                 <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Decision Makers</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px] lg:flex-1">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
                 <span className="text-3xl font-bold text-violet-700 tabular-nums leading-none tracking-tight">{infCount}</span>
                 <span className="text-[10px] font-semibold text-violet-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Influencers</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px] lg:flex-1">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
                 <span className="text-3xl font-bold text-blue-700 tabular-nums leading-none tracking-tight">{unlockedCount}</span>
                 <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Unlocked</span>
               </div>
-              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px] lg:flex-1">
+              <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
                 <span className="text-3xl font-bold text-gray-700 tabular-nums leading-none tracking-tight">{filteredLeads.length}</span>
                 <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Showing</span>
               </div>
@@ -740,7 +755,7 @@ export default function CampaignDetailClient({
                           <p className="text-xs text-gray-500 truncate mt-0.5" title={lead.job_title}>{lead.job_title}</p>
                         </div>
                       </div>
-                      <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
+                      <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-medium ${tier.className}`}><span className="truncate">{tier.label}</span></span>
                     </div>
                     {(companyName || lead.geo_location) && (
                       <div className="text-xs text-gray-500 space-y-0.5">
@@ -835,8 +850,8 @@ export default function CampaignDetailClient({
                             }
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`inline-flex shrink-0 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${tier.className}`}>
-                              {tier.label}
+                            <span className={`inline-flex items-center shrink-0 px-3 py-1 rounded-full text-[11px] leading-none font-medium whitespace-nowrap ${tier.className}`}>
+                              <span className="truncate">{tier.label}</span>
                             </span>
                           </td>
                           <td className="px-4 py-3">

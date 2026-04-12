@@ -554,7 +554,7 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
 
       {/* ── Results table ── */}
       {!searching && displayResults !== null && displayResults.length > 0 && (
-        <div className="rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
 
           {/* Stats bar */}
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-5 text-xs flex-wrap">
@@ -661,8 +661,8 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
 
                       {/* Tier */}
                       <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide whitespace-nowrap ${tierCfg.className}`}>
-                          {tierCfg.label}
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-semibold whitespace-nowrap ${tierCfg.className}`}>
+                          <span className="truncate">{tierCfg.label}</span>
                         </span>
                       </td>
 
@@ -771,8 +771,8 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                         {lead.company_name || "—"}
                       </p>
                     </div>
-                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${tierCfg.className}`}>
-                      {tierCfg.label}
+                    <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-semibold ${tierCfg.className}`}>
+                      <span className="truncate">{tierCfg.label}</span>
                     </span>
                   </div>
 

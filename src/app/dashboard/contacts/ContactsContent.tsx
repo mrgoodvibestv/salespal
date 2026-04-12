@@ -177,19 +177,19 @@ export default function ContactsContent({
 
           {/* Stats row */}
           <div className="flex items-stretch gap-2 mb-6 overflow-x-auto pb-0.5">
-            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px] lg:flex-1">
-              <span className="text-3xl font-bold text-gray-900 tabular-nums leading-none tracking-tight">{totalContacts}</span>
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-gray-300 bg-gray-50 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
+              <span className="text-3xl font-bold tabular-nums leading-none tracking-tight bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}>{totalContacts}</span>
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Contacts</span>
             </div>
-            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px] lg:flex-1">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-violet-400 bg-violet-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
               <span className="text-3xl font-bold text-violet-700 tabular-nums leading-none tracking-tight">{campaignCount}</span>
               <span className="text-[10px] font-semibold text-violet-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">Campaigns</span>
             </div>
-            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px] lg:flex-1">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-blue-400 bg-blue-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
               <span className="text-3xl font-bold text-blue-700 tabular-nums leading-none tracking-tight">{withEmail}</span>
               <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">With Email</span>
             </div>
-            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px] lg:flex-1">
+            <div className="flex flex-col items-start pl-3 pr-5 py-3 rounded-xl border-l-2 border-emerald-400 bg-emerald-50/60 shrink-0 min-w-[80px] lg:flex-1 shadow-sm">
               <span className="text-3xl font-bold text-emerald-700 tabular-nums leading-none tracking-tight">{withPhone}</span>
               <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-[0.1em] mt-1.5 whitespace-nowrap">With Phone</span>
             </div>
@@ -253,9 +253,13 @@ export default function ContactsContent({
                 <div key={group.campaign_id}>
                   {/* Section header — truncate on mobile, angle pill hidden on mobile */}
                   <div className="flex items-center gap-2 mb-3 min-w-0">
+                    <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
                     <Link
                       href={`/dashboard/campaigns/${group.campaign_id}`}
                       className="font-semibold text-black hover:text-[#4B6BF5] transition-colors duration-150 text-sm truncate max-w-[200px] sm:max-w-none"
+                      title={group.campaign_name}
                     >
                       {group.campaign_name}
                     </Link>
@@ -281,12 +285,12 @@ export default function ContactsContent({
                           {/* Name + title + mobile email */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-gray-900 text-sm truncate">{contact.full_name}</span>
-                              <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${tier.className}`}>
-                                {tier.label}
+                              <span className="font-semibold text-gray-900 text-sm truncate" title={contact.full_name}>{contact.full_name}</span>
+                              <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-medium ${tier.className}`}>
+                                <span className="truncate">{tier.label}</span>
                               </span>
                             </div>
-                            <p className="text-xs text-gray-400 truncate mt-0.5">{contact.job_title}</p>
+                            <p className="text-xs text-gray-400 truncate mt-0.5" title={contact.job_title}>{contact.job_title}</p>
                             {/* Email shown inline on mobile (hidden on sm+) */}
                             {contact.email && (
                               <p className="text-xs text-gray-400 truncate mt-0.5 sm:hidden">{contact.email}</p>
@@ -299,6 +303,7 @@ export default function ContactsContent({
                               <a
                                 href={`mailto:${contact.email}`}
                                 className="text-xs text-gray-600 hover:text-black truncate max-w-[200px]"
+                                title={contact.email}
                               >
                                 {contact.email}
                               </a>

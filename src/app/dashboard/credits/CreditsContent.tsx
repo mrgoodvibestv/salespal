@@ -59,6 +59,7 @@ export default function CreditsContent({
   cancelled: boolean
 }) {
   const [loading, setLoading]                       = useState<string | null>(null)
+  const [purchaseError, setPurchaseError]           = useState<string | null>(null)
   const [successDismissed, setSuccessDismissed]     = useState(false)
   const [cancelledDismissed, setCancelledDismissed] = useState(false)
   const [balance, setBalance]   = useState(credits)
@@ -95,6 +96,7 @@ export default function CreditsContent({
 
   async function handlePurchase(priceId: string, planId: string) {
     setLoading(planId)
+    setPurchaseError(null)
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -104,9 +106,13 @@ export default function CreditsContent({
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
+        return
       }
+      setPurchaseError("Something went wrong. Please try again.")
+      setTimeout(() => setPurchaseError(null), 5000)
     } catch {
-      // noop — stay on page
+      setPurchaseError("Something went wrong. Please try again.")
+      setTimeout(() => setPurchaseError(null), 5000)
     }
     setLoading(null)
   }
@@ -291,6 +297,11 @@ export default function CreditsContent({
           )
         })}
       </div>
+
+      {/* Purchase error */}
+      {purchaseError && (
+        <p className="text-sm text-red-500 text-center">{purchaseError}</p>
+      )}
 
       {/* Bottom note */}
       <p className="text-xs text-gray-400 text-center">

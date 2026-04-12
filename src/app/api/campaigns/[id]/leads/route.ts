@@ -387,7 +387,13 @@ export async function POST(
     p_explorium_cost: prospects.length * 0.04,
     p_reference_id:   campaignId,
   })
-  if (deductError) console.error("[leads] deduct_credits error:", deductError)
+  if (deductError) {
+    console.error("[leads] deduct_credits failed:", deductError)
+    return NextResponse.json(
+      { error: "Failed to process credits. Please try again." },
+      { status: 500 }
+    )
+  }
 
   // ── Update campaign status (page 1 only) ────────────────────────────────
   if (page === 1) {

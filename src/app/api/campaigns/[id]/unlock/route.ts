@@ -105,6 +105,17 @@ export async function POST(
 
   }
 
+  // Don't charge if enrichment returned nothing useful
+  if (!email && !phone) {
+    return NextResponse.json(
+      {
+        error: "Contact details not available for this prospect. You were not charged.",
+        charged: false,
+      },
+      { status: 200 }
+    )
+  }
+
   // Deduct 2 credits atomically via deduct_credits RPC
   const { error: deductError } = await supabase.rpc("deduct_credits", {
     p_user_id:        user.id,

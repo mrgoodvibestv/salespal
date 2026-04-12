@@ -169,7 +169,8 @@ export default function CampaignDetailClient({
   const [fetching, setFetching]         = useState(false)
   const [fetchError, setFetchError]     = useState("")
   const [unlockingId, setUnlockingId]   = useState<string | null>(null)
-  const [unlockErrors, setUnlockErrors] = useState<Record<string, string>>({})
+  const [unlockErrors, setUnlockErrors]     = useState<Record<string, string>>({})
+  const [unlockWarnings, setUnlockWarnings] = useState<Record<string, string>>({})
   const [contactsFound, setContactsFound] = useState<number | null>(null)
   const [activeTab, setActiveTab]       = useState<"leads" | "sequences">("leads")
 
@@ -344,6 +345,14 @@ export default function CampaignDetailClient({
           ...e,
           [lead.id]: res.status === 402 ? "Not enough credits (2 required)" : (data.error ?? "Unlock failed"),
         }))
+        return
+      }
+
+      if (data.charged === false) {
+        setUnlockWarnings((e) => ({ ...e, [lead.id]: "Contact details unavailable. Not charged." }))
+        setTimeout(() => {
+          setUnlockWarnings((e) => { const n = { ...e }; delete n[lead.id]; return n })
+        }, 4000)
         return
       }
 
@@ -746,7 +755,8 @@ export default function CampaignDetailClient({
                 const companyName = lead.companies?.name ?? lead.company_name ?? ""
                 const tier = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.influencer
                 const isUnlocking = unlockingId === lead.id
-                const unlockErr = unlockErrors[lead.id]
+                const unlockErr  = unlockErrors[lead.id]
+                const unlockWarn = unlockWarnings[lead.id]
                 return (
                   <div key={lead.id} className={`card-lift p-4 rounded-2xl border border-gray-200 space-y-3 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
                     <div className="flex items-center justify-between gap-2">
@@ -806,7 +816,8 @@ export default function CampaignDetailClient({
                             <><svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>Unlock · 2 credits</>
                           )}
                         </button>
-                        {unlockErr && <span className="text-xs text-red-500">{unlockErr}</span>}
+                        {unlockErr  && <span className="text-xs text-red-500">{unlockErr}</span>}
+                        {unlockWarn && <span className="text-xs text-amber-500">{unlockWarn}</span>}
                       </div>
                     )}
                   </div>
@@ -836,7 +847,8 @@ export default function CampaignDetailClient({
                       const companyName = lead.companies?.name ?? lead.company_name ?? ""
                       const tier = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.influencer
                       const isUnlocking = unlockingId === lead.id
-                      const unlockErr = unlockErrors[lead.id]
+                      const unlockErr  = unlockErrors[lead.id]
+                      const unlockWarn = unlockWarnings[lead.id]
 
                       return (
                         <tr key={lead.id} className={`hover:bg-[#EEF1FE]/30 transition-colors duration-150 ${lead.tier === "noise" ? "opacity-50" : ""}`}>
@@ -911,7 +923,8 @@ export default function CampaignDetailClient({
                                     <><svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>Unlock · 2 credits</>
                                   )}
                                 </button>
-                                {unlockErr && <span className="text-xs text-red-500">{unlockErr}</span>}
+                                {unlockErr  && <span className="text-xs text-red-500">{unlockErr}</span>}
+                                {unlockWarn && <span className="text-xs text-amber-500">{unlockWarn}</span>}
                               </div>
                             )}
                           </td>

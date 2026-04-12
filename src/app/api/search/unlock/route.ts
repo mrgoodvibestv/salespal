@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     p_amount:         UNLOCK_COST,
     p_action:         "contact_unlock",
     p_explorium_cost: 0.08,
-    p_reference_id:   prospect_id,
+    p_reference_id:   null,
   })
 
   if (deductError) {

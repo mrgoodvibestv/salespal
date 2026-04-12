@@ -67,7 +67,7 @@ All must be set in `.env.local` and Vercel project settings.
 
 ## Database Schema
 
-All migrations in `supabase/migrations/`. Applied in order 001–005.
+All migrations in `supabase/migrations/`. Applied in order 001–006.
 
 ### Enums
 
@@ -76,10 +76,10 @@ campaign_status: draft | extracting_icp | angle_selected | fetching_companies | 
 contact_tier:    decision_maker | influencer | noise
 outreach_channel: email | linkedin | call
 export_type:     csv | pdf
-credit_action:   trial_grant | pack_purchase | company_fetch | contact_unlock | outreach_generation | refund
+credit_action:   trial_grant | pack_purchase | company_fetch | contact_unlock | outreach_generation | refund | sequence_regeneration
 ```
 
-**⚠️ Note:** `sequence_regeneration` is NOT in the `credit_action` enum. Any code passing `"sequence_regeneration"` to `deduct_credits` RPC will fail with a Postgres enum error.
+**Note:** `sequence_regeneration` was added via migration 006. Must be applied to DB before sequence regen works.
 
 ### users
 ```sql
@@ -395,8 +395,8 @@ const TIER_CONFIG = {
 
 ### Credit guards
 - **search/prospects:** zero results → return early before `deduct_credits`; `credits_remaining` included in response
-- **search/unlock:** `!email && !phone` → return `{ charged: false }` before `deduct_credits`
-- **campaigns/[id]/unlock:** same guard: `!email && !phone` → return `{ charged: false }` before `deduct_credits`
+- **search/unlock:** `!email && !phone` → return `{ charged: false }` before `deduct_credits`; `p_reference_id: null` (prospect IDs are not UUIDs)
+- **campaigns/[id]/unlock:** same guard: `!email && !phone` → return `{ charged: false }` before `deduct_credits`; `p_reference_id: campaignId` (valid UUID)
 - **campaigns/[id]/leads:** `deductError` → return 500 (not silently ignored)
 
 ### Webhook idempotency
@@ -434,17 +434,8 @@ Always use `.forEach((val, key) => {...})` — never `for...of` on Map iterators
 
 ## Known Issues & Limitations
 
-### 🔴 CRITICAL — `sequence_regeneration` not in credit_action enum
-The `credit_action` enum in the DB does not include `"sequence_regeneration"`. The sequences route passes `p_action: "sequence_regeneration"` to `deduct_credits`, which causes a Postgres enum cast error. Every regeneration attempt returns 500 "Failed to deduct credits". **Fix: add `sequence_regeneration` to the enum via a new migration.**
-
-### 🔴 CRITICAL — `p_reference_id` receives non-UUID in search/prospects
-`search/prospects/route.ts` passes `p_reference_id: \`search_${Date.now()}\`` to `deduct_credits`. The column is UUID type — this will fail. **Fix: pass `null` for reference_id in search/prospects.**
-
 ### 🟡 In-memory rate limiting on analyze-landing
 `ipCooldowns = new Map<string, number>()` is module-level. Does not persist across Vercel cold starts or parallel instances. Per-instance only — not globally enforced.
-
-### 🟡 Sequences workspace regeneration missing credit gate
-`SequencesContent.tsx` (the `/dashboard/sequences` page) calls the regenerate API without checking credit balance first. Only `SequencesTab` (inside campaign detail) has the `credits < 2` guard and "2 credits" label on the button.
 
 ### 🟡 Sequence regen credits lost if AI fails after deduction
 In sequences route, `deduct_credits` is called before the Claude API call. If Claude fails post-deduction, credits are lost and no new sequence is generated.
@@ -500,17 +491,16 @@ supabase/migrations/
   003_company_id_nullable.sql         — Makes leads.company_id nullable
   004_campaign_sequence.sql           — Adds campaigns.sequence_json JSONB
   005_lead_status.sql                 — Adds leads.status TEXT DEFAULT 'new'
+  006_sequence_regeneration_enum.sql  — Adds sequence_regeneration to credit_action enum
 ```
 
 ---
 
 ## Still To Build
 
-- **`sequence_regeneration` enum migration** — Required before regen works
-- **`reference_id` null fix in search/prospects** — Required before search deduction works reliably  
+- **Apply migration 006 to production DB** — `ALTER TYPE credit_action ADD VALUE IF NOT EXISTS 'sequence_regeneration';` — run in Supabase SQL editor
 - **Global rate limiting** — Replace in-memory Map with Redis/DB-backed per-IP limiter
 - **Server-side export save** — `POST /api/campaigns/[id]/export` to persist to `exports` table
-- **Sequences workspace credit gate** — Add `credits < 2` check + label to `SequencesContent` regenerate button
 - **Post-v1:** Gmail/LinkedIn direct send, CRM sync, A/B testing, reply tracking, team multi-seat, agentic auto-send
 
 ---

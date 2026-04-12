@@ -173,6 +173,7 @@ export default function SequencesContent({
   credits: number
   userEmail: string
 }) {
+  const [localCredits, setLocalCredits] = useState(credits)
   const [selectedId, setSelectedId] = useState<string | null>(
     sequences.length > 0 ? sequences[0].campaign_id : null
   )
@@ -187,7 +188,7 @@ export default function SequencesContent({
 
   async function handleRegenerate() {
     if (!selectedId) return
-    if (credits < 2) {
+    if (localCredits < 2) {
       setRegenError("You need 2 credits to regenerate a sequence.")
       return
     }
@@ -205,6 +206,7 @@ export default function SequencesContent({
         return
       }
       setSequenceMap((prev) => ({ ...prev, [selectedId]: data.emails ?? [] }))
+      if (typeof data.credits_remaining === "number") setLocalCredits(data.credits_remaining)
     } catch {
       setRegenError("Something went wrong.")
     } finally {
@@ -214,7 +216,7 @@ export default function SequencesContent({
 
   return (
     <div className="flex min-h-screen bg-white overflow-x-hidden">
-      <Sidebar credits={credits} userEmail={userEmail} />
+      <Sidebar credits={localCredits} userEmail={userEmail} />
 
       <main className="flex-1 min-w-0 ml-0 md:ml-64 pt-[88px] md:pt-0 flex flex-col">
 
@@ -292,7 +294,7 @@ export default function SequencesContent({
                         </span>
                       )}
                     </div>
-                    <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={credits < 2} />
+                    <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={localCredits < 2} />
                   </div>
                   {regenError && (
                     <div className="mb-3 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
@@ -386,7 +388,7 @@ export default function SequencesContent({
                           </Link>
                         </div>
                       </div>
-                      <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={credits < 2} />
+                      <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={localCredits < 2} />
                     </div>
 
                     {regenError && (

@@ -134,11 +134,13 @@ function TouchCard({ touch }: { touch: Touch }) {
   )
 }
 
-function RegenerateButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+function RegenerateButton({ onClick, loading, insufficientCredits }: { onClick: () => void; loading: boolean; insufficientCredits: boolean }) {
+  const isDisabled = loading || insufficientCredits
   return (
     <button
       onClick={onClick}
-      disabled={loading}
+      disabled={isDisabled}
+      title={insufficientCredits ? "You need 2 credits to regenerate" : undefined}
       className="btn-press shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
     >
       {loading ? (
@@ -155,6 +157,7 @@ function RegenerateButton({ onClick, loading }: { onClick: () => void; loading: 
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Regenerate
+          <span className="text-gray-400 font-normal">· 2 credits</span>
         </>
       )}
     </button>
@@ -184,6 +187,10 @@ export default function SequencesContent({
 
   async function handleRegenerate() {
     if (!selectedId) return
+    if (credits < 2) {
+      setRegenError("You need 2 credits to regenerate a sequence.")
+      return
+    }
     setRegenerating(true)
     setRegenError("")
     try {
@@ -285,7 +292,7 @@ export default function SequencesContent({
                         </span>
                       )}
                     </div>
-                    <RegenerateButton onClick={handleRegenerate} loading={regenerating} />
+                    <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={credits < 2} />
                   </div>
                   {regenError && (
                     <div className="mb-3 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
@@ -379,7 +386,7 @@ export default function SequencesContent({
                           </Link>
                         </div>
                       </div>
-                      <RegenerateButton onClick={handleRegenerate} loading={regenerating} />
+                      <RegenerateButton onClick={handleRegenerate} loading={regenerating} insufficientCredits={credits < 2} />
                     </div>
 
                     {regenError && (

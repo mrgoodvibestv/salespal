@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     p_amount:         SEARCH_COST,
     p_action:         "company_fetch",
     p_explorium_cost: 0.20,
-    p_reference_id:   `search_${Date.now()}`,
+    p_reference_id:   null,
   })
   if (deductError) {
     console.error("[search/prospects] deduct_credits error:", deductError)

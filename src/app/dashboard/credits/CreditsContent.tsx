@@ -87,6 +87,7 @@ export default function CreditsContent({
       } catch { /* ignore */ }
       if (attempts >= 5) {
         setPolling(false)
+        setSuccessConfirmed(true)
         clearInterval(interval)
       }
     }, 2000)
@@ -143,7 +144,7 @@ export default function CreditsContent({
             </svg>
             <p className="text-sm font-medium text-emerald-700">
               {successConfirmed
-                ? "Credits added to your account!"
+                ? "Credits added to your account. If your balance hasn't updated yet, refresh the page."
                 : "Payment confirmed! Adding credits to your account…"}
             </p>
           </div>

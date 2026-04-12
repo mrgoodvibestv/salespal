@@ -302,16 +302,16 @@ export default function LandingPage() {
                 if (e.target === e.currentTarget && !analyzing) setModalOpen(false)
               }}
             >
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
 
                 {/* Modal header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 border-l-4 border-l-[#4B6BF5] sticky top-0 bg-white z-10">
                   <div>
                     <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
                       {analyzing ? "Analyzing…" : "Your ICP Preview"}
                     </p>
                     {result && (
-                      <p className="text-sm font-semibold text-gray-900 mt-0.5">{result.company_name}</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate max-w-[220px] sm:max-w-none">{result.company_name}</p>
                     )}
                   </div>
                   {!analyzing && (
@@ -372,15 +372,15 @@ export default function LandingPage() {
                     <div className="space-y-4">
 
                       {/* Company summary */}
-                      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+                      <div className="rounded-xl border border-[#4B6BF5]/15 bg-gradient-to-br from-[#EEF1FE]/60 to-[#F0EBFE]/40 overflow-hidden p-4">
                         <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
                             <p className="font-bold text-gray-900">{result.company_name}</p>
-                            <p className="text-sm text-gray-500 mt-0.5">{result.what_they_sell}</p>
+                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-3">{result.what_they_sell}</p>
                           </div>
                           {result.tagline && (
-                            <span className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20">
+                            <span className="shrink-0 px-3 py-1 rounded-full text-[11px] leading-none font-medium text-[#4B6BF5] bg-white border border-[#4B6BF5]/20 whitespace-nowrap">
                               &ldquo;{result.tagline}&rdquo;
                             </span>
                           )}
@@ -388,34 +388,37 @@ export default function LandingPage() {
                       </div>
 
                       {/* ICP */}
-                      <div className="rounded-xl border border-gray-100 p-4">
-                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                          Ideal Customer Profile
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                          <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
-                            <p className="text-gray-700 text-xs leading-relaxed">{result.ideal_customer_profile.company_type}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
-                            <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
-                            <div className="flex flex-wrap gap-1">
-                              {result.ideal_customer_profile.industries.map((ind) => (
-                                <span key={ind} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
-                                  {ind}
-                                </span>
-                              ))}
+                      <div className="rounded-xl border border-gray-100 overflow-hidden">
+                        <div className="h-1" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
+                        <div className="p-4">
+                          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
+                            Ideal Customer Profile
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                            <div className="min-w-0 overflow-hidden">
+                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
+                              <p className="text-gray-700 text-xs leading-relaxed line-clamp-3">{result.ideal_customer_profile.company_type}</p>
+                            </div>
+                            <div className="min-w-0 overflow-hidden">
+                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
+                              <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
+                            </div>
+                            <div className="min-w-0 overflow-hidden">
+                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
+                              <div className="flex flex-wrap gap-2">
+                                {result.ideal_customer_profile.industries.map((ind) => (
+                                  <span key={ind} className="px-3 py-1 rounded-full text-[11px] leading-none font-medium whitespace-nowrap bg-gray-100 text-gray-600">
+                                    {ind}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Target titles */}
-                      <div className="rounded-xl border border-gray-100 p-4">
+                      <div className="rounded-xl border border-gray-100 border-l-2 border-l-[#4B6BF5]/30 p-4 overflow-hidden">
                         <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
                           Target Titles
                         </p>
@@ -423,13 +426,13 @@ export default function LandingPage() {
                           {result.target_titles.map((title, i) => (
                             <span
                               key={title}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold whitespace-nowrap shrink-0 ${
                                 i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
                               }`}
                               style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
                             >
                               {i === 0 && (
-                                <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="size-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                               )}
@@ -440,7 +443,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* Campaign angles */}
-                      <div className="rounded-xl border border-gray-100 p-4">
+                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden">
                         <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
                           Campaign Angles
                         </p>
@@ -448,33 +451,35 @@ export default function LandingPage() {
                           {result.campaign_angles.map((angle, i) => (
                             <div
                               key={angle.angle}
-                              className={`p-4 rounded-xl border ${
-                                i === 0 ? "border-[#4B6BF5]/20 bg-[#EEF1FE]/50" : "border-gray-100 bg-gray-50/50"
+                              className={`p-4 rounded-xl border overflow-hidden ${
+                                i === 0
+                                  ? "border-[#4B6BF5]/25 bg-gradient-to-br from-[#EEF1FE]/70 to-[#F0EBFE]/50"
+                                  : "border-gray-100 bg-gray-50/50"
                               }`}
                             >
-                              <div className="flex items-center gap-2 mb-2">
-                                <p className="text-sm font-semibold text-gray-900">{angle.angle}</p>
+                              <div className="flex items-start gap-2 mb-2 flex-wrap">
+                                <p className="text-sm font-semibold text-gray-900 min-w-0 break-words">{angle.angle}</p>
                                 {i === 0 && (
                                   <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
+                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shrink-0"
                                     style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                                   >
                                     Best fit
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-600 mb-2">{angle.pitch}</p>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-3">{angle.pitch}</p>
                               {angle.why_now && (
-                                <p className="text-[10px] text-gray-400 mb-2 italic">
+                                <p className="text-[10px] text-gray-400 mb-2 italic line-clamp-2">
                                   Why now: {angle.why_now}
                                 </p>
                               )}
                               {angle.hook && (
-                                <div className="bg-white border border-gray-100 rounded-lg px-3 py-2">
+                                <div className="bg-[#F8F9FF] border border-[#4B6BF5]/10 rounded-lg px-3 py-2">
                                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
                                     Opening hook
                                   </p>
-                                  <p className="text-xs text-gray-700 leading-relaxed italic">
+                                  <p className="text-xs text-gray-700 leading-relaxed italic line-clamp-3">
                                     &ldquo;{angle.hook}&rdquo;
                                   </p>
                                 </div>
@@ -492,17 +497,17 @@ export default function LandingPage() {
                             Sign up or log in to unlock verified contact info for these decision makers.
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <Link
                             href="/signup"
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-opacity active:scale-[0.98]"
+                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-opacity active:scale-[0.98]"
                             style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
                           >
                             Sign up free →
                           </Link>
                           <Link
                             href="/login"
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors active:scale-[0.98]"
+                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors active:scale-[0.98]"
                           >
                             Log in
                           </Link>

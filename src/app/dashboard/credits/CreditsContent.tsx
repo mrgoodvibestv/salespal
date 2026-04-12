@@ -124,7 +124,7 @@ export default function CreditsContent({
       {cancelled && !cancelledDismissed && (
         <div className="flex items-start justify-between gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200">
           <p className="text-sm text-gray-500">
-            Purchase cancelled. Your credits were not charged.
+            Purchase cancelled. You were not charged.
           </p>
           <button
             onClick={() => setCancelledDismissed(true)}

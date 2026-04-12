@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   title: "SalesPal — AI-Powered Outbound Prospecting",
   description:
     "SalesPal identifies your best B2B campaign angle and generates qualified lead lists with personalized outreach sequences.",
-  metadataBase: new URL("https://salespal-eight.vercel.app"),
+  metadataBase: new URL("https://sp.goodvibesai.com"),
   openGraph: {
     title: "SalesPal",
     description: "Turn prospects into customers.",
-    url: "https://salespal-eight.vercel.app",
+    url: "https://sp.goodvibesai.com",
     siteName: "SalesPal",
     images: [
       {

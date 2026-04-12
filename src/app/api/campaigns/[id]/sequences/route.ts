@@ -37,6 +37,30 @@ export async function POST(
     return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
   }
 
+  // Determine if this is a regeneration (sequence already exists)
+  const isRegeneration = !!campaign.sequence_json
+
+  if (isRegeneration) {
+    const REGEN_COST = 2
+    const { error: deductError } = await supabase.rpc("deduct_credits", {
+      p_user_id:        user.id,
+      p_amount:         REGEN_COST,
+      p_action:         "sequence_regeneration",
+      p_explorium_cost: 0,
+      p_reference_id:   campaignId,
+    })
+
+    if (deductError) {
+      if (deductError.message?.includes("insufficient_credits")) {
+        return NextResponse.json(
+          { error: "You need 2 credits to regenerate a sequence" },
+          { status: 402 }
+        )
+      }
+      return NextResponse.json({ error: "Failed to deduct credits" }, { status: 500 })
+    }
+  }
+
   // Read campaign context from icp_json
   const icpJson = campaign.icp_json as Record<string, unknown> | null
   const angleData = icpJson?.angle_data as Record<string, unknown> | undefined
@@ -168,5 +192,12 @@ Write the 5-touch sequence targeting these decision makers.`
     console.error("[sequences] update error:", updateError)
   }
 
-  return NextResponse.json({ emails })
+  // Return updated credit balance so client can sync sidebar
+  const { data: userData } = await supabase
+    .from("users")
+    .select("credits_balance")
+    .eq("id", user.id)
+    .single()
+
+  return NextResponse.json({ emails, credits_remaining: userData?.credits_balance ?? null })
 }

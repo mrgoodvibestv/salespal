@@ -57,9 +57,13 @@ function ChannelBadge({ channel }: { channel?: "email" | "linkedin" }) {
 export default function SequencesTab({
   campaignId,
   initialSequence,
+  credits,
+  onCreditsUpdate,
 }: {
   campaignId: string
   initialSequence: Touch[] | null
+  credits: number
+  onCreditsUpdate: (n: number) => void
 }) {
   const [emails, setEmails]         = useState<Touch[] | null>(initialSequence)
   const [generating, setGenerating] = useState(false)
@@ -73,14 +77,21 @@ export default function SequencesTab({
       const res = await fetch(`/api/campaigns/${campaignId}/sequences`, { method: "POST" })
       const data = await res.json()
       if (!res.ok) {
-        setError(
-          data.error === "AI_OVERLOADED"
-            ? "Our AI is experiencing high demand. Try again in a moment."
-            : (data.error ?? "Failed to generate sequence")
-        )
+        if (res.status === 402) {
+          setError("Not enough credits to regenerate. Buy more credits.")
+        } else {
+          setError(
+            data.error === "AI_OVERLOADED"
+              ? "Our AI is experiencing high demand. Try again in a moment."
+              : (data.error ?? "Failed to generate sequence")
+          )
+        }
         return
       }
       setEmails(data.emails ?? [])
+      if (typeof data.credits_remaining === "number") {
+        onCreditsUpdate(data.credits_remaining)
+      }
     } catch {
       setError("Something went wrong. Please try again.")
     } finally {
@@ -177,35 +188,35 @@ export default function SequencesTab({
           <p className="text-sm font-semibold text-black">Multi-Channel Outreach Sequence</p>
           <p className="text-xs text-gray-400 mt-0.5">5 touches · LinkedIn + Email · Day 1 through 14</p>
         </div>
-        <button
-          onClick={generate}
-          disabled={generating}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
-        >
-          {generating ? (
-            <>
-              <svg className="size-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Regenerating…
-            </>
-          ) : (
-            <>
-              <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Regenerate
-            </>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={generate}
+            disabled={generating || credits < 2}
+            title={credits < 2 ? "You need 2 credits to regenerate" : undefined}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:border-gray-300 transition-all disabled:opacity-50"
+          >
+            {generating ? (
+              <>
+                <svg className="size-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Regenerating…
+              </>
+            ) : (
+              <>
+                <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Regenerate · 2 credits
+              </>
+            )}
+          </button>
+          {error && (
+            <p className="text-xs text-red-400">{error}</p>
           )}
-        </button>
-      </div>
-
-      {error && (
-        <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
-          {error}
         </div>
-      )}
+      </div>
 
       {/* Touch cards */}
       <div className="space-y-3">

@@ -559,6 +559,8 @@ export default function CampaignDetailClient({
           <SequencesTab
             campaignId={campaign.id}
             initialSequence={campaign.sequence_json?.emails ?? null}
+            credits={credits}
+            onCreditsUpdate={setCredits}
           />
         )}
 

@@ -12,7 +12,7 @@ const PLANS = [
     features: [
       "10 lead fetches",
       "50 contact unlocks",
-      "10 prospect searches",
+      "20 prospect searches",
     ],
     featured: false,
     badge: null,
@@ -26,8 +26,8 @@ const PLANS = [
     features: [
       "40 lead fetches",
       "200 contact unlocks",
-      "40 prospect searches",
-      "2 sequence regenerations",
+      "80 prospect searches",
+      "200 sequence regenerations",
     ],
     featured: true,
     badge: "Most Popular",
@@ -41,7 +41,7 @@ const PLANS = [
     features: [
       "100 lead fetches",
       "500 contact unlocks",
-      "100 prospect searches",
+      "200 prospect searches",
     ],
     featured: false,
     badge: "Best Value",

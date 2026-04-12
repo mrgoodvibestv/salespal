@@ -375,31 +375,33 @@ export default function LandingPage() {
                     <div className="space-y-4">
 
                       {/* Company summary */}
-                      <div className="rounded-xl border border-[#4B6BF5]/15 bg-gradient-to-br from-[#EEF1FE]/60 to-[#F0EBFE]/40 overflow-hidden p-4">
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <svg className="size-3.5 text-[#4B6BF5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                              </svg>
-                              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Company</p>
+                      <div className="rounded-xl p-[1px] shadow-md" style={{ background: "linear-gradient(135deg, #4B6BF5, #7B4BF5)" }}>
+                        <div className="rounded-[11px] bg-white p-4">
+                          <div className="flex items-start justify-between gap-3 flex-wrap">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <svg className="size-3.5 text-[#4B6BF5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Company</p>
+                              </div>
+                              <p className="font-bold text-gray-900">{result.company_name}</p>
+                              <p className="text-sm text-gray-500 mt-0.5 line-clamp-2" title={result.what_they_sell}>{result.what_they_sell}</p>
                             </div>
-                            <p className="font-bold text-gray-900">{result.company_name}</p>
-                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2" title={result.what_they_sell}>{result.what_they_sell}</p>
+                            {result.tagline && (
+                              <span
+                                className="shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-medium text-[#4B6BF5] bg-[#EEF1FE] border border-[#4B6BF5]/20 max-w-[180px] cursor-default"
+                                title={result.tagline}
+                              >
+                                <span className="truncate">&ldquo;{result.tagline}&rdquo;</span>
+                              </span>
+                            )}
                           </div>
-                          {result.tagline && (
-                            <span
-                              className="shrink-0 px-3 py-1 rounded-full text-[11px] leading-none font-medium text-[#4B6BF5] bg-white border border-[#4B6BF5]/20 max-w-[180px] truncate cursor-default"
-                              title={result.tagline}
-                            >
-                              &ldquo;{result.tagline}&rdquo;
-                            </span>
-                          )}
                         </div>
                       </div>
 
                       {/* ICP */}
-                      <div className="rounded-xl border border-gray-100 overflow-hidden">
+                      <div className="rounded-xl border border-gray-100 overflow-hidden shadow-sm">
                         <div className="h-1" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
                         <div className="p-4">
                           <div className="flex items-center gap-1.5 mb-3">
@@ -444,9 +446,9 @@ export default function LandingPage() {
                                     <span
                                       key={ind}
                                       title={ind}
-                                      className="px-3 py-1 rounded-full text-[11px] leading-none font-medium bg-gray-100 text-gray-600 max-w-[160px] truncate cursor-default"
+                                      className="inline-flex items-center px-3 py-1 rounded-full text-[11px] leading-none font-medium bg-gray-100 text-gray-600 max-w-[160px] cursor-default"
                                     >
-                                      {ind}
+                                      <span className="truncate">{ind}</span>
                                     </span>
                                   ))}
                                 </div>
@@ -457,7 +459,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* Target titles */}
-                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden">
+                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden shadow-sm">
                         <div className="flex items-center gap-1.5 mb-3">
                           <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -471,7 +473,7 @@ export default function LandingPage() {
                             <span
                               key={title}
                               title={title}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold max-w-[220px] truncate cursor-default shrink-0 ${
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold max-w-[220px] cursor-default shrink-0 ${
                                 i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
                               }`}
                               style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
@@ -481,14 +483,14 @@ export default function LandingPage() {
                                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                               )}
-                              {title}
+                              <span className="truncate">{title}</span>
                             </span>
                           ))}
                         </div>
                       </div>
 
                       {/* Campaign angles */}
-                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden">
+                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden shadow-sm">
                         <div className="flex items-center gap-1.5 mb-3">
                           <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -501,7 +503,7 @@ export default function LandingPage() {
                           {result.campaign_angles.map((angle, i) => (
                             <div
                               key={angle.angle}
-                              className={`p-4 rounded-xl border overflow-hidden ${
+                              className={`p-4 rounded-xl border overflow-hidden shadow-sm ${
                                 i === 0
                                   ? "border-[#4B6BF5]/25 bg-gradient-to-br from-[#EEF1FE]/70 to-[#F0EBFE]/50"
                                   : "border-gray-100 bg-gray-50/50"
@@ -544,7 +546,7 @@ export default function LandingPage() {
                         <div>
                           <p className="text-sm font-semibold text-gray-900">Your leads are ready</p>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            Sign up or log in to unlock verified contact info for these decision makers.
+                            Sign up to unlock contact info for these decision makers.
                           </p>
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto">

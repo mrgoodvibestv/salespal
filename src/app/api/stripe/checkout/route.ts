@@ -5,10 +5,19 @@ import { createClient } from "@/lib/supabase/server"
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
+  const starter = process.env.STRIPE_PRICE_STARTER
+  const growth  = process.env.STRIPE_PRICE_GROWTH
+  const scale   = process.env.STRIPE_PRICE_SCALE
+
+  if (!starter || !growth || !scale) {
+    console.error("[checkout] Missing Stripe price env vars")
+    return NextResponse.json({ error: "Service configuration error" }, { status: 500 })
+  }
+
   const ALLOWED_PRICES: Record<string, number> = {
-    [process.env.STRIPE_PRICE_STARTER!]: 100,
-    [process.env.STRIPE_PRICE_GROWTH!]:  400,
-    [process.env.STRIPE_PRICE_SCALE!]:   1000,
+    [starter]: 100,
+    [growth]:  400,
+    [scale]:   1000,
   }
 
   const supabase = await createClient()

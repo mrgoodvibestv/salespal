@@ -46,6 +46,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, warning: "missing_metadata" }, { status: 200 })
     }
 
+    // Idempotency check — Stripe may deliver the same event more than once.
+    // Check for an existing pack_purchase with the same user + credit amount in the last 2 minutes.
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+    const { data: existing } = await supabase
+      .from("credit_transactions")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("action", "pack_purchase")
+      .eq("credits_delta", creditsToAdd)
+      .gte("created_at", twoMinutesAgo)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json({ received: true, info: "already_processed" }, { status: 200 })
+    }
+
     const { error } = await supabase.rpc("add_credits", {
       p_user_id:  userId,
       p_amount:   creditsToAdd,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const PLANS = [
   {
@@ -58,9 +58,40 @@ export default function CreditsContent({
   success: boolean
   cancelled: boolean
 }) {
-  const [loading, setLoading]           = useState<string | null>(null)
-  const [successDismissed, setSuccessDismissed] = useState(false)
+  const [loading, setLoading]                       = useState<string | null>(null)
+  const [successDismissed, setSuccessDismissed]     = useState(false)
   const [cancelledDismissed, setCancelledDismissed] = useState(false)
+  const [balance, setBalance]   = useState(credits)
+  const [polling, setPolling]   = useState(success)
+  const [successConfirmed, setSuccessConfirmed] = useState(false)
+
+  useEffect(() => {
+    if (!success) return
+    let attempts = 0
+    const initial = credits
+    const interval = setInterval(async () => {
+      attempts++
+      try {
+        const res = await fetch("/api/user/credits")
+        const data = await res.json()
+        if (typeof data.credits === "number") {
+          setBalance(data.credits)
+          if (data.credits > initial) {
+            setSuccessConfirmed(true)
+            setPolling(false)
+            clearInterval(interval)
+            return
+          }
+        }
+      } catch { /* ignore */ }
+      if (attempts >= 5) {
+        setPolling(false)
+        clearInterval(interval)
+      }
+    }, 2000)
+    return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handlePurchase(priceId: string, planId: string) {
     setLoading(planId)
@@ -105,7 +136,9 @@ export default function CreditsContent({
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <p className="text-sm font-medium text-emerald-700">
-              Credits added to your account! Your balance has been updated.
+              {successConfirmed
+                ? "Credits added to your account!"
+                : "Payment confirmed! Adding credits to your account…"}
             </p>
           </div>
           <button
@@ -146,10 +179,13 @@ export default function CreditsContent({
             className="text-4xl font-bold tabular-nums bg-clip-text text-transparent"
             style={{ backgroundImage: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
           >
-            {credits.toLocaleString()}
+            {balance.toLocaleString()}
           </span>
           <span className="text-sm text-gray-400">credits available</span>
         </div>
+        {polling && (
+          <p className="text-xs text-gray-400 mt-0.5">Updating balance…</p>
+        )}
       </div>
 
       {/* Pricing grid */}

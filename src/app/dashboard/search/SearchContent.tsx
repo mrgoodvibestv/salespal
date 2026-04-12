@@ -126,8 +126,9 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
   // UI state
   const [searching, setSearching]       = useState(false)
   const [searchError, setSearchError]   = useState("")
-  const [unlockingId, setUnlockingId]   = useState<string | null>(null)
-  const [unlockErrors, setUnlockErrors] = useState<Record<string, string>>({})
+  const [unlockingId, setUnlockingId]       = useState<string | null>(null)
+  const [unlockErrors, setUnlockErrors]     = useState<Record<string, string>>({})
+  const [unlockWarnings, setUnlockWarnings] = useState<Record<string, string>>({})
 
   // Derived
   const displayResults = pageCache[currentPage] ?? null
@@ -248,6 +249,15 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
         } else {
           setUnlockErrors((prev) => ({ ...prev, [prospect_id]: data.error ?? "Unlock failed" }))
         }
+        return
+      }
+
+      // Enrichment returned no data — user was not charged
+      if (data.charged === false) {
+        setUnlockWarnings((prev) => ({ ...prev, [prospect_id]: "Contact details unavailable. Not charged." }))
+        setTimeout(() => {
+          setUnlockWarnings((prev) => { const n = { ...prev }; delete n[prospect_id]; return n })
+        }, 4000)
         return
       }
 
@@ -602,7 +612,8 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                 {displayResults.map((lead) => {
                   const tierCfg = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.noise
                   const isUnlocking = unlockingId === lead.prospect_id
-                  const unlockErr = unlockErrors[lead.prospect_id]
+                  const unlockErr  = unlockErrors[lead.prospect_id]
+                  const unlockWarn = unlockWarnings[lead.prospect_id]
 
                   return (
                     <tr
@@ -728,6 +739,9 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                             {unlockErr && (
                               <p className="text-[10px] text-red-500 mt-0.5">{unlockErr}</p>
                             )}
+                            {unlockWarn && (
+                              <p className="text-[10px] text-amber-500 mt-0.5">{unlockWarn}</p>
+                            )}
                           </div>
                         )}
                       </td>
@@ -743,7 +757,8 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
             {displayResults.map((lead) => {
               const tierCfg = TIER_CONFIG[lead.tier] ?? TIER_CONFIG.noise
               const isUnlocking = unlockingId === lead.prospect_id
-              const unlockErr = unlockErrors[lead.prospect_id]
+              const unlockErr  = unlockErrors[lead.prospect_id]
+              const unlockWarn = unlockWarnings[lead.prospect_id]
 
               return (
                 <div key={lead.prospect_id} className="p-4 card-lift">
@@ -835,6 +850,9 @@ export default function SearchContent({ credits: initialCredits }: { credits: nu
                       </button>
                       {unlockErr && (
                         <p className="text-[10px] text-red-500 mt-1">{unlockErr}</p>
+                      )}
+                      {unlockWarn && (
+                        <p className="text-[10px] text-amber-500 mt-1">{unlockWarn}</p>
                       )}
                     </div>
                   )}

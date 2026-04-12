@@ -291,6 +291,30 @@ export default function LandingPage() {
               </span>
             </div>
 
+            {/* Stats trust bar */}
+            <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold bg-gradient-to-r from-[#4B6BF5] to-[#7B4BF5] bg-clip-text text-transparent">
+                  250M+
+                </span>
+                <span className="text-xs text-gray-400">Contacts</span>
+              </div>
+              <span className="text-gray-200 text-xs hidden sm:block">·</span>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold bg-gradient-to-r from-[#4B6BF5] to-[#7B4BF5] bg-clip-text text-transparent">
+                  50M+
+                </span>
+                <span className="text-xs text-gray-400">Companies</span>
+              </div>
+              <span className="text-gray-200 text-xs hidden sm:block">·</span>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-semibold bg-gradient-to-r from-[#4B6BF5] to-[#7B4BF5] bg-clip-text text-transparent">
+                  Verified
+                </span>
+                <span className="text-xs text-gray-400">Emails & Phones</span>
+              </div>
+            </div>
+
           </div>
 
           {/* ── Modal ── */}

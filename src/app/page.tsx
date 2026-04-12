@@ -305,25 +305,28 @@ export default function LandingPage() {
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
 
                 {/* Modal header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 border-l-4 border-l-[#4B6BF5] sticky top-0 bg-white z-10">
-                  <div>
-                    <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
-                      {analyzing ? "Analyzing…" : "Your ICP Preview"}
-                    </p>
-                    {result && (
-                      <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate max-w-[220px] sm:max-w-none">{result.company_name}</p>
+                <div className="sticky top-0 bg-white z-10">
+                  <div className="flex items-center justify-between px-6 py-4">
+                    <div>
+                      <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">
+                        {analyzing ? "Analyzing…" : "Your ICP Preview"}
+                      </p>
+                      {result && (
+                        <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate max-w-[220px] sm:max-w-none">{result.company_name}</p>
+                      )}
+                    </div>
+                    {!analyzing && (
+                      <button
+                        onClick={() => setModalOpen(false)}
+                        className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     )}
                   </div>
-                  {!analyzing && (
-                    <button
-                      onClick={() => setModalOpen(false)}
-                      className="size-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                    >
-                      <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
+                  <div className="h-px" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
                 </div>
 
                 {/* Modal body */}
@@ -375,12 +378,20 @@ export default function LandingPage() {
                       <div className="rounded-xl border border-[#4B6BF5]/15 bg-gradient-to-br from-[#EEF1FE]/60 to-[#F0EBFE]/40 overflow-hidden p-4">
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-1">Company</p>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <svg className="size-3.5 text-[#4B6BF5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                              <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Company</p>
+                            </div>
                             <p className="font-bold text-gray-900">{result.company_name}</p>
-                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-3">{result.what_they_sell}</p>
+                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2" title={result.what_they_sell}>{result.what_they_sell}</p>
                           </div>
                           {result.tagline && (
-                            <span className="shrink-0 px-3 py-1 rounded-full text-[11px] leading-none font-medium text-[#4B6BF5] bg-white border border-[#4B6BF5]/20 whitespace-nowrap">
+                            <span
+                              className="shrink-0 px-3 py-1 rounded-full text-[11px] leading-none font-medium text-[#4B6BF5] bg-white border border-[#4B6BF5]/20 max-w-[180px] truncate cursor-default"
+                              title={result.tagline}
+                            >
                               &ldquo;{result.tagline}&rdquo;
                             </span>
                           )}
@@ -391,26 +402,54 @@ export default function LandingPage() {
                       <div className="rounded-xl border border-gray-100 overflow-hidden">
                         <div className="h-1" style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }} />
                         <div className="p-4">
-                          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                            Ideal Customer Profile
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                            <div className="min-w-0 overflow-hidden">
-                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Company Type</p>
-                              <p className="text-gray-700 text-xs leading-relaxed line-clamp-3">{result.ideal_customer_profile.company_type}</p>
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <svg className="size-3.5 text-[#4B6BF5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                              Ideal Customer Profile
+                            </p>
+                          </div>
+                          <div className="space-y-4">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <svg className="size-3 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
+                                </svg>
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Company Type</p>
+                              </div>
+                              <p className="text-gray-700 text-sm leading-relaxed" title={result.ideal_customer_profile.company_type}>
+                                {result.ideal_customer_profile.company_type}
+                              </p>
                             </div>
-                            <div className="min-w-0 overflow-hidden">
-                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Size</p>
-                              <p className="text-gray-700 text-xs">{result.ideal_customer_profile.company_size}</p>
-                            </div>
-                            <div className="min-w-0 overflow-hidden">
-                              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Industries</p>
-                              <div className="flex flex-wrap gap-2">
-                                {result.ideal_customer_profile.industries.map((ind) => (
-                                  <span key={ind} className="px-3 py-1 rounded-full text-[11px] leading-none font-medium whitespace-nowrap bg-gray-100 text-gray-600">
-                                    {ind}
-                                  </span>
-                                ))}
+                            <div className="flex gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <svg className="size-3 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Size</p>
+                                </div>
+                                <p className="text-gray-700 text-sm">{result.ideal_customer_profile.company_size}</p>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-2">
+                                  <svg className="size-3 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                                  </svg>
+                                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Industries</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {result.ideal_customer_profile.industries.map((ind) => (
+                                    <span
+                                      key={ind}
+                                      title={ind}
+                                      className="px-3 py-1 rounded-full text-[11px] leading-none font-medium bg-gray-100 text-gray-600 max-w-[160px] truncate cursor-default"
+                                    >
+                                      {ind}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -418,15 +457,21 @@ export default function LandingPage() {
                       </div>
 
                       {/* Target titles */}
-                      <div className="rounded-xl border border-gray-100 border-l-2 border-l-[#4B6BF5]/30 p-4 overflow-hidden">
-                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                          Target Titles
-                        </p>
+                      <div className="rounded-xl border border-gray-100 p-4 overflow-hidden">
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                            Target Titles
+                          </p>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {result.target_titles.map((title, i) => (
                             <span
                               key={title}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold whitespace-nowrap shrink-0 ${
+                              title={title}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] leading-none font-semibold max-w-[220px] truncate cursor-default shrink-0 ${
                                 i === 0 ? "text-white" : "bg-gray-100 text-gray-700"
                               }`}
                               style={i === 0 ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
@@ -444,9 +489,14 @@ export default function LandingPage() {
 
                       {/* Campaign angles */}
                       <div className="rounded-xl border border-gray-100 p-4 overflow-hidden">
-                        <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3">
-                          Campaign Angles
-                        </p>
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <svg className="size-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">
+                            Campaign Angles
+                          </p>
+                        </div>
                         <div className="space-y-2">
                           {result.campaign_angles.map((angle, i) => (
                             <div
@@ -468,9 +518,9 @@ export default function LandingPage() {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-600 mb-2 line-clamp-3">{angle.pitch}</p>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-3" title={angle.pitch}>{angle.pitch}</p>
                               {angle.why_now && (
-                                <p className="text-[10px] text-gray-400 mb-2 italic line-clamp-2">
+                                <p className="text-[10px] text-gray-400 mb-2 italic line-clamp-2" title={angle.why_now}>
                                   Why now: {angle.why_now}
                                 </p>
                               )}
@@ -479,7 +529,7 @@ export default function LandingPage() {
                                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
                                     Opening hook
                                   </p>
-                                  <p className="text-xs text-gray-700 leading-relaxed italic line-clamp-3">
+                                  <p className="text-xs text-gray-700 leading-relaxed italic line-clamp-3" title={angle.hook}>
                                     &ldquo;{angle.hook}&rdquo;
                                   </p>
                                 </div>

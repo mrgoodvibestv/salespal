@@ -131,7 +131,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap');
         @keyframes marquee {
           0%   { transform: translateX(0); }
@@ -145,7 +145,7 @@ export default function LandingPage() {
           font-style: italic;
           font-weight: 400;
         }
-      `}</style>
+      ` }} />
 
       <div className="min-h-screen flex flex-col bg-white overflow-x-hidden">
 

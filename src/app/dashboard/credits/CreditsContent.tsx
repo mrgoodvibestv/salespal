@@ -27,7 +27,6 @@ const PLANS = [
       "40 lead fetches",
       "200 contact unlocks",
       "80 prospect searches",
-      "200 sequence regenerations",
     ],
     featured: true,
     badge: "Most Popular",

@@ -179,7 +179,7 @@ export default function CreditsContent({
       )}
 
       {/* Current balance card */}
-      <div className="inline-flex flex-col items-start gap-0.5 px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="flex flex-col items-start gap-0.5 px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm w-full">
         <p className="text-xs text-gray-400 font-medium">Your current balance</p>
         <div className="flex items-baseline gap-2">
           <span

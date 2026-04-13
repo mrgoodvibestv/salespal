@@ -1,5 +1,5 @@
 # SalesPal — Engineering Reference
-**Good Vibes AI · v4.0 · April 2026**
+**Good Vibes AI · v4.1 · April 2026**
 
 ---
 
@@ -178,7 +178,7 @@ add_credits(p_user_id uuid, p_amount integer, p_action credit_action,
 
 | Route | Component | Type | Description |
 |-------|-----------|------|-------------|
-| `/` | `src/app/page.tsx` | Client | Landing — URL form, demo modal, ICP preview |
+| `/` | `src/app/page.tsx` | Client | Landing — URL form, demo modal, ICP preview, stats trust bar |
 | `/login` | `src/app/login/page.tsx` | Client | Supabase password auth |
 | `/signup` | `src/app/signup/page.tsx` | Client | Business email gate + Supabase signUp |
 | `/auth/callback` | `src/app/auth/callback/route.ts` | Route | OAuth code exchange |
@@ -191,20 +191,34 @@ add_credits(p_user_id uuid, p_amount integer, p_action credit_action,
 | `/dashboard/search` | `SearchContent.tsx` | Server+Client | Ad-hoc prospect search |
 | `/dashboard/credits` | `CreditsContent.tsx` | Server+Client | Buy credits (Stripe checkout) |
 
+### Site Metadata (`src/app/layout.tsx`)
+```typescript
+title: "SalesPal"
+description: "AI-powered outbound sales."
+```
+
 ### Standard Dashboard Layout
+All dashboard pages use this pattern (padding on the inner div, not `<main>`):
 ```tsx
 <div className="flex min-h-screen bg-white overflow-x-hidden">
   <Sidebar credits={credits} userEmail={userEmail} />
-  <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-    <div className="max-w-6xl w-full">
+  <main className="flex-1 min-w-0 ml-0 md:ml-64">
+    <div className="w-full max-w-7xl mx-auto px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
       {/* content */}
     </div>
   </main>
 </div>
 ```
-- `pt-[88px]` clears fixed 56px mobile header on mobile
-- `max-w-6xl` default; campaign detail uses `max-w-7xl`
-- Sequences page: `pt-[88px] md:pt-0` on main + split-panel layout
+- `pt-[88px]` clears the fixed 56px mobile header
+- `max-w-7xl` on the content div — all pages use this consistently
+- Sequences page: `<main className="flex-1 min-w-0 ml-0 md:ml-64 flex flex-col">` with inner `<div className="w-full max-w-7xl mx-auto flex flex-col flex-1 pt-[88px] md:pt-0">` for the split-panel layout
+
+### Inner Width Rules
+- **Full width** (`w-full`, no max-w): all data containers — tables, grids, stats bars, filter cards, ICP sections, results lists, pricing grids
+- **Narrow** (`max-w-sm mx-auto`): empty states only
+- **Narrow** (`max-w-2xl w-full`): new campaign wizard URL input form and geo step only — NOT angle selection or confirm steps
+- **Narrow** (`max-w-md w-full`): modal dialogs only
+- **Truncation only** (`max-w-[180px]` etc.): table cells and title overflow — not layout constraints
 
 ---
 
@@ -368,6 +382,34 @@ const TIER_CONFIG = {
 - `overflow-hidden` on card containers
 - `border border-gray-100` or `border border-gray-200` standard
 
+### Custom select dropdowns
+Always replace native browser arrows with a custom SVG chevron:
+```tsx
+<div className="relative">
+  <select className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 focus:border-[#4B6BF5] focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/10 cursor-pointer">
+    {/* options */}
+  </select>
+  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+    <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </div>
+</div>
+```
+- `appearance-none` removes native arrow
+- `pr-10` reserves space for the custom arrow
+- `pointer-events-none` on the overlay so it doesn't block clicks
+
+### Inline `<style>` tags with CSS `url()` references
+React SSR HTML-encodes `<style>` content — `'` → `&#x27;`, `&` → `&amp;`. In unquoted CSS `url()`, the encoded `#` character acts as a URL fragment separator, causing the browser to make a spurious `GET` request. Always use `dangerouslySetInnerHTML` for inline styles containing `url()`:
+```tsx
+// ❌ React encodes this — causes GET /& 404
+<style>{`@import url('https://fonts.googleapis.com/...');`}</style>
+
+// ✅ Bypasses React encoding
+<style dangerouslySetInnerHTML={{ __html: `@import url('https://fonts.googleapis.com/...');` }} />
+```
+
 ---
 
 ## Middleware
@@ -450,13 +492,13 @@ In sequences route, `deduct_credits` is called before the Claude API call. If Cl
 ```
 src/
   app/
-    page.tsx                          — Landing page
-    layout.tsx                        — Root layout (metadata, Analytics, SpeedInsights)
+    page.tsx                          — Landing page (stats trust bar, dangerouslySetInnerHTML for Google Fonts import)
+    layout.tsx                        — Root layout (title: "SalesPal", description: "AI-powered outbound sales.", Analytics, SpeedInsights)
     globals.css                       — Tailwind + custom utilities
     dashboard/
       page.tsx                        — Campaign list (server)
       campaigns/
-        new/page.tsx + NewCampaignContent.tsx
+        new/page.tsx + NewCampaignContent.tsx   — Wizard: URL→Geo→Angles(full-width)→Confirm(full-width)
         [id]/page.tsx + CampaignDetailClient.tsx + SequencesTab.tsx
       contacts/page.tsx + ContactsContent.tsx
       sequences/page.tsx + SequencesContent.tsx

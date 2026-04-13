@@ -148,8 +148,8 @@ export default function ContactsContent({
     <div className="flex min-h-screen bg-white overflow-x-hidden">
       <Sidebar credits={credits} userEmail={userEmail} />
 
-      <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-6xl w-full">
+      <main className="flex-1 min-w-0 ml-0 md:ml-64">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
 
           {/* Page header */}
           <div className="mb-8 flex items-start justify-between gap-4">

@@ -218,7 +218,8 @@ export default function SequencesContent({
     <div className="flex min-h-screen bg-white overflow-x-hidden">
       <Sidebar credits={localCredits} userEmail={userEmail} />
 
-      <main className="flex-1 min-w-0 ml-0 md:ml-64 pt-[88px] md:pt-0 flex flex-col">
+      <main className="flex-1 min-w-0 ml-0 md:ml-64 flex flex-col">
+        <div className="w-full max-w-7xl mx-auto flex flex-col flex-1 pt-[88px] md:pt-0">
 
         {/* Page header */}
         <div className="px-6 md:px-8 pt-0 md:pt-8 pb-4 border-b border-gray-100 shrink-0">
@@ -409,6 +410,7 @@ export default function SequencesContent({
             </div>
           </>
         )}
+        </div>
       </main>
     </div>
   )

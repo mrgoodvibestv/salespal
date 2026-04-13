@@ -30,8 +30,8 @@ export default async function CreditsPage({
   return (
     <div className="flex min-h-screen bg-white overflow-x-hidden">
       <Sidebar credits={credits} userEmail={user.email ?? ""} />
-      <main className="flex-1 min-w-0 ml-0 md:ml-64 px-4 sm:px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
-        <div className="max-w-6xl w-full">
+      <main className="flex-1 min-w-0 ml-0 md:ml-64">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-8 pt-[88px] md:pt-8 pb-8">
           <CreditsContent
             credits={credits}
             priceIds={priceIds}

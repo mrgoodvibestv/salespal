@@ -17,9 +17,8 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "SalesPal — AI-Powered Outbound Prospecting",
-  description:
-    "SalesPal identifies your best B2B campaign angle and generates qualified lead lists with personalized outreach sequences.",
+  title: "SalesPal",
+  description: "AI-powered outbound sales.",
   metadataBase: new URL("https://sp.goodvibesai.com"),
   openGraph: {
     title: "SalesPal",

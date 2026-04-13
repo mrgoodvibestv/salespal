@@ -289,34 +289,37 @@ export default function NewCampaignContent({
           )}
         </div>
 
-        <div className="max-w-2xl w-full">
-        {/* ── Step 1a: URL entry ── */}
-        {step === 1 && geoPhase === "url" && (
-          <Step1
-            url={url}
-            setUrl={setUrl}
-            urlError={urlError}
-            status={status}
-            scanStep={scanStep}
-            errorMsg={errorMsg}
-            onSubmit={handleUrlSubmit}
-            onRetry={() => { setStatus("idle"); setErrorMsg(""); setGeoPhase("url") }}
-            onRetryAnalysis={() => startAnalysis(url, geo)}
-          />
+        {/* ── Step 1a: URL entry — narrow form ── */}
+        {step === 1 && geoPhase === "url" && status !== "analyzing" && (
+          <div className="max-w-2xl w-full">
+            <Step1
+              url={url}
+              setUrl={setUrl}
+              urlError={urlError}
+              status={status}
+              scanStep={scanStep}
+              errorMsg={errorMsg}
+              onSubmit={handleUrlSubmit}
+              onRetry={() => { setStatus("idle"); setErrorMsg(""); setGeoPhase("url") }}
+              onRetryAnalysis={() => startAnalysis(url, geo)}
+            />
+          </div>
         )}
 
-        {/* ── Step 1b: Geography selection ── */}
+        {/* ── Step 1b: Geography selection — narrow form ── */}
         {step === 1 && geoPhase === "geo" && status !== "analyzing" && (
-          <GeoStep
-            url={url}
-            geo={geo}
-            setGeo={setGeo}
-            onBack={() => setGeoPhase("url")}
-            onContinue={() => startAnalysis(url, geo)}
-          />
+          <div className="max-w-2xl w-full">
+            <GeoStep
+              url={url}
+              geo={geo}
+              setGeo={setGeo}
+              onBack={() => setGeoPhase("url")}
+              onContinue={() => startAnalysis(url, geo)}
+            />
+          </div>
         )}
 
-        {/* ── Step 1 loading overlay (shown during analysis regardless of phase) ── */}
+        {/* ── Step 1 loading overlay — full width ── */}
         {step === 1 && status === "analyzing" && (
           <Step1
             url={url}
@@ -331,7 +334,7 @@ export default function NewCampaignContent({
           />
         )}
 
-        {/* ── Step 2: Angle selection ── */}
+        {/* ── Step 2: Angle selection — full width ── */}
         {step === 2 && analysis && (
           <Step2
             analysis={analysis}
@@ -342,7 +345,7 @@ export default function NewCampaignContent({
           />
         )}
 
-        {/* ── Step 3: Confirm & launch ── */}
+        {/* ── Step 3: Confirm & launch — full width ── */}
         {step === 3 && analysis && selectedAngle && (
           <Step3
             analysis={analysis}
@@ -355,7 +358,6 @@ export default function NewCampaignContent({
             onLaunch={handleLaunch}
           />
         )}
-        </div>
         </div>
       </main>
     </div>

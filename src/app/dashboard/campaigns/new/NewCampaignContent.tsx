@@ -531,15 +531,22 @@ function GeoStep({
         {/* Country */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-black">Country</label>
-          <select
-            value={geo.country}
-            onChange={(e) => setGeo({ ...geo, country: e.target.value, region: "" })}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 bg-white transition-all"
-          >
-            {COUNTRY_OPTIONS.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={geo.country}
+              onChange={(e) => setGeo({ ...geo, country: e.target.value, region: "" })}
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 focus:border-[#4B6BF5] focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/10 cursor-pointer"
+            >
+              {COUNTRY_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Other country text field */}
@@ -563,16 +570,23 @@ function GeoStep({
               {geo.country === "canada" ? "Province" : "State"}
               <span className="text-gray-400 font-normal ml-1">(optional)</span>
             </label>
-            <select
-              value={geo.region}
-              onChange={(e) => setGeo({ ...geo, region: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4B6BF5] focus:ring-2 focus:ring-[#4B6BF5]/10 bg-white transition-all"
-            >
-              <option value="">All {geo.country === "canada" ? "provinces" : "states"}</option>
-              {regionOptions.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={geo.region}
+                onChange={(e) => setGeo({ ...geo, region: e.target.value })}
+                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 focus:border-[#4B6BF5] focus:outline-none focus:ring-2 focus:ring-[#4B6BF5]/10 cursor-pointer"
+              >
+                <option value="">All {geo.country === "canada" ? "provinces" : "states"}</option>
+                {regionOptions.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         )}
 

@@ -85,15 +85,15 @@ async function analyzeWithClaude(url: string, websiteText: string, geo?: GeoPara
 
     geoConstraint = `\n\nHARD CONSTRAINT — GEOGRAPHY (do not override):
 The client targets ${scopeStr} customers in ${locationStr}.
-You MUST set country_code: ["${getCountryCode(geo.geo_country)}"] in explorium_filters for BOTH angles.
+You MUST set country_code: ["${getCountryCode(geo.geo_country)}"] in explorium_filters for ALL FOUR angles.
 Do not suggest different geographies. The ICP geography field must reflect "${locationStr}".`
   }
 
   const message = await retryWithBackoff(
     () => anthropic.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 2000,
-    system: `You are an expert B2B sales strategist. Analyze the provided business and generate an ICP and two outbound campaign angles.
+    model: "claude-sonnet-4-6",
+    max_tokens: 3500,
+    system: `You are an expert B2B sales strategist. Analyze the provided business and generate an ICP and four outbound campaign angles.
 Return ONLY valid JSON — no markdown fences, no explanation. The JSON must exactly match the schema provided.`,
     messages: [
       {
@@ -101,9 +101,11 @@ Return ONLY valid JSON — no markdown fences, no explanation. The JSON must exa
         content: `Business URL: ${url}
 ${siteContext}
 
-Generate two campaign angles:
-1. OBVIOUS ANGLE — the direct B2B campaign based on their stated offer
-2. HIDDEN ANGLE — a higher-leverage B2B angle they likely haven't considered (e.g. a completely different buyer persona or use case)
+Generate four campaign angles:
+1. OBVIOUS ANGLE — the direct B2B campaign based on their stated offer and primary buyer
+2. HIDDEN ANGLE — a higher-leverage B2B angle they likely haven't considered (completely different buyer persona or use case)
+3. GROWTH ANGLE — targets a broader ICP for higher lead volume; casts a wider net with more inclusive titles and company sizes
+4. NICHE ANGLE — targets a specific vertical, industry slice, or micro-segment for maximum precision and relevance
 
 Return this exact JSON structure:
 {
@@ -141,6 +143,36 @@ Return this exact JSON structure:
       "country_code": ["us"],
       "job_level": ["director", "vice president"],
       "job_department": ["human resources"]
+    }
+  },
+  "growth_angle": {
+    "name": "angle name targeting broad ICP for volume",
+    "tagline": "one punchy line that frames the campaign",
+    "target_titles": ["Title 1", "Title 2", "Title 3", "Title 4"],
+    "target_companies": "broader description of target companies — wider net",
+    "pitch_summary": "2-3 sentence pitch framed around their pain/outcome",
+    "why_now": "1 sentence on timing or urgency",
+    "explorium_filters": {
+      "website_keywords": ["keyword1", "keyword2"],
+      "company_size": ["51-200", "201-500", "501-1000", "1001-5000"],
+      "country_code": ["us", "ca"],
+      "job_level": ["manager", "director", "vice president"],
+      "job_department": ["operations"]
+    }
+  },
+  "niche_angle": {
+    "name": "angle name targeting specific vertical or segment",
+    "tagline": "one punchy line that frames the campaign",
+    "target_titles": ["Title 1", "Title 2"],
+    "target_companies": "precise description of the specific vertical or industry niche",
+    "pitch_summary": "2-3 sentence pitch tightly framed around this niche's specific pain/outcome",
+    "why_now": "1 sentence on timing or urgency specific to this vertical",
+    "explorium_filters": {
+      "website_keywords": ["niche-keyword1", "niche-keyword2", "niche-keyword3"],
+      "company_size": ["11-50", "51-200"],
+      "country_code": ["us"],
+      "job_level": ["c-suite", "founder", "owner"],
+      "job_department": ["sales"]
     }
   }
 }
@@ -231,6 +263,8 @@ interface ClaudeAnalysis {
   icp: { description: string; geography: string; key_signals: string[] }
   obvious_angle: CampaignAngle
   hidden_angle: CampaignAngle
+  growth_angle: CampaignAngle
+  niche_angle: CampaignAngle
 }
 
 // ── Route handler ──────────────────────────────────────────────────────────
@@ -277,6 +311,8 @@ export async function POST(request: NextRequest) {
     icp: analysis.icp,
     obvious_angle: analysis.obvious_angle,
     hidden_angle: analysis.hidden_angle,
+    growth_angle: analysis.growth_angle,
+    niche_angle: analysis.niche_angle,
     stats,
   })
 }

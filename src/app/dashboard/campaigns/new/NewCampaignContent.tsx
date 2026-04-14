@@ -28,6 +28,8 @@ interface AnalysisResult {
   icp: { description: string; geography: string; key_signals: string[] }
   obvious_angle: CampaignAngle
   hidden_angle: CampaignAngle
+  growth_angle: CampaignAngle
+  niche_angle: CampaignAngle
   stats: { companies: number; estimated_contacts: number }
 }
 
@@ -132,7 +134,7 @@ export default function NewCampaignContent({
   const [urlError, setUrlError]   = useState("")
   const [scanStep, setScanStep]   = useState(0)
   const [analysis, setAnalysis]   = useState<AnalysisResult | null>(null)
-  const [selectedAngle, setSelectedAngle] = useState<"obvious" | "hidden" | null>(null)
+  const [selectedAngle, setSelectedAngle] = useState<"obvious" | "hidden" | "growth" | "niche" | null>(null)
   const [campaignName, setCampaignName]   = useState("")
   const [errorMsg, setErrorMsg]   = useState("")
   const [geo, setGeo]             = useState<GeoSelection>({
@@ -218,9 +220,11 @@ export default function NewCampaignContent({
     if (!analysis || !selectedAngle) return
     setStatus("creating")
 
-    const angle = selectedAngle === "obvious"
-      ? analysis.obvious_angle
-      : analysis.hidden_angle
+    const angle =
+      selectedAngle === "obvious" ? analysis.obvious_angle :
+      selectedAngle === "hidden"  ? analysis.hidden_angle  :
+      selectedAngle === "growth"  ? analysis.growth_angle  :
+      analysis.niche_angle
 
     try {
       const res = await fetch("/api/campaigns/create", {
@@ -643,8 +647,8 @@ function Step2({
   analysis, selectedAngle, onSelect, onBack, onNext,
 }: {
   analysis: AnalysisResult
-  selectedAngle: "obvious" | "hidden" | null
-  onSelect: (a: "obvious" | "hidden") => void
+  selectedAngle: "obvious" | "hidden" | "growth" | "niche" | null
+  onSelect: (a: "obvious" | "hidden" | "growth" | "niche") => void
   onBack: () => void
   onNext: () => void
 }) {
@@ -681,25 +685,37 @@ function Step2({
       {/* Angle selection */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold text-black">
-          SalesPal found two campaign angles. Pick one.
+          SalesPal found four campaign angles. Pick one.
         </h2>
         <p className="text-sm text-gray-500">
-          The hidden angle is often the higher-leverage play.
+          Obvious is the direct play. Hidden is non-obvious. Growth casts a wider net. Niche goes deep on one vertical.
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <AngleCard
-          type="obvious"
+          label="Obvious"
           angle={analysis.obvious_angle}
           selected={selectedAngle === "obvious"}
           onSelect={() => onSelect("obvious")}
         />
         <AngleCard
-          type="hidden"
+          label="Hidden"
           angle={analysis.hidden_angle}
           selected={selectedAngle === "hidden"}
           onSelect={() => onSelect("hidden")}
+        />
+        <AngleCard
+          label="Growth"
+          angle={analysis.growth_angle}
+          selected={selectedAngle === "growth"}
+          onSelect={() => onSelect("growth")}
+        />
+        <AngleCard
+          label="Niche"
+          angle={analysis.niche_angle}
+          selected={selectedAngle === "niche"}
+          onSelect={() => onSelect("niche")}
         />
       </div>
 
@@ -724,14 +740,13 @@ function Step2({
 }
 
 function AngleCard({
-  type, angle, selected, onSelect,
+  label, angle, selected, onSelect,
 }: {
-  type: "obvious" | "hidden"
+  label: string
   angle: CampaignAngle
   selected: boolean
   onSelect: () => void
 }) {
-  const isHidden = type === "hidden"
   return (
     <button
       onClick={onSelect}
@@ -741,26 +756,10 @@ function AngleCard({
           : "border-gray-200 hover:border-gray-300 bg-white shadow-sm hover:shadow-md"
       }`}
     >
-      {/* Badge */}
+      {/* Badge row */}
       <div className="flex items-center justify-between">
-        <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-            isHidden
-              ? "text-white"
-              : "bg-gray-100 text-gray-600"
-          }`}
-          style={isHidden ? { background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" } : {}}
-        >
-          {isHidden ? (
-            <>
-              <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.001z" />
-              </svg>
-              Hidden angle
-            </>
-          ) : (
-            "Obvious angle"
-          )}
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-widest uppercase bg-gray-100 text-gray-500">
+          {label}
         </span>
         {/* Radio indicator */}
         <div
@@ -817,7 +816,7 @@ function Step3({
   status, errorMsg, onBack, onLaunch,
 }: {
   analysis: AnalysisResult
-  selectedAngle: "obvious" | "hidden"
+  selectedAngle: "obvious" | "hidden" | "growth" | "niche"
   campaignName: string
   setCampaignName: (v: string) => void
   status: Status

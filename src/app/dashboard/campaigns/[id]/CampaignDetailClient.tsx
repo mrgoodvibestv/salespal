@@ -183,7 +183,7 @@ export default function CampaignDetailClient({
   // ── Filter state ──────────────────────────────────────────────────────
   const [tierFilter, setTierFilter]   = useState<"all" | "decision_maker" | "influencer">("all")
   const [deptFilter, setDeptFilter]   = useState("all")
-  const [showNoise, setShowNoise]     = useState(false)
+  const [showNoise, setShowNoise]     = useState(true)
 
   // ── Refine panel state ────────────────────────────────────────────────
   const [refineOpen, setRefineOpen]   = useState(false)

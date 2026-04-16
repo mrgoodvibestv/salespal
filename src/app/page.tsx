@@ -565,6 +565,93 @@ export default function LandingPage() {
                         </div>
                       </div>
 
+                      {/* Blurred contacts teaser */}
+                      <div className="rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+                        {/* Section header */}
+                        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                          <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400">Contacts Found</p>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <svg className="size-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            250M+ contacts in database
+                          </span>
+                        </div>
+
+                        {/* Relative wrapper for blur + overlay */}
+                        <div className="relative">
+                          {/* Blurred table */}
+                          <div style={{ filter: "blur(6px)", pointerEvents: "none", userSelect: "none" }}>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="border-b border-gray-100 bg-gray-50/40">
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Name</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Title</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">Company</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">Location</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Email</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">Phone</th>
+                                    <th className="px-3 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">LinkedIn</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                  {[
+                                    { name: "Sarah Mitchell",  title: "VP of Marketing",       company: "Maple Systems",    location: "Toronto, CA",       email: "s.mitchell@maple.io",     phone: "+1 (416) 555-0182", linkedin: "linkedin.com/in/sarah-m" },
+                                    { name: "James Okafor",    title: "Director of Sales",      company: "Nexus Corp",       location: "Boston, US",        email: "j.okafor@nexuscorp.com",  phone: "+1 (617) 555-0347", linkedin: "linkedin.com/in/james-o" },
+                                    { name: "Priya Sharma",    title: "Head of Growth",         company: "Brightwave Inc",   location: "San Francisco, US", email: "p.sharma@brightwave.io",  phone: "+1 (415) 555-0093", linkedin: "linkedin.com/in/priya-s" },
+                                    { name: "Marcus Chen",     title: "Chief Revenue Officer",  company: "Portfield",        location: "New York, US",      email: "m.chen@portfield.com",    phone: "+1 (212) 555-0461", linkedin: "linkedin.com/in/marcus-c" },
+                                    { name: "Olivia Brooks",   title: "VP of People",           company: "Clarion Software", location: "Austin, US",        email: "o.brooks@clarion.io",     phone: "+1 (737) 555-0258", linkedin: "linkedin.com/in/olivia-b" },
+                                  ].map((row) => (
+                                    <tr key={row.name} className="hover:bg-gray-50/50">
+                                      <td className="px-3 py-3 font-semibold text-gray-900 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                          <div className="size-7 rounded-full bg-[#EEF1FE] text-[#4B6BF5] flex items-center justify-center text-[10px] font-bold shrink-0">
+                                            {row.name.split(" ").map((n) => n[0]).join("")}
+                                          </div>
+                                          {row.name}
+                                        </div>
+                                      </td>
+                                      <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{row.title}</td>
+                                      <td className="px-3 py-3 text-gray-600 whitespace-nowrap hidden sm:table-cell">{row.company}</td>
+                                      <td className="px-3 py-3 text-gray-500 whitespace-nowrap hidden sm:table-cell">{row.location}</td>
+                                      <td className="px-3 py-3 text-gray-500 whitespace-nowrap">{row.email}</td>
+                                      <td className="px-3 py-3 text-gray-500 whitespace-nowrap hidden sm:table-cell">{row.phone}</td>
+                                      <td className="px-3 py-3 text-[#0A66C2] whitespace-nowrap">{row.linkedin}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Lock overlay */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+                            <div
+                              className="size-11 rounded-2xl flex items-center justify-center shadow-sm"
+                              style={{ background: "linear-gradient(135deg, #EEF1FE, #F0EBFE)" }}
+                            >
+                              <svg className="size-5 text-[#4B6BF5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                            <div className="text-center">
+                              <p className="font-semibold text-gray-900 text-sm">Your buyers are in here</p>
+                              <p className="text-xs text-gray-500 mt-1 max-w-[220px]">
+                                Sign up free to unlock contact names, emails, LinkedIn, and phone numbers
+                              </p>
+                            </div>
+                            <Link
+                              href="/signup"
+                              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] shadow-sm"
+                              style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
+                            >
+                              See your leads →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Inline CTA */}
                       <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>

@@ -596,13 +596,18 @@ export default function LandingPage() {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
-                                  {[
-                                    { name: "Sarah Mitchell",  title: "VP of Marketing",       company: "Maple Systems",    location: "Toronto, CA",       email: "s.mitchell@maple.io",     phone: "+1 (416) 555-0182", linkedin: "linkedin.com/in/sarah-m" },
-                                    { name: "James Okafor",    title: "Director of Sales",      company: "Nexus Corp",       location: "Boston, US",        email: "j.okafor@nexuscorp.com",  phone: "+1 (617) 555-0347", linkedin: "linkedin.com/in/james-o" },
-                                    { name: "Priya Sharma",    title: "Head of Growth",         company: "Brightwave Inc",   location: "San Francisco, US", email: "p.sharma@brightwave.io",  phone: "+1 (415) 555-0093", linkedin: "linkedin.com/in/priya-s" },
-                                    { name: "Marcus Chen",     title: "Chief Revenue Officer",  company: "Portfield",        location: "New York, US",      email: "m.chen@portfield.com",    phone: "+1 (212) 555-0461", linkedin: "linkedin.com/in/marcus-c" },
-                                    { name: "Olivia Brooks",   title: "VP of People",           company: "Clarion Software", location: "Austin, US",        email: "o.brooks@clarion.io",     phone: "+1 (737) 555-0258", linkedin: "linkedin.com/in/olivia-b" },
-                                  ].map((row) => (
+                                  {(() => {
+                                    const titles = result.target_titles?.length
+                                      ? result.target_titles
+                                      : ["VP of Marketing", "Director of Sales", "Head of Growth", "Chief Revenue Officer", "VP of People"]
+                                    return [
+                                      { name: "Sarah Mitchell",  company: "Maple Systems",    location: "Toronto, CA",       email: "s.mitchell@maple.io",     phone: "+1 (416) 555-0182", linkedin: "linkedin.com/in/sarah-m" },
+                                      { name: "James Okafor",    company: "Nexus Corp",       location: "Boston, US",        email: "j.okafor@nexuscorp.com",  phone: "+1 (617) 555-0347", linkedin: "linkedin.com/in/james-o" },
+                                      { name: "Priya Sharma",    company: "Brightwave Inc",   location: "San Francisco, US", email: "p.sharma@brightwave.io",  phone: "+1 (415) 555-0093", linkedin: "linkedin.com/in/priya-s" },
+                                      { name: "Marcus Chen",     company: "Portfield",        location: "New York, US",      email: "m.chen@portfield.com",    phone: "+1 (212) 555-0461", linkedin: "linkedin.com/in/marcus-c" },
+                                      { name: "Olivia Brooks",   company: "Clarion Software", location: "Austin, US",        email: "o.brooks@clarion.io",     phone: "+1 (737) 555-0258", linkedin: "linkedin.com/in/olivia-b" },
+                                    ].map((row, i) => ({ ...row, title: titles[i % titles.length] }))
+                                  })().map((row) => (
                                     <tr key={row.name} className="hover:bg-gray-50/50">
                                       <td className="px-3 py-3 font-semibold text-gray-900 whitespace-nowrap">
                                         <div className="flex items-center gap-2">

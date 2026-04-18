@@ -252,7 +252,7 @@ export default function Sidebar({ credits, userEmail }: SidebarProps) {
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer panel */}
-          <div className="relative w-72 max-w-[85vw] bg-white h-full shadow-xl flex flex-col">
+          <div className="relative w-72 max-w-[85vw] bg-white h-full shadow-xl flex flex-col rounded-r-2xl overflow-hidden">
             {/* Drawer header */}
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
               <Link

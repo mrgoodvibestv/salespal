@@ -824,9 +824,11 @@ function Step3({
   onBack: () => void
   onLaunch: () => void
 }) {
-  const angle = selectedAngle === "obvious"
-    ? analysis.obvious_angle
-    : analysis.hidden_angle
+  const angle =
+    selectedAngle === "obvious" ? analysis.obvious_angle :
+    selectedAngle === "hidden"  ? analysis.hidden_angle  :
+    selectedAngle === "growth"  ? analysis.growth_angle  :
+    analysis.niche_angle
 
   return (
     <div className="space-y-8">
@@ -859,7 +861,7 @@ function Step3({
             className="text-xs font-semibold px-2.5 py-1 rounded-full text-white"
             style={{ background: "linear-gradient(to right, #4B6BF5, #7B4BF5)" }}
           >
-            {selectedAngle === "hidden" ? "Hidden" : "Obvious"}
+            {selectedAngle === "obvious" ? "Obvious" : selectedAngle === "hidden" ? "Hidden" : selectedAngle === "growth" ? "Growth" : "Niche"}
           </span>
         </div>
 
